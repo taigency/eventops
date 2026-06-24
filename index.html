@@ -144,6 +144,55 @@
   .bn{flex:1;text-align:center;padding:9px 0 11px;color:var(--muted);font-size:.68rem;cursor:pointer}
   .bn .ic{display:block;font-size:1.2rem;margin-bottom:2px}
   .bn.active{color:var(--accent2)}
+  /* COMMS HUB */
+  .comms-wrap{display:grid;grid-template-columns:260px 1fr;gap:0;height:calc(100vh - 120px);min-height:400px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)}
+  @media(max-width:760px){.comms-wrap{grid-template-columns:1fr;height:auto}}
+  .comms-sidebar{background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+  .comms-sidebar-head{padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:.95rem;display:flex;justify-content:space-between;align-items:center}
+  .comms-groups{flex:1;overflow-y:auto;padding:8px}
+  .cg-section{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:10px 8px 4px}
+  .cg-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;transition:.15s;margin-bottom:2px}
+  .cg-item:hover{background:var(--panel)}
+  .cg-item.active{background:var(--panel);box-shadow:inset 3px 0 0 var(--accent)}
+  .cg-item .cg-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .cg-item .cg-name{font-size:.88rem;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cg-item .cg-badge{background:var(--accent);color:#fff;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:100px;flex-shrink:0}
+  .comms-main{display:flex;flex-direction:column;overflow:hidden}
+  .comms-head{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-shrink:0}
+  .comms-head .ch-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .comms-head .ch-title{font-weight:700;font-size:.95rem}
+  .comms-head .ch-sub{font-size:.74rem;color:var(--muted)}
+  .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
+  .cm{display:flex;gap:10px;max-width:80%}
+  .cm.mine{flex-direction:row-reverse;align-self:flex-end}
+  .cm .av{width:30px;height:30px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0;margin-top:2px}
+  .cm .bubble{padding:9px 13px;border-radius:14px;font-size:.84rem;line-height:1.5;word-break:break-word}
+  .cm:not(.mine) .bubble{background:var(--panel2);border-bottom-left-radius:3px}
+  .cm.mine .bubble{background:var(--accent);color:#fff;border-bottom-right-radius:3px}
+  .cm .cm-meta{font-size:.68rem;color:var(--muted);margin-top:3px;text-align:right}
+  .cm:not(.mine) .cm-meta{text-align:left}
+  .chat-input-wrap{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px;flex-shrink:0}
+  .chat-input-wrap textarea{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:9px 13px;font-size:.86rem;resize:none;outline:none;font-family:inherit}
+  .chat-input-wrap textarea:focus{border-color:var(--accent)}
+  .chat-date-sep{text-align:center;font-size:.7rem;color:var(--muted);margin:8px 0;position:relative}
+  .chat-date-sep::before,.chat-date-sep::after{content:'';position:absolute;top:50%;width:30%;height:1px;background:var(--line)}
+  .chat-date-sep::before{left:0}.chat-date-sep::after{right:0}
+  /* EVENT INFO */
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:900px){.info-grid{grid-template-columns:1fr}}
+  .contact-card{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
+  .contact-card .cc-av{width:38px;height:38px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
+  .contact-card .cc-body{flex:1;min-width:0}
+  .contact-card .cc-name{font-weight:700;font-size:.9rem}
+  .contact-card .cc-role{font-size:.76rem;color:var(--accent2);margin-bottom:2px}
+  .contact-card .cc-info{font-size:.78rem;color:var(--muted)}
+  .contact-card .cc-acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .wx-card{background:var(--panel2);border-radius:12px;padding:14px;display:flex;gap:10px;overflow-x:auto;margin-top:4px}
+  .wx-day{text-align:center;min-width:62px;padding:8px;background:var(--bg2);border:1px solid var(--line);border-radius:10px}
+  .wx-day .wic{font-size:1.5rem;margin-bottom:3px}
+  .wx-day .wdt{font-size:.7rem;color:var(--muted);margin-bottom:2px}
+  .wx-day .wtmp{font-size:.82rem;font-weight:700}
+  .wx-day .wrain{font-size:.68rem;color:var(--accent2)}
   /* CREW BOARD */
   .cb-screen{min-height:100vh;background:var(--bg)}
   .cb-hero{background:var(--grad);padding:44px 30px 32px;text-align:center}
@@ -233,7 +282,7 @@ const initials=n=>n.split(/[\s(]/).filter(Boolean).slice(0,2).map(w=>w[0]).join(
 const CATS=['Venue','AV & Production','Decor & Styling','Staging & Set','Catering','Transport & Logistics','Labour & Crew','Other'];
 
 function seed(){return{
-  currentEvent:'e1',role:'Event Director',org:{name:'Your Event Company',tagline:'Professional Event Management',client:'Acme Corporate',logo:null,logoPos:'left',address:'',phone:'',email:'',vatNo:'',regNo:'',banking:'',accentColor:'#6d6bff',quoteTerms:'• This quotation is valid for 30 days from the date of issue.\n• Prices are subject to change until a signed contract is received.\n• A 50% deposit is required to confirm the booking.\n• All prices exclude VAT unless otherwise stated.',invoiceTerms:'• Payment is due within 14 days of invoice date.\n• Interest of 2% per month will be charged on overdue amounts.\n• Queries must be raised within 5 business days of receipt.\n• Banking details are provided above — please use invoice number as reference.',poTerms:'• This Purchase Order constitutes a binding commitment to supply.\n• Goods/services must be delivered as specified.\n• Invoices must reference this PO number.\n• Any variation to scope requires written approval before proceeding.',contractTerms:'• This contract is binding upon signature by both parties.\n• Cancellation within 30 days of the event forfeits the full deposit.\n• The service provider retains the right to subcontract with prior written notice.\n• Disputes will be resolved via arbitration under South African law.'},
+  currentEvent:'e1',role:'Event Director',org:{name:'Your Event Company',tagline:'Professional Event Management',client:'Acme Corporate',clientContact:'',clientPhone:'',clientEmail:'',logo:null,logoPos:'left',address:'',phone:'',email:'',vatNo:'',regNo:'',banking:'',accentColor:'#6d6bff',quoteTerms:'• This quotation is valid for 30 days from the date of issue.\n• Prices are subject to change until a signed contract is received.\n• A 50% deposit is required to confirm the booking.\n• All prices exclude VAT unless otherwise stated.',invoiceTerms:'• Payment is due within 14 days of invoice date.\n• Interest of 2% per month will be charged on overdue amounts.\n• Queries must be raised within 5 business days of receipt.\n• Banking details are provided above — please use invoice number as reference.',poTerms:'• This Purchase Order constitutes a binding commitment to supply.\n• Goods/services must be delivered as specified.\n• Invoices must reference this PO number.\n• Any variation to scope requires written approval before proceeding.',contractTerms:'• This contract is binding upon signature by both parties.\n• Cancellation within 30 days of the event forfeits the full deposit.\n• The service provider retains the right to subcontract with prior written notice.\n• Disputes will be resolved via arbitration under South African law.'},
   events:{e1:{
     id:'e1',name:'TechExpo Cape Town',venue:'CTICC · Hall 4',dates:'12–14 Aug 2026',scope:420000,status:'Draft',
     pricing:{marginPct:18,mgmtFeePct:8,discountPct:5,vatPct:15},
@@ -243,7 +292,10 @@ function seed(){return{
     triple:[{id:uid(),item:'AV & Lighting Package',scope:145000,po:148500,invoice:0},{id:uid(),item:'Custom Stand Build',scope:98000,po:97000,invoice:97000},{id:uid(),item:'Transport & Logistics',scope:38000,po:41500,invoice:43900}],
     schedule:[{id:uid(),day:'11 Aug',time:'06:00',activity:'Bump-in: trusses & rigging',owner:'Operations',assignee:'Rigging Crew (x4)',confirmed:false},{id:uid(),day:'11 Aug',time:'12:00',activity:'AV install & focus',owner:'Production',assignee:'AV Operators (x2)',confirmed:false},{id:uid(),day:'11 Aug',time:'18:00',activity:'Set build & decor dress',owner:'Staging',assignee:'Lead Technician',confirmed:false},{id:uid(),day:'12 Aug',time:'07:00',activity:'Tech rehearsal & soundcheck',owner:'Production',assignee:'AV Operators (x2)',confirmed:false},{id:uid(),day:'12 Aug',time:'08:00',activity:'Final rig check & sign-off',owner:'Production',assignee:'Lead Technician',confirmed:false},{id:uid(),day:'14 Aug',time:'17:00',activity:'Bump-out & strike',owner:'Operations',assignee:'Rigging Crew (x4)',confirmed:false}],
     designs:[],
-    labour:[{id:uid(),name:'Lead Technician',rate:480,hours:30},{id:uid(),name:'Rigging Crew (x4)',rate:1200,hours:24},{id:uid(),name:'AV Operators (x2)',rate:560,hours:26}],
+    venue_address:'Convention Square, 1 Lower Long St, Cape Town, 8001',
+    brief:'Annual technology exhibition showcasing innovation across AI, cloud infrastructure and enterprise software. Expected 1,200 delegates over 3 days with live keynotes, exhibition floor, networking cocktail and gala dinner.',
+    contacts:[{id:'c1',section:'Event Director',name:'TK Director',role:'Event Director',phone:'+27 82 000 0001',email:'director@eventops.app'},{id:'c2',section:'Production',name:'Production Lead',role:'Head of Production',phone:'+27 82 000 0002',email:'production@eventops.app'},{id:'c3',section:'Operations',name:'Ops Manager',role:'Operations Manager',phone:'+27 82 000 0003',email:'ops@eventops.app'},{id:'c4',section:'Staging',name:'Stage Manager',role:'Stage & Set Lead',phone:'+27 82 000 0004',email:'staging@eventops.app'},{id:'c5',section:'Catering',name:'Catering Coord',role:'Catering Coordinator',phone:'+27 82 000 0005',email:'catering@eventops.app'}],
+    labour:[{id:uid(),name:'Lead Technician',rate:480,hours:30,desc:'Senior AV technician — full setup and strike',published:false,positionId:null,appCount:0},{id:uid(),name:'Rigging Crew (x4)',rate:1200,hours:24,desc:'Structural rigging for trusses and stage',published:false,positionId:null,appCount:0},{id:uid(),name:'AV Operators (x2)',rate:560,hours:26,desc:'Live mixing, vision switching and playback',published:false,positionId:null,appCount:0}],
     logistics:[{id:uid(),task:'Stage trusses delivery',status:'On time'},{id:uid(),task:'Generator + fuel drop',status:'Delayed'},{id:uid(),task:'Furniture bump-in',status:'Scheduled'}],
     vendors:[{id:uid(),name:'Apex Staging (Pty) Ltd',csd:true,bbbee:'Level 2',expiry:'2027-01-15'},{id:uid(),name:'BrightLine AV',csd:true,bbbee:'Level 4',expiry:'2026-07-07'},{id:uid(),name:'RapidHaul Logistics',csd:true,bbbee:'Level 1',expiry:'2026-12-01'},{id:uid(),name:'Northgate Catering',csd:false,bbbee:'Level 3',expiry:'2026-09-20'}],
   }}
@@ -286,7 +338,13 @@ function migrateDB(){
     if(!e.pricing) e.pricing={...def.pricing};
     ['marginPct','mgmtFeePct','discountPct','vatPct'].forEach(k=>{ if(e.pricing[k]===undefined) e.pricing[k]=def.pricing[k]; });
     e.labour.forEach(l=>{ if(!l.positionId) l.positionId=null; if(l.published===undefined) l.published=false; if(l.appCount===undefined) l.appCount=0; if(l.desc===undefined) l.desc=''; });
+    if(!e.contacts) e.contacts=[];
+    if(!e.venue_address) e.venue_address='';
+    if(!e.brief) e.brief='';
   });
+  if(!DB.org.clientContact) DB.org.clientContact='';
+  if(!DB.org.clientPhone) DB.org.clientPhone='';
+  if(!DB.org.clientEmail) DB.org.clientEmail='';
 }
 
 const E=()=>DB.events[DB.currentEvent];
@@ -296,7 +354,7 @@ function costSubtotal(){return E().quote.reduce((s,q)=>s+q.cost*q.qty,0)+labourS
 function quoteCalc(){const sub=costSubtotal(),p=E().pricing;const margin=sub*(p.marginPct/100),mgmt=sub*(p.mgmtFeePct/100);const pre=sub+margin+mgmt,discount=pre*(p.discountPct/100);const net=pre-discount,vat=net*((p.vatPct||0)/100),total=net+vat;return{sub,margin,mgmt,pre,discount,net,vat,total,grossProfit:margin+mgmt-discount};}
 function rippleCost(){const r=E().ripple,d=r.delay;return{labour:r.otRate*d,accom:r.accomRate*d,catering:r.cateringRate*d,fuel:r.fuelRate*d,total:(r.otRate+r.accomRate+r.cateringRate+r.fuelRate)*d};}
 
-const PAGES=[{id:'dashboard',ic:'🎯',label:'Director'},{id:'quote',ic:'🧾',label:'Quotation'},{id:'finance',ic:'💰',label:'Finance'},{id:'designs',ic:'🎨',label:'Designs'},{id:'schedule',ic:'🗓️',label:'Schedule'},{id:'ripple',ic:'⚡',label:'Ripple Engine'},{id:'workforce',ic:'👷',label:'Workforce'},{id:'logistics',ic:'🚚',label:'Logistics'},{id:'compliance',ic:'🛡️',label:'Compliance'},{id:'settings',ic:'⚙️',label:'Settings & Branding'}];
+const PAGES=[{id:'dashboard',ic:'🎯',label:'Director'},{id:'quote',ic:'🧾',label:'Quotation'},{id:'finance',ic:'💰',label:'Finance'},{id:'designs',ic:'🎨',label:'Designs'},{id:'schedule',ic:'🗓️',label:'Schedule'},{id:'ripple',ic:'⚡',label:'Ripple Engine'},{id:'workforce',ic:'👷',label:'Workforce'},{id:'logistics',ic:'🚚',label:'Logistics'},{id:'compliance',ic:'🛡️',label:'Compliance'},{id:'eventinfo',ic:'📋',label:'Event Info & Brief'},{id:'comms',ic:'💬',label:'Comms & Groups'},{id:'settings',ic:'⚙️',label:'Settings & Branding'}];
 let page='dashboard', fieldTab='duties';
 
 /* ═══ ROUTER ════════════════════════════════════════════════ */
@@ -411,10 +469,10 @@ function renderAdmin(){
       </div>
       <div class="content" id="content"></div>
     </div>`;
-  ({dashboard:vDash,quote:vQuote,finance:vFin,designs:vDesigns,schedule:vSched,ripple:vRipple,workforce:vWork,logistics:vLog,compliance:vComp,settings:vSettings}[page])();
+  ({dashboard:vDash,quote:vQuote,finance:vFin,designs:vDesigns,schedule:vSched,ripple:vRipple,workforce:vWork,logistics:vLog,compliance:vComp,eventinfo:vEventInfo,comms:vComms,settings:vSettings}[page])();
 }
 
-function go(p){page=p;renderAdmin();}
+function go(p){stopCommsPoll();page=p;renderAdmin();}
 function statusBadge(s){const m={Draft:'b-blue',Quoted:'b-amber',Accepted:'b-green',Contracted:'b-green'};return`<span class="badge ${m[s]||'b-blue'}">${s}</span>`;}
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200);}
 
@@ -647,6 +705,309 @@ function addLabour(){
 function addLog(){modal('Add logistics task',[{k:'task',label:'Task'}],v=>{if(v.task)E().logistics.push({id:uid(),task:v.task,status:'Scheduled'});});}
 function addVendor(){modal('Add vendor',[{k:'name',label:'Vendor name'},{k:'bbbee',label:'B-BBEE level',ph:'Level 1'},{k:'expiry',label:'Affidavit expiry',type:'date'}],v=>{if(v.name)E().vendors.push({id:uid(),name:v.name,csd:true,bbbee:v.bbbee||'—',expiry:v.expiry||'2026-12-31'});});}
 function newEvent(){modal('New event',[{k:'name',label:'Event name'},{k:'venue',label:'Venue'},{k:'dates',label:'Dates'}],v=>{if(!v.name)return;const id=uid();DB.events[id]={id,name:v.name,venue:v.venue||'',dates:v.dates||'',scope:0,status:'Draft',pricing:{marginPct:18,mgmtFeePct:8,discountPct:0,vatPct:15},milestones:[{id:uid(),label:'Deposit on signature',pct:50,status:'Pending'},{id:uid(),label:'Pre-event payment',pct:40,status:'Pending'},{id:uid(),label:'Final on reconciliation',pct:10,status:'Pending'}],ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},quote:[],triple:[],schedule:[],designs:[],labour:[],logistics:[],vendors:[]};DB.currentEvent=id;page='quote';});}
+
+/* ═══ EVENT INFO & BRIEF ════════════════════════════════════ */
+const WMO_DESC={0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',80:'Showers',81:'Heavy showers',82:'Violent showers',95:'Thunderstorm',96:'Thunderstorm+hail'};
+const WMO_IC={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️'};
+
+async function fetchWeather(address){
+  try{
+    const geo=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address+', South Africa')}&format=json&limit=1`).then(r=>r.json());
+    if(!geo||!geo[0]) return null;
+    const {lat,lon}=geo[0];
+    const wx=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Africa%2FJohannesburg&forecast_days=7`).then(r=>r.json());
+    return wx.daily;
+  }catch(e){return null;}
+}
+
+function vEventInfo(){
+  const e=E(),o=DB.org;
+  // render skeleton first, then load weather async
+  const sched=[...e.schedule].sort((a,b)=>(a.day+a.time).localeCompare(b.day+b.time));
+  const depts=[...new Set(sched.map(s=>s.owner))];
+
+  document.getElementById('content').innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <div><div class="pg-title">📋 Event Info & Production Brief</div><div class="pg-sub">Single source of truth — share with all crew and clients as a PDF.</div></div>
+    <div style="display:flex;gap:8px"><button class="btn btn-g btn-sm" onclick="printEventBrief()">🖨 Print / PDF</button><button class="btn btn-p btn-sm" onclick="go('comms')">💬 Open Comms →</button></div>
+  </div>
+
+  <div class="info-grid">
+  <div>
+    <!-- EVENT DETAILS -->
+    <div class="card">
+      <div class="sec-h"><h3>Event details</h3></div>
+      <div class="form-row"><label class="fl">Event name</label><input class="ipt" value="${e.name}" oninput="E().name=this.value;save()"></div>
+      <div class="form-row"><label class="fl">Venue name</label><input class="ipt" value="${e.venue}" oninput="E().venue=this.value;save()"></div>
+      <div class="form-row"><label class="fl">Full address</label><textarea class="ipt" rows="2" oninput="E().venue_address=this.value;save()">${e.venue_address||''}</textarea></div>
+      <div class="form-row"><label class="fl">Dates</label><input class="ipt" value="${e.dates}" oninput="E().dates=this.value;save()"></div>
+      <div class="form-row"><label class="fl">Event brief / overview</label><textarea class="ipt" rows="3" oninput="E().brief=this.value;save()">${e.brief||''}</textarea></div>
+    </div>
+    <!-- CLIENT -->
+    <div class="card">
+      <div class="sec-h"><h3>Client details</h3></div>
+      <div class="form-row"><label class="fl">Client / company</label><input class="ipt" value="${o.client||''}" oninput="DB.org.client=this.value;save()"></div>
+      <div class="form-row"><label class="fl">Client contact name</label><input class="ipt" value="${o.clientContact||''}" oninput="DB.org.clientContact=this.value;save()"></div>
+      <div class="form-row"><label class="fl">Client phone</label><input class="ipt" value="${o.clientPhone||''}" oninput="DB.org.clientPhone=this.value;save()"></div>
+      <div class="form-row"><label class="fl">Client email</label><input class="ipt" value="${o.clientEmail||''}" oninput="DB.org.clientEmail=this.value;save()"></div>
+    </div>
+    <!-- WEATHER -->
+    <div class="card">
+      <div class="sec-h"><h3>🌤 Weather forecast</h3><button class="btn btn-g btn-sm" onclick="loadWeatherCard()">↻ Refresh</button></div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:10px">Based on venue address · updates daily closer to event</div>
+      <div id="wx-content"><div style="color:var(--muted);font-size:.85rem">Loading forecast…</div></div>
+    </div>
+  </div>
+
+  <div>
+    <!-- SECTION CONTACTS -->
+    <div class="card">
+      <div class="sec-h"><h3>Section contacts</h3><button class="btn btn-p btn-sm" onclick="addContact()">+ Add contact</button></div>
+      <div id="contacts-list">${renderContactsList()}</div>
+    </div>
+    <!-- PRODUCTION SCHEDULE -->
+    <div class="card">
+      <div class="sec-h"><h3>Production schedule with contacts</h3></div>
+      ${sched.length?`<table><tr><th>Day</th><th>Time</th><th>Activity</th><th>Dept</th><th>Responsible</th><th>Contact</th></tr>
+      ${sched.map(s=>{
+        const ct=e.contacts.find(c=>c.section===s.owner)||null;
+        return`<tr>
+          <td>${s.day}</td><td>${s.time}</td><td>${s.activity}</td>
+          <td><span class="pill">${s.owner}</span></td>
+          <td>${ct?ct.name:'—'}</td>
+          <td>${ct?`<a href="tel:${ct.phone}" style="color:var(--accent2)">${ct.phone}</a>`:'—'}</td>
+        </tr>`;
+      }).join('')}</table>`:'<div class="empty">Add schedule items to see them here.</div>'}
+    </div>
+  </div>
+  </div>`;
+
+  loadWeatherCard();
+}
+
+async function loadWeatherCard(){
+  const addr=E().venue_address||E().venue;
+  if(!addr){document.getElementById('wx-content').innerHTML='<div class="note">Add a venue address to load weather.</div>';return;}
+  document.getElementById('wx-content').innerHTML='<div style="color:var(--muted);font-size:.85rem">Fetching forecast…</div>';
+  const wx=await fetchWeather(addr);
+  if(!wx){document.getElementById('wx-content').innerHTML='<div class="note">Could not load weather — check venue address.</div>';return;}
+  const html=`<div class="wx-card">${wx.time.map((d,i)=>{
+    const dt=new Date(d);const label=dt.toLocaleDateString('en-ZA',{weekday:'short',day:'numeric',month:'short'});
+    const ic=WMO_IC[wx.weather_code[i]]||'🌡️';
+    return`<div class="wx-day"><div class="wic">${ic}</div><div class="wdt">${label}</div><div class="wtmp">${Math.round(wx.temperature_2m_max[i])}° / ${Math.round(wx.temperature_2m_min[i])}°</div><div class="wrain">💧${wx.precipitation_probability_max[i]}%</div></div>`;
+  }).join('')}</div>`;
+  document.getElementById('wx-content').innerHTML=html;
+}
+
+function renderContactsList(){
+  const e=E();
+  if(!e.contacts.length) return '<div class="empty">No contacts yet. Add section leads so they appear on the schedule.</div>';
+  return e.contacts.map(c=>`
+    <div class="contact-card">
+      <div class="cc-av">${initials(c.name)}</div>
+      <div class="cc-body">
+        <div class="cc-name">${c.name}</div>
+        <div class="cc-role">${c.section} · ${c.role}</div>
+        <div class="cc-info">${[c.phone,c.email].filter(Boolean).join(' · ')}</div>
+        <div class="cc-acts">
+          ${c.phone?`<a href="tel:${c.phone}" class="btn btn-g btn-sm" style="text-decoration:none">📞 Call</a>`:''}
+          ${c.phone?`<a href="https://wa.me/${c.phone.replace(/\D/g,'')}" target="_blank" class="btn btn-g btn-sm" style="text-decoration:none">💬 WhatsApp</a>`:''}
+          <button class="btn btn-p btn-sm" onclick="openDM('${c.name.replace(/'/g,'')}')">✉ Message</button>
+          <button class="x" onclick="delContact('${c.id}')">✕</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function addContact(){
+  const depts=[...new Set(E().schedule.map(s=>s.owner)),'Event Director','Production','Operations','Staging','Catering','AV & Technical','Logistics','Risk','Other'];
+  modal('Add section contact',[
+    {k:'section',label:'Section / department',val:depts[0],select:depts},
+    {k:'name',label:'Full name'},
+    {k:'role',label:'Role / title'},
+    {k:'phone',label:'Phone',ph:'+27 82 000 0000'},
+    {k:'email',label:'Email'}
+  ],v=>{if(v.name){E().contacts.push({id:uid(),...v});save();vEventInfo();}});
+}
+
+function delContact(id){E().contacts=E().contacts.filter(c=>c.id!==id);save();vEventInfo();}
+
+function printEventBrief(){
+  const e=E(),o=DB.org,acc=o.accentColor||'#6d6bff';
+  const sched=[...e.schedule].sort((a,b)=>(a.day+a.time).localeCompare(b.day+b.time));
+  showDoc(`<div class="paper">
+    ${docHeader('PRODUCTION BRIEF','PB-'+e.id.toUpperCase()+'-'+new Date().getFullYear())}
+    <h2>${e.name}</h2>
+    <p><b>Venue:</b> ${e.venue}${e.venue_address?'<br>'+e.venue_address:''}</p>
+    <p><b>Dates:</b> ${e.dates}</p>
+    ${e.brief?`<p style="margin-top:8px;color:#444">${e.brief}</p>`:''}
+    <h2>Client</h2>
+    <p><b>${o.client||'—'}</b>${o.clientContact?' · '+o.clientContact:''}</p>
+    ${o.clientPhone?`<p class="ph">${o.clientPhone}${o.clientEmail?' · '+o.clientEmail:''}</p>`:''}
+    <h2>Section Contacts</h2>
+    <table><tr><th>Section</th><th>Name</th><th>Role</th><th>Phone</th><th>Email</th></tr>
+    ${e.contacts.map(c=>`<tr><td>${c.section}</td><td><b>${c.name}</b></td><td>${c.role}</td><td>${c.phone||'—'}</td><td>${c.email||'—'}</td></tr>`).join('')}
+    </table>
+    <h2>Production Schedule</h2>
+    <table><tr><th>Day</th><th>Time</th><th>Activity</th><th>Dept</th><th>Assigned</th><th>Responsible</th></tr>
+    ${sched.map(s=>{const ct=e.contacts.find(c=>c.section===s.owner);return`<tr><td>${s.day}</td><td>${s.time}</td><td>${s.activity}</td><td>${s.owner}</td><td>${s.assignee||'—'}</td><td>${ct?ct.name:'—'}</td></tr>`;}).join('')}
+    </table>
+    ${docTerms('quoteTerms')}
+  </div>`);
+}
+
+/* ═══ COMMS HUB ══════════════════════════════════════════════ */
+let commsGroup='All Hands', commsRealtimeChannel=null, commsPollTimer=null, commsLastTs=null;
+
+const GROUP_COLORS={'All Hands':'#6d6bff','Production':'#22d3ee','Operations':'#34d399','Staging':'#a855f7','Catering':'#fbbf24','AV & Technical':'#fb7185','Logistics':'#f97316','Risk':'#64748b'};
+function groupColor(g){return GROUP_COLORS[g]||'#6d6bff';}
+function groupIcon(g){return{'All Hands':'📢','Production':'🎬','Operations':'⚙️','Staging':'🎭','Catering':'🍽️','AV & Technical':'🎛️','Logistics':'🚚','Risk':'🛡️','Event Director':'🎯'}[g]||'💬';}
+
+function getGroups(){
+  const e=E();
+  const depts=[...new Set(e.schedule.map(s=>s.owner))];
+  const base=['All Hands',...depts];
+  // add DM groups for contacts
+  const dms=e.contacts.map(c=>({type:'dm',name:c.name,contact:c}));
+  return{groups:base,dms};
+}
+
+async function vComms(){
+  stopCommsPoll();
+  const e=E();
+  const {groups,dms}=getGroups();
+  const sessionName=session?.name||supabaseUser?.email?.split('@')[0]||'Me';
+
+  document.getElementById('content').innerHTML=`
+  <div class="pg-title" style="margin-bottom:4px">💬 Comms & Groups</div>
+  <div class="pg-sub" style="margin-bottom:14px">Section group chats + direct messages — replaces WhatsApp groups.</div>
+  <div class="comms-wrap">
+    <div class="comms-sidebar">
+      <div class="comms-sidebar-head"><span>Channels</span><button class="btn btn-p btn-sm" onclick="addCommsGroup()">+</button></div>
+      <div class="comms-groups" id="cg-list">
+        <div class="cg-section">Event groups</div>
+        ${groups.map(g=>`<div class="cg-item ${commsGroup===g?'active':''}" onclick="switchCommsGroup('${g.replace(/'/g,'')}')">
+          <div class="cg-ic" style="background:${groupColor(g)}22;color:${groupColor(g)}">${groupIcon(g)}</div>
+          <span class="cg-name">${g}</span>
+        </div>`).join('')}
+        ${dms.length?`<div class="cg-section">Direct messages</div>${dms.map(d=>`<div class="cg-item ${commsGroup==='dm:'+d.name?'active':''}" onclick="switchCommsGroup('dm:${d.name.replace(/'/g,'')}')">
+          <div class="cg-ic" style="background:var(--panel2)">${initials(d.name)}</div>
+          <span class="cg-name">${d.name}</span>
+        </div>`).join('')}`:''}
+      </div>
+    </div>
+    <div class="comms-main">
+      <div class="comms-head">
+        <div class="ch-ic" id="cg-head-ic" style="background:${groupColor(commsGroup)}22;color:${groupColor(commsGroup)}">${groupIcon(commsGroup)}</div>
+        <div><div class="ch-title" id="cg-head-title">${commsGroup}</div><div class="ch-sub" id="cg-head-sub">${e.name}</div></div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn btn-g btn-sm" onclick="broadcastMessage()">📣 Broadcast</button>
+        </div>
+      </div>
+      <div class="chat-area" id="comms-msgs"><div style="color:var(--muted);text-align:center;padding:30px;font-size:.85rem">Loading messages…</div></div>
+      <div class="chat-input-wrap">
+        <textarea id="comms-ipt" rows="1" placeholder="Message ${commsGroup}… (Enter to send, Shift+Enter for new line)"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendCommsMsg()}"></textarea>
+        <button class="btn btn-p" onclick="sendCommsMsg()" style="padding:9px 16px">Send</button>
+      </div>
+    </div>
+  </div>`;
+
+  await loadCommsMessages();
+  startCommsPoll();
+}
+
+function switchCommsGroup(g){
+  commsGroup=g;commsLastTs=null;
+  stopCommsPoll();
+  vComms();
+}
+
+function openDM(name){commsGroup='dm:'+name;page='comms';renderAdmin();}
+
+async function loadCommsMessages(append=false){
+  const box=document.getElementById('comms-msgs');if(!box)return;
+  const gname=commsGroup;
+  let q=sb.from('event_messages').select('*').eq('event_id',DB.currentEvent).eq('group_name',gname).order('created_at',{ascending:true}).limit(80);
+  if(append&&commsLastTs) q=q.gt('created_at',commsLastTs);
+  const {data,error}=await q;
+  if(error){if(!append)box.innerHTML='<div class="empty">Could not load messages.</div>';return;}
+  if(!data||!data.length){
+    if(!append) box.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:8px">${groupIcon(gname.replace('dm:',''))}</div><div style="font-weight:700;margin-bottom:4px">${gname.startsWith('dm:')?'Direct message: '+gname.slice(3):gname}</div><div style="font-size:.83rem">No messages yet. Send the first one!</div></div>`;
+    return;
+  }
+  const me=session?.name||supabaseUser?.email?.split('@')[0]||'';
+  if(!append) box.innerHTML='';
+  let lastDay='';
+  data.forEach(msg=>{
+    const d=new Date(msg.created_at);
+    const dayStr=d.toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long'});
+    if(dayStr!==lastDay){
+      lastDay=dayStr;
+      const sep=document.createElement('div');sep.className='chat-date-sep';sep.textContent=dayStr;box.appendChild(sep);
+    }
+    const isMine=msg.sender_name===me;
+    const el=document.createElement('div');el.className='cm'+(isMine?' mine':'');
+    el.innerHTML=`${!isMine?`<div class="av" style="background:${groupColor(msg.sender_name)}">${initials(msg.sender_name)}</div>`:''}
+      <div><div class="bubble">${escHtml(msg.content)}</div>
+      <div class="cm-meta">${isMine?'':msg.sender_name+' · '}${d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'})}</div></div>`;
+    box.appendChild(el);
+  });
+  commsLastTs=data[data.length-1].created_at;
+  box.scrollTop=box.scrollHeight;
+}
+
+function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+
+async function sendCommsMsg(){
+  const ipt=document.getElementById('comms-ipt');if(!ipt)return;
+  const content=ipt.value.trim();if(!content)return;
+  if(!supabaseUser){toast('Sign in to send messages');return;}
+  const senderName=session?.name||supabaseUser.email.split('@')[0];
+  ipt.value='';
+  const msg={id:uid(),event_id:DB.currentEvent,group_name:commsGroup,sender_id:supabaseUser.id,sender_name:senderName,content};
+  const {error}=await sb.from('event_messages').insert(msg);
+  if(error){toast('Send failed: '+error.message);ipt.value=content;return;}
+  await loadCommsMessages();
+}
+
+function startCommsPoll(){
+  stopCommsPoll();
+  commsPollTimer=setInterval(async()=>{
+    if(!document.getElementById('comms-msgs')) return stopCommsPoll();
+    await loadCommsMessages(true);
+  },4000);
+}
+
+function stopCommsPoll(){if(commsPollTimer){clearInterval(commsPollTimer);commsPollTimer=null;}}
+
+function addCommsGroup(){
+  modal('Create custom group',[{k:'name',label:'Group name'}],v=>{
+    if(!v.name) return;
+    commsGroup=v.name;
+    page='comms';renderAdmin();
+  });
+}
+
+async function broadcastMessage(){
+  const m=document.getElementById('modal');
+  m.innerHTML=`<h3>📣 Broadcast to all groups</h3>
+    <div class="form-row"><label class="fl">Message</label><textarea class="ipt" id="bc-msg" rows="3" placeholder="Urgent update for all crew…"></textarea></div>
+    <div class="modal-acts"><button class="btn btn-g" onclick="closeModal()">Cancel</button><button class="btn btn-p" onclick="sendBroadcast()">Send to all groups</button></div>`;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+async function sendBroadcast(){
+  const content=document.getElementById('bc-msg')?.value.trim();
+  if(!content||!supabaseUser){closeModal();return;}
+  const {groups}=getGroups();
+  const senderName=session?.name||supabaseUser.email.split('@')[0];
+  const msgs=groups.map(g=>({id:uid(),event_id:DB.currentEvent,group_name:g,sender_id:supabaseUser.id,sender_name:senderName,content:'📣 '+content}));
+  await sb.from('event_messages').insert(msgs);
+  closeModal();
+  toast('Broadcast sent to '+msgs.length+' groups ✓');
+  await loadCommsMessages();
+}
 
 /* ═══ CREW BOARD ════════════════════════════════════════════ */
 function delLabour(id){
