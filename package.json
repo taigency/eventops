@@ -1,0 +1,9 @@
+{
+  "name": "eventops",
+  "version": "1.0.0",
+  "description": "EventOps ERP — Professional Event Management SaaS",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "stripe": "^14.0.0"
+  }
+}

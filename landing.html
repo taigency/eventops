@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EventOps — Professional Event Management ERP</title>
+<meta name="description" content="The all-in-one event management platform. Quotations, finance, crew, logistics, compliance and comms — in one place.">
+<style>
+:root{--bg:#060810;--panel:#0f1326;--line:rgba(255,255,255,.08);--txt:#eef1f8;--muted:#8a93b0;--accent:#6d6bff;--accent2:#22d3ee;--good:#34d399;--warn:#fbbf24;--grad:linear-gradient(120deg,#6d6bff,#a855f7 50%,#22d3ee);}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',-apple-system,Segoe UI,sans-serif;font-size:15px;line-height:1.6}
+a{color:inherit;text-decoration:none}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:flex;justify-content:space-between;align-items:center;background:rgba(6,8,16,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav-brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem}
+.nav-brand .m{width:32px;height:32px;border-radius:9px;background:var(--grad);display:grid;place-items:center;font-size:15px}
+.nav-links{display:flex;gap:28px;font-size:.9rem;color:var(--muted)}
+.nav-links a:hover{color:var(--txt)}
+.nav-cta{display:flex;gap:10px}
+.btn{padding:9px 18px;border-radius:9px;font-weight:600;font-size:.88rem;border:none;cursor:pointer;transition:.2s;font-family:inherit}
+.btn-p{background:var(--grad);color:#fff}.btn-p:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-g{background:var(--panel);color:var(--txt);border:1px solid var(--line)}.btn-g:hover{border-color:var(--accent)}
+.btn-lg{padding:14px 32px;font-size:1rem;border-radius:12px}
+/* HERO */
+.hero{padding:160px 40px 100px;text-align:center;max-width:900px;margin:0 auto;position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(109,107,255,.15);border:1px solid rgba(109,107,255,.3);border-radius:100px;padding:6px 16px;font-size:.8rem;color:#a9a7ff;margin-bottom:24px}
+.hero h1{font-size:clamp(2.4rem,5vw,4rem);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:20px}
+.hero p{font-size:1.15rem;color:var(--muted);max-width:600px;margin:0 auto 36px}
+.hero-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hero-note{margin-top:16px;font-size:.8rem;color:var(--muted)}
+/* GLOW */
+.glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(109,107,255,.18) 0%,transparent 70%);top:-100px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:-1}
+/* LOGOS */
+.logos{padding:30px 40px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);text-align:center}
+.logos p{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}
+.logo-row{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;opacity:.45;font-weight:700;font-size:.95rem;letter-spacing:.05em}
+/* FEATURES */
+.features{padding:100px 40px;max-width:1100px;margin:0 auto}
+.section-label{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent2);margin-bottom:12px}
+.section-h{font-size:2.2rem;font-weight:800;letter-spacing:-.02em;margin-bottom:16px}
+.section-sub{color:var(--muted);max-width:560px;margin-bottom:54px}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.feat-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;transition:.2s}
+.feat-card:hover{border-color:rgba(109,107,255,.4);transform:translateY(-2px)}
+.feat-icon{font-size:1.8rem;margin-bottom:14px}
+.feat-card h3{font-size:1.05rem;font-weight:700;margin-bottom:8px}
+.feat-card p{font-size:.88rem;color:var(--muted);line-height:1.6}
+/* PRICING */
+.pricing{padding:100px 40px;background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.pricing-inner{max-width:900px;margin:0 auto;text-align:center}
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:50px;text-align:left}
+@media(max-width:700px){.pricing-grid{grid-template-columns:1fr}}
+.plan-card{background:var(--bg);border:1px solid var(--line);border-radius:22px;padding:32px;position:relative;transition:.2s}
+.plan-card.featured{border-color:rgba(109,107,255,.6);box-shadow:0 0 50px rgba(109,107,255,.15)}
+.plan-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;font-size:.72rem;font-weight:700;padding:4px 16px;border-radius:100px;white-space:nowrap}
+.plan-name{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.plan-price{font-size:3rem;font-weight:900;letter-spacing:-.04em;margin-bottom:4px}
+.plan-price sup{font-size:1.4rem;vertical-align:top;margin-top:10px;font-weight:700}
+.plan-price span{font-size:1rem;font-weight:400;color:var(--muted)}
+.plan-zar{font-size:.82rem;color:var(--muted);margin-bottom:20px}
+.plan-desc{font-size:.9rem;color:var(--muted);margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+.feat-list{list-style:none;margin-bottom:28px}
+.feat-list li{font-size:.88rem;padding:7px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;color:var(--muted)}
+.feat-list li:last-child{border:none}
+.feat-list li.on{color:var(--txt)}
+.feat-list .ck{font-size:.9rem}
+.pay-opts{display:flex;flex-direction:column;gap:8px}
+.pay-opt-label{font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:2px}
+/* HOW IT WORKS */
+.how{padding:100px 40px;max-width:900px;margin:0 auto}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:50px}
+@media(max-width:700px){.steps{grid-template-columns:1fr}}
+.step{text-align:center}
+.step-num{width:48px;height:48px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:1.1rem;margin:0 auto 16px}
+.step h3{font-weight:700;margin-bottom:8px}
+.step p{font-size:.88rem;color:var(--muted)}
+/* CTA BANNER */
+.cta-banner{padding:80px 40px;text-align:center;background:linear-gradient(135deg,rgba(109,107,255,.15),rgba(34,211,238,.08))}
+.cta-banner h2{font-size:2.2rem;font-weight:800;letter-spacing:-.02em;margin-bottom:14px}
+.cta-banner p{color:var(--muted);margin-bottom:32px;font-size:1.05rem}
+/* FOOTER */
+footer{padding:40px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-size:.82rem;color:var(--muted)}
+/* MODAL */
+.pay-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.pay-modal-bg.show{display:flex}
+.pay-modal{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:32px;width:100%;max-width:480px}
+.pay-modal h2{font-size:1.3rem;font-weight:800;margin-bottom:6px}
+.pay-modal p{color:var(--muted);font-size:.88rem;margin-bottom:22px}
+.pay-method-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.pay-method{background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:18px;text-align:center;cursor:pointer;transition:.2s}
+.pay-method:hover,.pay-method.sel{border-color:var(--accent);background:rgba(109,107,255,.08)}
+.pay-method .pm-icon{font-size:1.8rem;margin-bottom:6px}
+.pay-method .pm-name{font-weight:700;font-size:.9rem}
+.pay-method .pm-sub{font-size:.75rem;color:var(--muted)}
+.err{color:#fb7185;font-size:.82rem;margin-bottom:10px;min-height:18px}
+input.ipt{background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:10px 13px;width:100%;font-size:.9rem;font-family:inherit;margin-bottom:10px}
+input.ipt:focus{outline:none;border-color:var(--accent)}
+@media(max-width:600px){nav{padding:14px 20px}.nav-links{display:none}.hero{padding:120px 20px 70px}.features,.pricing,.how{padding:70px 20px}footer{flex-direction:column;text-align:center}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand"><div class="m">⚡</div>EventOps</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#how">How it works</a>
+  </div>
+  <div class="nav-cta">
+    <a href="index.html" class="btn btn-g">Sign in</a>
+    <button class="btn btn-p" onclick="openPayModal('pro')">Start free trial</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="glow"></div>
+  <div class="hero-badge">⚡ Now in Beta — 14-day free trial</div>
+  <h1>The ERP built for<br><span class="grad">event professionals</span></h1>
+  <p>Quotations, finance, crew management, logistics, compliance and real-time comms — one platform replacing five tools and every WhatsApp group.</p>
+  <div class="hero-ctas">
+    <button class="btn btn-p btn-lg" onclick="openPayModal('pro')">Start free trial — no card required</button>
+    <a href="index.html" class="btn btn-g btn-lg">View demo</a>
+  </div>
+  <div class="hero-note">14-day free trial · Cancel anytime · South African & international payments</div>
+</section>
+
+<!-- LOGOS -->
+<div class="logos">
+  <p>Built for</p>
+  <div class="logo-row">
+    <span>Corporate events</span><span>Exhibitions</span><span>Concerts</span><span>Gala dinners</span><span>Brand activations</span><span>Festivals</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-label">Everything you need</div>
+  <h2 class="section-h">Replace your entire event<br>management stack</h2>
+  <p class="section-sub">Built specifically for the complexity of live events — not adapted from generic project management tools.</p>
+  <div class="feat-grid">
+    <div class="feat-card"><div class="feat-icon">🧾</div><h3>Smart Quotation Builder</h3><p>Compile vendor quotes by category, apply margin, management fee, VAT and discounts. Generate branded client proposals in one click.</p></div>
+    <div class="feat-card"><div class="feat-icon">💰</div><h3>Finance & Milestone Invoicing</h3><p>Triple-Match accounting (Scope → PO → Invoice), milestone-based invoicing, tax invoice generation and payment tracking.</p></div>
+    <div class="feat-card"><div class="feat-icon">👷</div><h3>Workforce Marketplace</h3><p>Post open positions to a public Crew Board. Freelance crew apply with their quote. Directors review, accept and track contracts.</p></div>
+    <div class="feat-card"><div class="feat-icon">💬</div><h3>Comms Hub — Replace WhatsApp</h3><p>Section group chats (Production, AV, Catering, Logistics…), direct messages and broadcast announcements. All in one place.</p></div>
+    <div class="feat-card"><div class="feat-icon">⚡</div><h3>Ripple Engine</h3><p>Simulate setup delays and watch costs cascade across labour, accommodation, catering and fuel in real time. Know your risk before it hits.</p></div>
+    <div class="feat-card"><div class="feat-icon">📋</div><h3>Production Brief & Weather</h3><p>Auto-populated production schedule with section contacts. Live weather forecast for the venue. Printable PDF brief for all crew.</p></div>
+    <div class="feat-card"><div class="feat-icon">🛡️</div><h3>Supplier Compliance</h3><p>Track vendor CSD registration, B-BBEE level and affidavit expiry dates. Automatic alerts for non-compliant suppliers.</p></div>
+    <div class="feat-card"><div class="feat-icon">📱</div><h3>Field App for Crew</h3><p>Mobile-optimised field view for technicians. Personal call sheet, duty confirmation, document uploads, and run sheet access.</p></div>
+    <div class="feat-card"><div class="feat-icon">⚙️</div><h3>White-Label Documents</h3><p>Upload your logo, choose colours and customise terms per document type. Every quote, invoice, PO and contract carries your brand.</p></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="section-label">Simple pricing</div>
+    <h2 class="section-h">Start free. Scale as you grow.</h2>
+    <p style="color:var(--muted)">14-day free trial on the Pro plan. No card required to start. Pay with card (Stripe) or instant EFT (Ozow).</p>
+    <div class="pricing-grid">
+
+      <!-- STARTER -->
+      <div class="plan-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price"><sup>$</sup>5<span>/month</span></div>
+        <div class="plan-zar">≈ R90/month · billed monthly</div>
+        <div class="plan-desc">Perfect for independent event coordinators managing a single event at a time.</div>
+        <ul class="feat-list">
+          <li class="on"><span class="ck">✓</span> 1 active event</li>
+          <li class="on"><span class="ck">✓</span> Quotation builder</li>
+          <li class="on"><span class="ck">✓</span> Finance & milestone invoicing</li>
+          <li class="on"><span class="ck">✓</span> Production schedule</li>
+          <li class="on"><span class="ck">✓</span> Designs & renders upload</li>
+          <li class="on"><span class="ck">✓</span> White-label documents</li>
+          <li class="on"><span class="ck">✓</span> Field app (3 crew max)</li>
+          <li><span class="ck" style="opacity:.3">✗</span> Comms Hub & group chat</li>
+          <li><span class="ck" style="opacity:.3">✗</span> Workforce marketplace</li>
+          <li><span class="ck" style="opacity:.3">✗</span> Ripple Engine</li>
+          <li><span class="ck" style="opacity:.3">✗</span> Supplier compliance</li>
+        </ul>
+        <div class="pay-opts">
+          <div class="pay-opt-label">Pay with</div>
+          <button class="btn btn-g" onclick="openPayModal('starter','stripe')" style="width:100%">💳 Card via Stripe</button>
+          <button class="btn btn-g" onclick="openPayModal('starter','ozow')" style="width:100%">🏦 Instant EFT via Ozow</button>
+        </div>
+      </div>
+
+      <!-- PRO -->
+      <div class="plan-card featured">
+        <div class="plan-badge">Most popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price"><sup>$</sup>25<span>/month</span></div>
+        <div class="plan-zar">≈ R450/month · billed monthly</div>
+        <div class="plan-desc">For professional event companies running multiple events with a full crew.</div>
+        <ul class="feat-list">
+          <li class="on"><span class="ck">✓</span> <b>Unlimited</b> events</li>
+          <li class="on"><span class="ck">✓</span> All Starter features</li>
+          <li class="on"><span class="ck">✓</span> Comms Hub — group & direct chat</li>
+          <li class="on"><span class="ck">✓</span> Workforce marketplace & crew board</li>
+          <li class="on"><span class="ck">✓</span> ⚡ Ripple Engine</li>
+          <li class="on"><span class="ck">✓</span> Supplier compliance tracking</li>
+          <li class="on"><span class="ck">✓</span> Event Info & production brief PDF</li>
+          <li class="on"><span class="ck">✓</span> Weather forecast integration</li>
+          <li class="on"><span class="ck">✓</span> Unlimited crew on field app</li>
+          <li class="on"><span class="ck">✓</span> Priority support</li>
+        </ul>
+        <div class="pay-opts">
+          <div class="pay-opt-label">Start 14-day free trial</div>
+          <button class="btn btn-p" onclick="openPayModal('pro','stripe')" style="width:100%">💳 Card via Stripe</button>
+          <button class="btn btn-g" onclick="openPayModal('pro','ozow')" style="width:100%;margin-top:0">🏦 Instant EFT via Ozow</button>
+        </div>
+      </div>
+
+    </div>
+    <p style="color:var(--muted);font-size:.82rem;margin-top:24px">All prices in USD. Ozow payments billed in ZAR at prevailing exchange rate. Cancel anytime — no lock-in.</p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div style="text-align:center">
+    <div class="section-label">Simple onboarding</div>
+    <h2 class="section-h">Up and running in minutes</h2>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Create your account</h3>
+      <p>Sign up with your email. 14-day free Pro trial starts immediately — no card needed.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Set up your brand</h3>
+      <p>Upload your logo, add company details and customise document terms in Settings.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Create your first event</h3>
+      <p>Add vendors, build your quote, roster crew, and generate a branded quotation in minutes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<div class="cta-banner">
+  <h2>Ready to run professional events?</h2>
+  <p>Join event companies across South Africa already using EventOps to deliver exceptional events.</p>
+  <button class="btn btn-p btn-lg" onclick="openPayModal('pro')">Start your free 14-day trial</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div style="display:flex;align-items:center;gap:10px;font-weight:700"><span style="width:28px;height:28px;border-radius:8px;background:var(--grad);display:inline-grid;place-items:center;font-size:13px">⚡</span>EventOps</div>
+  <div style="display:flex;gap:24px"><a href="index.html" style="color:var(--muted)">App</a><a href="mailto:support@eventops.io" style="color:var(--muted)">Support</a></div>
+  <div>© 2026 EventOps · Built for the industry</div>
+</footer>
+
+<!-- PAYMENT MODAL -->
+<div class="pay-modal-bg" id="payModalBg">
+  <div class="pay-modal">
+    <h2 id="pm-title">Start your trial</h2>
+    <p id="pm-sub">14 days free, then billed monthly. Cancel anytime.</p>
+    <div class="err" id="pm-err"></div>
+    <input class="ipt" id="pm-email" type="email" placeholder="Your email address">
+    <input class="ipt" id="pm-pass" type="password" placeholder="Create a password (min 8 chars)">
+    <div class="pay-method-grid" id="pm-methods">
+      <div class="pay-method sel" id="pm-stripe" onclick="selectPayMethod('stripe')">
+        <div class="pm-icon">💳</div>
+        <div class="pm-name">Card</div>
+        <div class="pm-sub">Visa · Mastercard<br>via Stripe</div>
+      </div>
+      <div class="pay-method" id="pm-ozow" onclick="selectPayMethod('ozow')">
+        <div class="pm-icon">🏦</div>
+        <div class="pm-name">Instant EFT</div>
+        <div class="pm-sub">South African banks<br>via Ozow</div>
+      </div>
+    </div>
+    <button class="btn btn-p" id="pm-btn" style="width:100%;padding:13px;font-size:.95rem" onclick="submitPayment()">Continue →</button>
+    <button class="btn btn-g" style="width:100%;padding:11px;margin-top:8px" onclick="closePayModal()">Cancel</button>
+    <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:14px">Your data is stored securely. No spam, ever.</p>
+  </div>
+</div>
+
+<script>
+// CONFIG — replace with your actual keys
+const SUPABASE_URL = 'https://awbtpgugmzitjqovlewr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3YnRwZ3VnbXppdGpxb3ZsZXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTkzMDYsImV4cCI6MjA5NzQzNTMwNn0.0SJMcy-B8tfoJHFDVwz4wQPuA03IU5NFWMBKe1_XNn0';
+
+// Stripe Price IDs — create these in your Stripe Dashboard → Products
+const STRIPE_PRICE_STARTER = 'price_STARTER_ID_HERE';
+const STRIPE_PRICE_PRO     = 'price_PRO_ID_HERE';
+
+let selectedPlan = 'pro';
+let selectedMethod = 'stripe';
+
+function openPayModal(plan, method = 'stripe') {
+  selectedPlan = plan;
+  selectedMethod = method;
+  selectPayMethod(method);
+  document.getElementById('pm-title').textContent = plan === 'pro' ? 'Start Pro free trial' : 'Start Starter plan';
+  document.getElementById('pm-sub').textContent = plan === 'pro'
+    ? '14 days free on Pro, then $25/month. No card charged until trial ends.'
+    : '$5/month — billed immediately after sign-up.';
+  document.getElementById('pm-err').textContent = '';
+  document.getElementById('payModalBg').classList.add('show');
+}
+
+function closePayModal() { document.getElementById('payModalBg').classList.remove('show'); }
+document.getElementById('payModalBg').onclick = e => { if (e.target.id === 'payModalBg') closePayModal(); };
+
+function selectPayMethod(m) {
+  selectedMethod = m;
+  document.getElementById('pm-stripe').classList.toggle('sel', m === 'stripe');
+  document.getElementById('pm-ozow').classList.toggle('sel', m === 'ozow');
+  document.getElementById('pm-btn').textContent = m === 'stripe' ? 'Pay with card →' : 'Pay with Instant EFT →';
+}
+
+async function submitPayment() {
+  const email = document.getElementById('pm-email').value.trim();
+  const pass = document.getElementById('pm-pass').value;
+  const err = document.getElementById('pm-err');
+  err.textContent = '';
+  if (!email || pass.length < 8) { err.textContent = 'Enter a valid email and password (min 8 chars).'; return; }
+
+  document.getElementById('pm-btn').textContent = 'Setting up account…';
+  document.getElementById('pm-btn').disabled = true;
+
+  try {
+    // 1. Sign up with Supabase
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data, error: signUpErr } = await sb.auth.signUp({ email, password: pass });
+    if (signUpErr) { err.textContent = signUpErr.message; reset(); return; }
+
+    const userId = data.user?.id;
+    const origin = window.location.origin;
+
+    if (selectedMethod === 'stripe') {
+      const priceId = selectedPlan === 'pro' ? STRIPE_PRICE_PRO : STRIPE_PRICE_STARTER;
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          priceId, userId, email,
+          successUrl: `${origin}/index.html?checkout=success`,
+          cancelUrl: `${origin}/landing.html?checkout=cancel`,
+        }),
+      });
+      const { url, error: checkoutErr } = await res.json();
+      if (checkoutErr) { err.textContent = checkoutErr; reset(); return; }
+      window.location.href = url;
+    } else {
+      // Ozow EFT
+      const amountUSD = selectedPlan === 'pro' ? 25 : 5;
+      // Convert to ZAR — in production fetch live rate; here use a fixed estimate
+      const amountZAR = (amountUSD * 18.5).toFixed(2);
+      const res = await fetch('/api/ozow-init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: selectedPlan, userId, email, amount: amountZAR,
+          successUrl: `${origin}/index.html?checkout=success`,
+          cancelUrl: `${origin}/landing.html?checkout=cancel`,
+          notifyUrl: `${origin}/api/ozow-notify`,
+        }),
+      });
+      const { url, error: ozowErr } = await res.json();
+      if (ozowErr) { err.textContent = ozowErr; reset(); return; }
+      window.location.href = url;
+    }
+  } catch (e) {
+    err.textContent = 'Something went wrong. Please try again.';
+    reset();
+  }
+}
+
+function reset() {
+  document.getElementById('pm-btn').textContent = selectedMethod === 'stripe' ? 'Pay with card →' : 'Pay with Instant EFT →';
+  document.getElementById('pm-btn').disabled = false;
+}
+
+// Show success/cancel toast from redirect
+const params = new URLSearchParams(window.location.search);
+if (params.get('checkout') === 'success') {
+  setTimeout(() => {
+    document.body.insertAdjacentHTML('beforeend', '<div style="position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#10142a;border:1px solid rgba(52,211,153,.4);color:#34d399;padding:14px 24px;border-radius:12px;font-weight:600;z-index:999">✓ Payment successful — redirecting to your account…</div>');
+    setTimeout(() => window.location.href = 'index.html', 2000);
+  }, 100);
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</body>
+</html>
