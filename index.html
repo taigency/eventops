@@ -532,8 +532,13 @@ function vSettings(){
     `<div style="width:120px;height:60px;background:var(--bg2);border:1.5px dashed var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.75rem">No logo</div>`;
   const acc=o.accentColor||'#6d6bff';
   document.getElementById('content').innerHTML=`
-  <div class="pg-title">Settings & Branding</div>
-  <div class="pg-sub">White-label your documents — logos, colours, terms and company details applied to all generated quotes, invoices, POs and contracts.</div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <div><div class="pg-title">Settings & Branding</div><div class="pg-sub">White-label your documents — logos, colours, terms and company details.</div></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="settings-status" style="font-size:.78rem;color:var(--muted);opacity:0;transition:.3s">● unsaved changes</span>
+      <button class="btn btn-p" onclick="saveSettings()">💾 Save changes</button>
+    </div>
+  </div>
 
   <div class="grid g2">
   <div>
@@ -542,8 +547,8 @@ function vSettings(){
       <div class="sec-h"><h3>Organisation details</h3></div>
       ${[['name','Company / trading name'],['tagline','Tagline (shown under logo)'],['address','Address (use line breaks)'],['phone','Phone'],['email','Email'],['vatNo','VAT registration number'],['regNo','Company reg number'],['banking','Banking details (shown on invoices)']].map(([k,l])=>
         k==='address'||k==='banking'
-          ?`<div class="form-row"><label class="fl">${l}</label><textarea class="ipt" rows="2" oninput="DB.org.${k}=this.value;save()">${o[k]||''}</textarea></div>`
-          :`<div class="form-row"><label class="fl">${l}</label><input class="ipt" value="${(o[k]||'').replace(/"/g,'&quot;')}" oninput="DB.org.${k}=this.value;save()"></div>`
+          ?`<div class="form-row"><label class="fl">${l}</label><textarea class="ipt" rows="2" oninput="DB.org.${k}=this.value;markSettingsDirty()">${o[k]||''}</textarea></div>`
+          :`<div class="form-row"><label class="fl">${l}</label><input class="ipt" value="${(o[k]||'').replace(/"/g,'&quot;')}" oninput="DB.org.${k}=this.value;markSettingsDirty()"></div>`
       ).join('')}
     </div>
 
@@ -557,11 +562,11 @@ function vSettings(){
         <div>
           <label class="fl">Logo position on documents</label>
           <div style="display:flex;gap:8px;margin-top:6px">
-            ${['left','center','right'].map(p=>`<button class="btn ${o.logoPos===p?'btn-p':'btn-g'} btn-sm" onclick="DB.org.logoPos='${p}';save();vSettings()">${p.charAt(0).toUpperCase()+p.slice(1)}</button>`).join('')}
+            ${['left','center','right'].map(p=>`<button class="btn ${o.logoPos===p?'btn-p':'btn-g'} btn-sm" onclick="DB.org.logoPos='${p}';markSettingsDirty();vSettings()">${p.charAt(0).toUpperCase()+p.slice(1)}</button>`).join('')}
           </div>
           <div class="form-row" style="margin-top:14px"><label class="fl">Document accent colour</label>
             <div style="display:flex;align-items:center;gap:10px">
-              <input type="color" value="${acc}" oninput="DB.org.accentColor=this.value;save()" style="width:44px;height:34px;border-radius:8px;border:1px solid var(--line);background:none;cursor:pointer;padding:2px">
+              <input type="color" value="${acc}" oninput="DB.org.accentColor=this.value;markSettingsDirty()" style="width:44px;height:34px;border-radius:8px;border:1px solid var(--line);background:none;cursor:pointer;padding:2px">
               <span style="font-size:.82rem;color:var(--muted)">${acc} — used for headings & rule lines</span>
             </div>
           </div>
@@ -590,12 +595,15 @@ function vSettings(){
       ${[['quoteTerms','📄 Quotation terms'],['invoiceTerms','💳 Invoice terms'],['poTerms','📋 Purchase Order terms'],['contractTerms','✍️ Contract terms']].map(([k,l])=>`
         <div style="margin-bottom:18px">
           <label class="fl" style="font-size:.8rem;font-weight:700;color:var(--accent2);margin-bottom:6px">${l}</label>
-          <textarea class="ipt" rows="4" style="font-size:.82rem;line-height:1.6" oninput="DB.org.${k}=this.value;save()">${(o[k]||'').replace(/</g,'&lt;')}</textarea>
+          <textarea class="ipt" rows="4" style="font-size:.82rem;line-height:1.6" oninput="DB.org.${k}=this.value;markSettingsDirty()">${(o[k]||'').replace(/</g,'&lt;')}</textarea>
         </div>`).join('')}
     </div>
   </div>
   </div>`;
 }
+
+function markSettingsDirty(){const el=document.getElementById('settings-status');if(el){el.style.opacity='1';el.textContent='● unsaved changes';}}
+function saveSettings(){save();const el=document.getElementById('settings-status');if(el){el.textContent='✓ Saved';el.style.color='var(--good)';el.style.opacity='1';clearTimeout(el._t);el._t=setTimeout(()=>{el.style.opacity='0';el.style.color='var(--muted)';},2500);}toast('Settings saved ✓');}
 
 function uploadLogo(inp){
   const f=inp.files[0];if(!f)return;
