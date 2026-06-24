@@ -267,8 +267,24 @@ async function loadFromCloud(){
   if(!supabaseUser) return;
   try{
     const {data} = await sb.from('user_data').select('data').eq('user_id',supabaseUser.id).single();
-    if(data?.data){ DB=data.data; store.setItem(DB_KEY,JSON.stringify(DB)); }
+    if(data?.data){ DB=data.data; migrateDB(); store.setItem(DB_KEY,JSON.stringify(DB)); }
   }catch(e){ /* use local */ }
+}
+
+function migrateDB(){
+  if(!DB.events) DB.events={};
+  if(!DB.org) DB.org={name:'EventOps',client:'Client'};
+  if(!DB.role) DB.role='Event Director';
+  const evIds=Object.keys(DB.events);
+  if(!DB.currentEvent||!DB.events[DB.currentEvent]) DB.currentEvent=evIds[0]||null;
+  const def={pricing:{marginPct:18,mgmtFeePct:8,discountPct:0,vatPct:15},milestones:[],ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},quote:[],triple:[],schedule:[],designs:[],labour:[],logistics:[],vendors:[],status:'Draft'};
+  evIds.forEach(id=>{
+    const e=DB.events[id];
+    Object.keys(def).forEach(k=>{ if(e[k]===undefined) e[k]=JSON.parse(JSON.stringify(def[k])); });
+    if(!e.pricing) e.pricing={...def.pricing};
+    ['marginPct','mgmtFeePct','discountPct','vatPct'].forEach(k=>{ if(e.pricing[k]===undefined) e.pricing[k]=def.pricing[k]; });
+    e.labour.forEach(l=>{ if(!l.positionId) l.positionId=null; if(l.published===undefined) l.published=false; if(l.appCount===undefined) l.appCount=0; if(l.desc===undefined) l.desc=''; });
+  });
 }
 
 const E=()=>DB.events[DB.currentEvent];
