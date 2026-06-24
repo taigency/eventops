@@ -585,31 +585,17 @@ async function viewApplicants(positionId,roleName){
     m.innerHTML=`<h3>Applicants — ${roleName}</h3><div class="empty">No applications yet.</div><div class="modal-acts"><button class="btn btn-g" onclick="closeModal();m.style.maxWidth=''">Close</button></div>`;
     return;
   }
-  // Enrich with CrewDeck profiles
-  const cdProfiles={};
-  await Promise.all(data.map(async a=>{
-    if(a.applicant_email){
-      try{const r=await fetch(`https://crewdeck-ten.vercel.app/api/eventops/lookup?email=${encodeURIComponent(a.applicant_email)}`);const d=await r.json();if(d.found)cdProfiles[a.applicant_email]=d.profile;}catch(e){}
-    }
-  }));
   const rows=data.map(a=>{
     const cls=a.status==='accepted'?'b-green':a.status==='rejected'?'b-red':'b-blue';
     const st=a.status==='accepted'?'✓ Accepted':a.status==='rejected'?'Rejected':'Pending';
-    const cd=cdProfiles[a.applicant_email];
-    const cdBadge=cd?`<a href="${cd.crewdeck_url}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(120deg,rgba(245,158,11,.2),rgba(217,119,6,.15));border:1px solid rgba(245,158,11,.4);color:#f59e0b;border-radius:100px;padding:2px 8px;font-size:.68rem;font-weight:700;text-decoration:none;white-space:nowrap">🃏 CrewDeck${cd.is_verified?' ✓':''}</a>`:'';
-    const cdSkills=cd&&cd.skills.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${cd.skills.slice(0,5).map(s=>`<span style="background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:2px 7px;font-size:.68rem;color:var(--muted)">${s.name} <span style="color:var(--accent2)">${s.proficiency}</span></span>`).join('')}</div>`:'';
-    const cdKpi=cd&&cd.kpi?`<div style="display:flex;gap:8px;margin-top:6px;font-size:.72rem;color:var(--muted)"><span>⭐ ${cd.kpi.avg_rating?.toFixed(1)||'—'}</span><span>📊 ${cd.kpi.total_projects||0} projects</span><span>⏱ ${cd.kpi.on_time_percentage||0}% on-time</span><span>🔄 ${cd.kpi.would_rehire_percentage||0}% rehire</span></div>`:'';
     return`<div class="app-card">
       <div class="ac-top">
-        <div><div class="ac-name">${a.applicant_name||'—'} ${cdBadge}</div><div class="ac-email">${a.applicant_email||''}</div></div>
+        <div><div class="ac-name">${a.applicant_name||'—'}</div><div class="ac-email">${a.applicant_email||''}</div></div>
         <div style="text-align:right"><div class="ac-quote">${fmt(a.quote_amount||0)}</div><span class="badge ${cls}" style="font-size:.68rem">${st}</span></div>
       </div>
-      ${cd&&cd.bio?`<div style="font-size:.82rem;color:var(--muted);line-height:1.4;margin:6px 0">${cd.bio.slice(0,150)}${cd.bio.length>150?'…':''}</div>`:''}
-      ${cdSkills}${cdKpi}
       ${a.message?`<div class="ac-msg">"${a.message}"</div>`:''}
       ${a.portfolio_url?`<div class="ac-port"><a href="${a.portfolio_url}" target="_blank" style="color:var(--accent2)">${a.portfolio_url}</a></div>`:''}
       <div class="ac-acts">
-        ${cd?`<a href="${cd.crewdeck_url}" target="_blank" class="btn btn-g btn-sm" style="text-decoration:none;border-color:rgba(245,158,11,.4);color:#f59e0b">🃏 View CrewDeck Profile</a>`:''}
         ${a.status!=='accepted'?`<button class="btn btn-p btn-sm" onclick="setAppStatus('${a.id}','${positionId}','${roleName}','accepted')">✓ Accept</button>`:''}
         ${a.status!=='rejected'?`<button class="btn btn-g btn-sm" onclick="setAppStatus('${a.id}','${positionId}','${roleName}','rejected')">Reject</button>`:''}
         <button class="btn btn-g btn-sm" onclick="navigator.clipboard.writeText('${a.applicant_email||''}');toast('Email copied')">📋 Copy email</button>
@@ -661,13 +647,12 @@ async function renderCrewBoard(){
       <div class="cb-hero">
         <h1>⚡ EventOps Crew Board</h1>
         <p>Open positions for professional event crew. Apply directly — the Event Director reviews your quote.</p>
-        <div class="cb-link">Powered by EventOps ERP · CrewDeck Integrated</div>
+        <div class="cb-link">Powered by EventOps ERP · Sign up to apply</div>
       </div>
       <div class="cb-body">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
           <div style="font-weight:700;font-size:1.1rem">${(positions||[]).length} open position${(positions||[]).length===1?'':'s'}</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <a href="https://crewdeck-ten.vercel.app/eventops" target="_blank" class="btn btn-g btn-sm" style="text-decoration:none;background:linear-gradient(120deg,rgba(245,158,11,.15),rgba(217,119,6,.1));border:1px solid rgba(245,158,11,.3);color:#f59e0b">🃏 Browse CrewDeck Technicians</a>
+          <div style="display:flex;gap:8px">
             ${boardUser?`<span style="font-size:.82rem;color:var(--muted);line-height:32px">Signed in as ${boardUser.email}</span><button class="btn btn-g btn-sm" onclick="sb.auth.signOut().then(()=>renderCrewBoard())">Sign out</button>`:`<button class="btn btn-p btn-sm" onclick="showCBAuth()">Sign in / Join to apply</button>`}
             <a href="${window.location.origin+window.location.pathname}" class="btn btn-g btn-sm" style="text-decoration:none">← ERP Login</a>
           </div>
@@ -848,8 +833,5 @@ async function init(){
 window.addEventListener('hashchange',()=>{ if(isCrewBoard()) renderCrewBoard(); else { init(); } });
 init();
 </script>
-
-<!-- CrewDeck Integration — Browse technicians, enrich applicants -->
-<script src="https://crewdeck-ten.vercel.app/crewdeck-eventops.js"></script>
 </body>
 </html>
