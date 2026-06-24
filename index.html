@@ -3,588 +3,504 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EventOps — ERP</title>
+<title>EventOps ERP</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#070912;--bg2:#0c1020;--panel:#10142a;--panel2:#161b36;--line:rgba(255,255,255,.08);--txt:#eef1f8;--muted:#9aa3bd;--accent:#6d6bff;--accent2:#22d3ee;--good:#34d399;--bad:#fb7185;--warn:#fbbf24;--grad:linear-gradient(120deg,#6d6bff,#22d3ee);}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{background:var(--bg);color:var(--txt);font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;font-size:14px;display:flex;flex-direction:column;height:100vh;overflow:hidden}
-button{font-family:inherit;cursor:pointer}
-input,select,textarea{font-family:inherit}
-.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-
-/* ── TOP BAR ─────────────────────────────────────────────── */
-.topbar{height:54px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:10}
-.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.05rem}
-.brand .m{width:28px;height:28px;border-radius:8px;background:var(--grad);display:grid;place-items:center;font-size:13px;color:#fff;flex-shrink:0}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
-.btn{padding:7px 14px;border-radius:9px;font-weight:600;font-size:.82rem;border:none;transition:.15s;cursor:pointer;white-space:nowrap}
-.btn-p{background:var(--grad);color:#fff}.btn-p:hover{filter:brightness(1.1)}
-.btn-g{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}.btn-g:hover{background:#1d2342}
-.btn-bad{background:rgba(251,113,133,.15);color:var(--bad);border:1px solid rgba(251,113,133,.2)}.btn-bad:hover{background:rgba(251,113,133,.25)}
-.demo-chip{background:linear-gradient(90deg,rgba(109,107,255,.2),rgba(34,211,238,.15));border:1px solid rgba(109,107,255,.4);border-radius:20px;padding:3px 10px;font-size:.75rem;color:var(--accent2);font-weight:600}
-
-/* ── MAIN LAYOUT ─────────────────────────────────────────── */
-.layout{display:flex;flex:1;overflow:hidden}
-
-/* ── SIDEBAR ─────────────────────────────────────────────── */
-.sidebar{width:260px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
-.sidebar-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);flex-shrink:0}
-.sidebar-head h3{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
-.add-event-form{display:flex;flex-direction:column;gap:6px}
-.ipt{background:var(--panel);border:1px solid var(--line);color:var(--txt);padding:8px 10px;border-radius:8px;width:100%;font-size:.83rem}
-.ipt:focus{outline:none;border-color:var(--accent)}
-.ipt::placeholder{color:var(--muted)}
-.btn-add-event{background:var(--grad);color:#fff;border:none;border-radius:8px;padding:8px;font-weight:600;font-size:.82rem;width:100%;cursor:pointer}
-.btn-add-event:hover{filter:brightness(1.1)}
-.events-list{flex:1;overflow-y:auto;padding:10px 10px}
-.events-list::-webkit-scrollbar{width:4px}
-.events-list::-webkit-scrollbar-track{background:transparent}
-.events-list::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
-.ev-item{padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:.15s;background:var(--panel)}
-.ev-item:hover{border-color:var(--accent);background:var(--panel2)}
-.ev-item.sel{border-color:var(--accent);background:var(--panel2);box-shadow:inset 3px 0 0 var(--accent)}
-.ev-name{font-weight:700;font-size:.88rem;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ev-meta{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ev-footer{display:flex;justify-content:space-between;align-items:center;margin-top:5px}
-.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:.68rem;font-weight:700}
-.badge-confirmed{background:rgba(52,211,153,.15);color:var(--good)}
-.badge-draft{background:rgba(155,163,189,.1);color:var(--muted)}
-.badge-invoiced{background:rgba(251,191,36,.15);color:var(--warn)}
-.badge-paid{background:rgba(52,211,153,.2);color:var(--good)}
-.x{background:none;border:none;color:var(--bad);font-size:.8rem;cursor:pointer;padding:2px 5px;border-radius:4px;opacity:.6}
-.x:hover{opacity:1;background:rgba(251,113,133,.1)}
-.empty-events{padding:20px 12px;text-align:center;color:var(--muted);font-size:.82rem;line-height:1.6}
-.empty-events .arrow{font-size:1.4rem;margin-bottom:8px;display:block}
-
-/* ── MAIN PANEL ──────────────────────────────────────────── */
-.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
-.main::-webkit-scrollbar{width:5px}
-.main::-webkit-scrollbar-track{background:transparent}
-.main::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
-.main-inner{padding:20px 24px;flex:1}
-
-/* ── EMPTY STATE ─────────────────────────────────────────── */
-.empty-main{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:12px;padding:40px}
-.empty-main .icon{font-size:3rem;margin-bottom:4px}
-.empty-main h2{font-size:1.1rem;font-weight:700}
-.empty-main p{color:var(--muted);font-size:.88rem;max-width:320px;line-height:1.6}
-.arrow-left{font-size:1.2rem;color:var(--accent2)}
-
-/* ── QUOTATION AREA ──────────────────────────────────────── */
-.q-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
-.q-title{font-size:1rem;font-weight:800}
-.q-meta{font-size:.78rem;color:var(--muted)}
-.status-sel{background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:5px 10px;border-radius:8px;font-size:.8rem;cursor:pointer;outline:none}
-.add-line-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
-.add-line-form .ipt{margin:0;flex:1;min-width:110px}
-.fl{font-size:.72rem;color:var(--muted);display:block;margin-bottom:4px}
-.field-wrap{display:flex;flex-direction:column;flex:1;min-width:100px}
-.field-wrap.sm{flex:0 0 70px;min-width:70px}
-.field-wrap.md{flex:0 0 110px;min-width:110px}
-.btn-add-line{background:var(--grad);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:.83rem;font-weight:600;cursor:pointer;white-space:nowrap;align-self:flex-end}
-.btn-add-line:hover{filter:brightness(1.1)}
-table{width:100%;border-collapse:collapse;font-size:.84rem;background:var(--panel);border-radius:12px;overflow:hidden;border:1px solid var(--line)}
-th{text-align:left;color:var(--muted);font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
-td{padding:10px 12px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,.02)}
-.totals{margin-left:auto;max-width:320px;margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
-.br{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:.85rem}
-.br:last-child{border:none}
-.br.tot{border-top:2px solid var(--accent);font-weight:800;font-size:1.05rem;margin-top:4px;padding-top:12px}
-.no-items{color:var(--muted);text-align:center;padding:32px;font-size:.85rem}
-
-/* ── AUTH ────────────────────────────────────────────────── */
-.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
-.auth-box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px;width:100%;max-width:400px}
-.err-msg{color:var(--bad);font-size:.82rem;margin-bottom:10px;min-height:18px}
-
-/* ── WIZARD ──────────────────────────────────────────────── */
-.wz-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center}
-.wz-box{background:var(--panel);border:1px solid var(--line);border-radius:20px;width:500px;max-width:94vw;overflow:hidden}
-.wz-head{background:var(--grad);padding:26px 28px 18px}
-.wz-head h2{color:#fff;font-size:1.25rem;font-weight:800;margin-bottom:3px}
-.wz-head p{color:rgba(255,255,255,.8);font-size:.85rem}
-.wz-dots{display:flex;gap:5px;margin-top:12px}
-.wz-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35);transition:.3s}
-.wz-dot.on{background:#fff;width:20px;border-radius:4px}
-.wz-body{padding:22px 28px}
-.wz-body h3{font-size:.95rem;font-weight:700;margin-bottom:6px}
-.wz-body p{color:var(--muted);font-size:.85rem;line-height:1.6;margin-bottom:10px}
-.wz-feat{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--line)}
-.wz-feat:last-child{border:none}
-.wz-icon{width:34px;height:34px;border-radius:9px;background:var(--bg2);display:grid;place-items:center;font-size:16px;flex-shrink:0}
-.wz-foot{padding:14px 28px 22px;display:flex;justify-content:space-between;align-items:center}
-.wz-skip{background:none;border:none;color:var(--muted);font-size:.8rem;cursor:pointer}
-.wz-skip:hover{color:var(--txt)}
-.wz-btns{display:flex;gap:8px}
-
-/* ── CHAT ────────────────────────────────────────────────── */
-.chat-fab{position:fixed;bottom:22px;right:22px;width:52px;height:52px;border-radius:50%;background:var(--grad);border:none;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(109,107,255,.45);z-index:800;display:none;align-items:center;justify-content:center;transition:.2s}
-.chat-fab:hover{transform:scale(1.08)}
-.chat-panel{position:fixed;bottom:84px;right:22px;width:340px;max-width:calc(100vw - 28px);background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.55);z-index:800;display:flex;flex-direction:column;overflow:hidden;transition:.2s;transform-origin:bottom right}
-.chat-panel.hidden{transform:scale(.85);opacity:0;pointer-events:none}
-.chat-head{background:var(--grad);padding:13px 16px;display:flex;justify-content:space-between;align-items:center}
-.chat-head span{color:#fff;font-weight:700;font-size:.9rem}
-.chat-close{background:none;border:none;color:rgba(255,255,255,.85);cursor:pointer;font-size:16px}
-.chat-msgs{height:280px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
-.chat-msgs::-webkit-scrollbar{width:3px}
-.chat-msgs::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
-.msg{max-width:90%;padding:8px 12px;border-radius:13px;font-size:.83rem;line-height:1.5}
-.msg.bot{background:var(--panel2);border-bottom-left-radius:3px;align-self:flex-start}
-.msg.user{background:var(--accent);color:#fff;border-bottom-right-radius:3px;align-self:flex-end}
-.msg.typing span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;margin:0 1px}
-.msg.typing span:nth-child(2){animation-delay:.2s}
-.msg.typing span:nth-child(3){animation-delay:.4s}
-@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
-.chat-chips{padding:0 10px 8px;display:flex;flex-wrap:wrap;gap:5px}
-.chip{background:var(--bg2);border:1px solid var(--line);color:var(--muted);border-radius:20px;padding:3px 9px;font-size:.73rem;cursor:pointer;transition:.15s}
-.chip:hover{border-color:var(--accent);color:var(--txt)}
-.chat-input-row{padding:8px 10px;border-top:1px solid var(--line);display:flex;gap:6px}
-.chat-ipt{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:7px 11px;font-size:.83rem;resize:none;outline:none}
-.chat-ipt:focus{border-color:var(--accent)}
-.chat-send{background:var(--accent);border:none;color:#fff;border-radius:9px;padding:7px 13px;font-size:.82rem;font-weight:600;cursor:pointer}
-.chat-send:hover{filter:brightness(1.1)}
-code{background:var(--bg2);padding:2px 5px;border-radius:4px;font-size:.82em}
+  :root{--bg:#070912;--bg2:#0c1020;--panel:#10142a;--panel2:#161b36;--line:rgba(255,255,255,.08);--txt:#eef1f8;--muted:#9aa3bd;--accent:#6d6bff;--accent2:#22d3ee;--good:#34d399;--warn:#fbbf24;--bad:#fb7185;--grad:linear-gradient(120deg,#6d6bff,#a855f7 50%,#22d3ee);}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--txt);font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;font-size:14px}
+  button{font-family:inherit;cursor:pointer}input,select,textarea{font-family:inherit}
+  .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  #app{display:flex;min-height:100vh}
+  .side{width:225px;background:var(--bg2);border-right:1px solid var(--line);padding:18px 14px;flex-shrink:0;display:flex;flex-direction:column}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.05rem;padding:6px 8px 16px}
+  .brand .m{width:28px;height:28px;border-radius:8px;background:var(--grad);display:grid;place-items:center;font-size:14px}
+  .nav-i{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--muted);font-weight:500;margin-bottom:2px;transition:.15s;font-size:.9rem;cursor:pointer}
+  .nav-i:hover{background:var(--panel);color:var(--txt)}
+  .nav-i.active{background:var(--panel);color:var(--txt);box-shadow:inset 3px 0 0 var(--accent)}
+  .nav-i .ic{width:20px;text-align:center}
+  .side-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);font-size:.76rem;color:var(--muted)}
+  .logoutb{margin-top:10px;width:100%;text-align:left}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .top{display:flex;align-items:center;justify-content:space-between;padding:13px 24px;border-bottom:1px solid var(--line);background:rgba(12,16,32,.6);backdrop-filter:blur(10px);position:sticky;top:0;z-index:20}
+  .top .evt{display:flex;align-items:center;gap:10px}
+  .top select{background:var(--panel);color:var(--txt);border:1px solid var(--line);padding:8px 12px;border-radius:9px;font-size:.88rem}
+  .role-tag{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted)}
+  .hamb{display:none;background:var(--panel);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:7px 11px;font-size:1rem}
+  .content{padding:24px;overflow:auto}
+  .pg-title{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+  .pg-sub{color:var(--muted);margin-bottom:20px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}
+  .grid{display:grid;gap:16px}.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1fr 1fr}
+  @media(max-width:1050px){.g4{grid-template-columns:1fr 1fr}.g3,.g2{grid-template-columns:1fr}}
+  .btn{padding:9px 16px;border-radius:9px;font-weight:600;font-size:.85rem;border:none;transition:.2s;cursor:pointer}
+  .btn-p{background:var(--grad);color:#fff}.btn-p:hover{filter:brightness(1.1)}
+  .btn-g{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}.btn-g:hover{background:#1d2342}
+  .btn-sm{padding:5px 11px;font-size:.78rem;border-radius:7px}
+  .kpi .lbl{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .kpi .v{font-size:1.5rem;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums}
+  .kpi .d{font-size:.78rem;margin-top:4px}
+  table{width:100%;border-collapse:collapse;font-size:.87rem}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding:9px 11px;border-bottom:1px solid var(--line)}
+  td{padding:10px 11px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+  tr:last-child td{border-bottom:none}
+  .badge{font-size:.71rem;font-weight:700;padding:4px 10px;border-radius:100px;white-space:nowrap}
+  .b-green{background:rgba(52,211,153,.15);color:var(--good)}.b-amber{background:rgba(251,191,36,.15);color:var(--warn)}.b-red{background:rgba(251,113,133,.15);color:var(--bad)}.b-blue{background:rgba(109,107,255,.18);color:#a9a7ff}
+  .sec-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+  .sec-h h3{font-size:1.08rem}
+  .ipt{background:var(--bg2);border:1px solid var(--line);color:var(--txt);padding:9px 11px;border-radius:8px;width:100%;font-size:.88rem}
+  .ipt:focus{outline:none;border-color:var(--accent)}
+  .form-row{margin-bottom:10px}
+  label.fl{font-size:.78rem;color:var(--muted);display:block;margin-bottom:5px}
+  .pos{color:var(--good)}.neg{color:var(--bad)}.amb{color:var(--warn)}
+  .empty{color:var(--muted);text-align:center;padding:26px;font-size:.9rem}
+  .x{background:none;border:none;color:var(--bad);font-size:.95rem;cursor:pointer}
+  input[type=range]{width:100%;-webkit-appearance:none;height:6px;border-radius:6px;background:#262b44}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#6d6bff;cursor:pointer}
+  .note{font-size:.78rem;color:var(--muted);background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:14px}
+  .ripple-flag{margin-top:16px;padding:12px 16px;border-radius:10px;display:flex;align-items:center;gap:10px;font-size:.88rem}
+  .pill{font-size:.78rem;padding:5px 12px;border-radius:100px;background:var(--panel2);border:1px solid var(--line)}
+  .br{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:.92rem}.br:last-child{border:none}
+  .br.tot{border-top:2px solid var(--accent);border-bottom:none;margin-top:6px;padding-top:14px;font-size:1.12rem;font-weight:800}
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+  .ga{background:var(--bg2);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .ga img{width:100%;height:120px;object-fit:cover;display:block}
+  .ga .cap{padding:8px 10px;font-size:.8rem;display:flex;justify-content:space-between;align-items:center}
+  .ga .typ{font-size:.68rem;color:var(--accent2);text-transform:uppercase;letter-spacing:.05em}
+  .upbox{border:1.5px dashed var(--line);border-radius:12px;padding:24px;text-align:center;color:var(--muted);cursor:pointer}
+  .upbox:hover{border-color:var(--accent);color:var(--txt)}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;width:100%;max-width:460px;max-height:90vh;overflow:auto}
+  .modal h3{margin-bottom:16px}.modal-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+  #doc{position:fixed;inset:0;background:#3a3f55;z-index:200;display:none;overflow:auto;padding:30px 0}
+  #doc.show{display:block}
+  .doc-bar{position:fixed;top:0;left:0;right:0;background:#10142a;border-bottom:1px solid var(--line);padding:12px 20px;display:flex;justify-content:flex-end;gap:10px;z-index:210}
+  .paper{background:#fff;color:#1a1d29;max-width:780px;margin:64px auto 0;padding:54px 60px;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.4);font-size:13px;line-height:1.6}
+  .paper h1{font-size:1.7rem;color:#10142a;margin-bottom:2px}
+  .paper h2{font-size:1.05rem;margin:26px 0 10px;color:#10142a;border-bottom:2px solid #6d6bff;padding-bottom:5px}
+  .paper table{font-size:12.5px}.paper th{color:#666;border-color:#ddd}.paper td{border-color:#eee;color:#1a1d29}
+  .paper .ph{color:#888}.paper .pbr{display:flex;justify-content:space-between;padding:6px 0}
+  .paper .pbr.t{font-weight:800;font-size:1.1rem;border-top:2px solid #10142a;margin-top:6px;padding-top:10px}
+  .paper .sig{margin-top:40px;display:flex;justify-content:space-between;gap:40px}
+  .paper .sig div{flex:1;border-top:1px solid #333;padding-top:6px;font-size:11px;color:#666}
+  .paper .imgrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.paper .imgrow img{width:100%;border-radius:4px;border:1px solid #ddd}
+  @media print{.doc-bar{display:none}#app,#modalBg{display:none!important}#doc{position:static;background:#fff;padding:0}.paper{box-shadow:none;margin:0;max-width:100%}}
+  #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#1d2342;border:1px solid var(--line);padding:11px 18px;border-radius:10px;font-size:.85rem;opacity:0;transition:.3s;z-index:300;pointer-events:none;text-align:center}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media(max-width:760px){
+    .side{position:fixed;left:0;top:0;bottom:0;z-index:60;transform:translateX(-100%);transition:.25s;box-shadow:0 0 50px rgba(0,0,0,.6)}
+    .side.open{transform:none}
+    .hamb{display:inline-block}.content{padding:16px}.top{padding:11px 14px}
+    .role-tag span{display:none}
+  }
+  /* AUTH */
+  .auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+  .auth-box{max-width:420px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:32px}
+  .auth-brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.3rem;margin-bottom:6px}
+  .auth-brand .m{width:36px;height:36px;border-radius:10px;background:var(--grad);display:grid;place-items:center;font-size:18px}
+  .auth-tabs{display:flex;gap:0;margin:22px 0 20px;background:var(--bg2);border-radius:10px;padding:3px}
+  .auth-tab{flex:1;text-align:center;padding:8px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--muted);transition:.15s}
+  .auth-tab.on{background:var(--panel);color:var(--txt)}
+  .auth-err{color:var(--bad);font-size:.82rem;margin-bottom:10px;min-height:18px}
+  .auth-demo{margin-top:14px;padding:14px;background:var(--bg2);border:1px solid var(--line);border-radius:12px}
+  .auth-demo-title{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent2);margin-bottom:10px}
+  .demo-user{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:.15s;background:var(--panel)}
+  .demo-user:hover{border-color:var(--accent)}
+  .demo-av{width:34px;height:34px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+  .demo-user .nm{font-weight:600;font-size:.88rem}.demo-user .rl{font-size:.74rem;color:var(--muted)}
+  /* LOGIN (role selector) */
+  .login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .loginbox{max-width:390px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:28px}
+  .loginbox .lh{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.25rem;margin-bottom:4px}
+  .loginbox .lh .m{width:34px;height:34px;border-radius:9px;background:var(--grad);display:grid;place-items:center;font-size:16px}
+  .lsec{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:20px 0 8px}
+  .luser{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:13px;margin-bottom:8px;cursor:pointer;transition:.15s;background:var(--bg2)}
+  .luser:hover{border-color:var(--accent);transform:translateX(2px)}
+  .luser .av{width:38px;height:38px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:700;font-size:.9rem;flex-shrink:0}
+  .luser .nm{font-weight:600}.luser .rl{font-size:.78rem;color:var(--muted)}
+  .luser .arr{margin-left:auto;color:var(--muted)}
+  .side-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);font-size:.76rem;color:var(--muted)}
+  .logoutb{margin-top:10px;width:100%;text-align:left}
+  /* FIELD APP */
+  .fieldapp{max-width:460px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg2);position:relative}
+  .fbar{background:var(--grad);padding:18px 18px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .fbar .fapp{font-size:.7rem;opacity:.85;letter-spacing:.06em}
+  .fbar .fev{font-weight:800;font-size:1.2rem;margin-top:2px}
+  .fbar .fmeta{font-size:.78rem;opacity:.92;margin-top:2px}
+  .favatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-weight:700;flex-shrink:0}
+  .fevsel{padding:12px 16px 0}
+  .fbody{flex:1;padding:16px;padding-bottom:84px;overflow:auto}
+  .ptab{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:4px 0 10px}
+  .duty{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px}
+  .duty .dt{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+  .duty .tm{font-weight:800;font-size:1.05rem}
+  .duty .ac{font-size:.92rem}.duty .ow{font-size:.74rem;color:var(--muted);margin-top:3px}
+  .confbtn{border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;font-weight:700;cursor:pointer}
+  .upgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .upbtn{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 8px;text-align:center;font-size:.82rem;cursor:pointer;color:var(--txt)}
+  .upbtn:hover{border-color:var(--accent)}.upbtn .ic{font-size:1.4rem;display:block;margin-bottom:5px}
+  .botnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;background:var(--panel);border-top:1px solid var(--line);display:flex;z-index:40}
+  .bn{flex:1;text-align:center;padding:9px 0 11px;color:var(--muted);font-size:.68rem;cursor:pointer}
+  .bn .ic{display:block;font-size:1.2rem;margin-bottom:2px}
+  .bn.active{color:var(--accent2)}
+  /* CHAT */
+  .chat-fab{position:fixed;bottom:22px;right:22px;width:52px;height:52px;border-radius:50%;background:var(--grad);border:none;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(109,107,255,.45);z-index:500;display:flex;align-items:center;justify-content:center;transition:.2s}
+  .chat-fab:hover{transform:scale(1.08)}
+  .chat-panel{position:fixed;bottom:84px;right:22px;width:340px;max-width:calc(100vw - 28px);background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.55);z-index:500;display:flex;flex-direction:column;overflow:hidden;transition:.2s;transform-origin:bottom right}
+  .chat-panel.hidden{transform:scale(.85);opacity:0;pointer-events:none}
+  .chat-head{background:var(--grad);padding:13px 16px;display:flex;justify-content:space-between;align-items:center}
+  .chat-head span{color:#fff;font-weight:700;font-size:.9rem}
+  .chat-close{background:none;border:none;color:rgba(255,255,255,.85);cursor:pointer;font-size:16px}
+  .chat-msgs{height:280px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+  .msg{max-width:90%;padding:8px 12px;border-radius:13px;font-size:.83rem;line-height:1.5}
+  .msg.bot{background:var(--panel2);border-bottom-left-radius:3px;align-self:flex-start}
+  .msg.user{background:var(--accent);color:#fff;border-bottom-right-radius:3px;align-self:flex-end}
+  .msg.typing span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;margin:0 1px}
+  .msg.typing span:nth-child(2){animation-delay:.2s}.msg.typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+  .chat-chips{padding:0 10px 8px;display:flex;flex-wrap:wrap;gap:5px}
+  .chip{background:var(--bg2);border:1px solid var(--line);color:var(--muted);border-radius:20px;padding:3px 9px;font-size:.73rem;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--accent);color:var(--txt)}
+  .chat-input-row{padding:8px 10px;border-top:1px solid var(--line);display:flex;gap:6px}
+  .chat-ipt{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:7px 11px;font-size:.83rem;resize:none;outline:none}
+  .chat-ipt:focus{border-color:var(--accent)}
+  .chat-send{background:var(--accent);border:none;color:#fff;border-radius:9px;padding:7px 13px;font-size:.82rem;font-weight:600;cursor:pointer}
 </style>
 </head>
 <body>
+<div id="app"></div>
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<div id="doc"><div class="doc-bar"><button class="btn btn-g btn-sm" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn btn-p btn-sm" onclick="closeDoc()">Close</button></div><div id="paper"></div></div>
+<div id="toast"></div>
 
-<!-- AUTH SCREEN (replaces body content) -->
-<div id="auth-screen" style="display:none">
-  <div class="auth-wrap">
-    <div class="auth-box">
-      <div class="brand" style="margin-bottom:18px"><span class="m">⚡</span>EventOps <span class="grad">ERP</span></div>
-      <div class="err-msg" id="auth-err"></div>
-      <label class="fl">Email</label>
-      <input class="ipt" id="auth-email" type="email" placeholder="you@company.co.za" style="margin-bottom:10px">
-      <label class="fl">Password</label>
-      <input class="ipt" id="auth-pass" type="password" placeholder="••••••••" style="margin-bottom:12px">
-      <button class="btn btn-p" id="auth-go" style="width:100%;padding:10px">Sign in</button>
-      <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
-        <p style="font-size:.82rem;color:var(--muted)">No account? <a href="#" id="auth-swap" style="color:var(--accent2)">Sign up</a></p>
-        <button class="btn btn-g" style="width:100%;padding:9px" onclick="demoLogin()">🎯 Try Demo — no sign-up needed</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- APP SHELL -->
-<div id="app-shell" style="display:none;flex-direction:column;height:100%">
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div class="brand"><span class="m">⚡</span>EventOps <span class="grad">ERP</span></div>
-    <span class="demo-chip" id="demo-chip" style="display:none">🎯 Demo mode</span>
-    <div class="topbar-right">
-      <button class="btn btn-g" onclick="showWizard()">? Tour</button>
-      <button class="btn btn-bad" onclick="signOut()">Sign out</button>
-    </div>
-  </div>
-
-  <!-- LAYOUT -->
-  <div class="layout">
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="sidebar-head">
-        <h3>Events</h3>
-        <div class="add-event-form">
-          <input class="ipt" id="ev_name" placeholder="Event name *" autocomplete="off">
-          <input class="ipt" id="ev_venue" placeholder="Venue" autocomplete="off">
-          <input class="ipt" id="ev_dates" placeholder="Dates" autocomplete="off">
-          <button class="btn-add-event" onclick="addEvent()">+ Create Event</button>
-        </div>
-      </div>
-      <div class="events-list" id="events-list">
-        <div class="empty-events"><span class="arrow">↑</span>Fill in the form above and click <b>Create Event</b> to get started.</div>
-      </div>
-    </div>
-
-    <!-- MAIN -->
-    <div class="main" id="main">
-      <div class="main-inner">
-        <div class="empty-main">
-          <div class="icon">📋</div>
-          <h2>No event selected</h2>
-          <p>Create an event using the panel on the left, then click it to open its quotation.</p>
-          <p class="arrow-left">← Start there</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- WIZARD -->
-<div class="wz-overlay" id="wizard" style="display:none">
-  <div class="wz-box">
-    <div class="wz-head">
-      <h2 id="wz-title"></h2>
-      <p id="wz-sub"></p>
-      <div class="wz-dots" id="wz-dots"></div>
-    </div>
-    <div class="wz-body" id="wz-body"></div>
-    <div class="wz-foot">
-      <span style="font-size:.76rem;color:var(--muted)" id="wz-prog"></span>
-      <div class="wz-btns">
-        <button class="wz-skip" onclick="closeWizard()">Skip tour</button>
-        <button class="btn btn-p" id="wz-next" onclick="wzNext()">Next →</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- CHAT FAB -->
-<button class="chat-fab" id="chat-fab" onclick="toggleChat()">💬</button>
+<!-- CHAT -->
+<button class="chat-fab" id="chat-fab" onclick="toggleChat()" style="display:none">💬</button>
 <div class="chat-panel hidden" id="chat-panel">
-  <div class="chat-head">
-    <span>⚡ EventOps Support</span>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
-  </div>
+  <div class="chat-head"><span>⚡ EventOps Support</span><button class="chat-close" onclick="toggleChat()">✕</button></div>
   <div class="chat-msgs" id="chat-msgs"></div>
   <div class="chat-chips" id="chat-chips"></div>
   <div class="chat-input-row">
-    <textarea class="chat-ipt" id="chat-ipt" rows="1" placeholder="Ask anything…"
-      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+    <textarea class="chat-ipt" id="chat-ipt" rows="1" placeholder="Ask anything…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
     <button class="chat-send" onclick="sendChat()">Send</button>
   </div>
 </div>
 
 <script>
-/* ═══ CONFIG ══════════════════════════════════════════════ */
-const SUPABASE_URL     = "https://awbtpgugmzitjqovlewr.supabase.co";
-const SUPABASE_ANON_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3YnRwZ3VnbXppdGpxb3ZsZXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTkzMDYsImV4cCI6MjA5NzQzNTMwNn0.0SJMcy-B8tfoJHFDVwz4wQPuA03IU5NFWMBKe1_XNn0";
-const DEMO_EMAIL       = "demo@eventops.app";
-const DEMO_PASS        = "Demo1234!";
-/* ═════════════════════════════════════════════════════════ */
+/* ═══ CONFIG ═══════════════════════════════════════════════ */
+const SUPABASE_URL      = "https://awbtpgugmzitjqovlewr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3YnRwZ3VnbXppdGpxb3ZsZXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTkzMDYsImV4cCI6MjA5NzQzNTMwNn0.0SJMcy-B8tfoJHFDVwz4wQPuA03IU5NFWMBKe1_XNn0";
+const DEMO_EMAIL        = "demo@eventops.app";
+const DEMO_PASS         = "Demo1234!";
+/* ══════════════════════════════════════════════════════════ */
 
-const fmt = n => 'R ' + Math.round(n||0).toLocaleString('en-ZA');
-let sb, currentEvent = null, events = [], items = [], isDemo = false;
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabaseUser = null;   // logged-in Supabase user
+let session = null;        // role session {type, name, role}
 
-/* ── INIT ──────────────────────────────────────────────── */
-function init(){
-  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  sb.auth.getSession().then(({data}) => data.session ? showApp(data.session.user) : showAuth());
-  sb.auth.onAuthStateChange((_e, session) => session ? showApp(session.user) : showAuth());
+const store=(()=>{try{localStorage.setItem('__t','1');localStorage.removeItem('__t');return localStorage;}catch(e){const m={};return{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>m[k]=v+'',removeItem:k=>delete m[k]};}})();
+const DB_KEY='eventops_v4';
+const fmt=n=>'R '+Math.round(n).toLocaleString('en-ZA');
+const uid=()=>Math.random().toString(36).slice(2,9);
+const initials=n=>n.split(/[\s(]/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const CATS=['Venue','AV & Production','Decor & Styling','Staging & Set','Catering','Transport & Logistics','Labour & Crew','Other'];
+
+function seed(){return{
+  currentEvent:'e1',role:'Event Director',org:{name:'Your Event Company',client:'Acme Corporate'},
+  events:{e1:{
+    id:'e1',name:'TechExpo Cape Town',venue:'CTICC · Hall 4',dates:'12–14 Aug 2026',scope:420000,status:'Draft',
+    pricing:{marginPct:18,mgmtFeePct:8,discountPct:5,vatPct:15},
+    milestones:[{id:uid(),label:'Deposit on signature',pct:50,status:'Pending'},{id:uid(),label:'Pre-event payment',pct:40,status:'Pending'},{id:uid(),label:'Final on reconciliation',pct:10,status:'Pending'}],
+    ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},
+    quote:[{id:uid(),cat:'Venue',vendor:'CTICC',desc:'Hall 4 hire · 3 days incl. power',cost:96000,qty:1},{id:uid(),cat:'AV & Production',vendor:'BrightLine AV',desc:'LED wall, line array, lighting rig',cost:118000,qty:1},{id:uid(),cat:'AV & Production',vendor:'BrightLine AV',desc:'Vision mixing & operators',cost:27000,qty:1},{id:uid(),cat:'Staging & Set',vendor:'Apex Staging',desc:'Custom main stage & set build',cost:98000,qty:1},{id:uid(),cat:'Decor & Styling',vendor:'Bloom & Co',desc:'Floral, drapery & lounge styling',cost:41000,qty:1},{id:uid(),cat:'Catering',vendor:'Northgate Catering',desc:'Crew + delegate catering',cost:34000,qty:1},{id:uid(),cat:'Transport & Logistics',vendor:'RapidHaul',desc:'Equipment transport & rigging',cost:38000,qty:1}],
+    triple:[{id:uid(),item:'AV & Lighting Package',scope:145000,po:148500,invoice:0},{id:uid(),item:'Custom Stand Build',scope:98000,po:97000,invoice:97000},{id:uid(),item:'Transport & Logistics',scope:38000,po:41500,invoice:43900}],
+    schedule:[{id:uid(),day:'11 Aug',time:'06:00',activity:'Bump-in: trusses & rigging',owner:'Operations',assignee:'Rigging Crew (x4)',confirmed:false},{id:uid(),day:'11 Aug',time:'12:00',activity:'AV install & focus',owner:'Production',assignee:'AV Operators (x2)',confirmed:false},{id:uid(),day:'11 Aug',time:'18:00',activity:'Set build & decor dress',owner:'Staging',assignee:'Lead Technician',confirmed:false},{id:uid(),day:'12 Aug',time:'07:00',activity:'Tech rehearsal & soundcheck',owner:'Production',assignee:'AV Operators (x2)',confirmed:false},{id:uid(),day:'12 Aug',time:'08:00',activity:'Final rig check & sign-off',owner:'Production',assignee:'Lead Technician',confirmed:false},{id:uid(),day:'14 Aug',time:'17:00',activity:'Bump-out & strike',owner:'Operations',assignee:'Rigging Crew (x4)',confirmed:false}],
+    designs:[],
+    labour:[{id:uid(),name:'Lead Technician',rate:480,hours:30},{id:uid(),name:'Rigging Crew (x4)',rate:1200,hours:24},{id:uid(),name:'AV Operators (x2)',rate:560,hours:26}],
+    logistics:[{id:uid(),task:'Stage trusses delivery',status:'On time'},{id:uid(),task:'Generator + fuel drop',status:'Delayed'},{id:uid(),task:'Furniture bump-in',status:'Scheduled'}],
+    vendors:[{id:uid(),name:'Apex Staging (Pty) Ltd',csd:true,bbbee:'Level 2',expiry:'2027-01-15'},{id:uid(),name:'BrightLine AV',csd:true,bbbee:'Level 4',expiry:'2026-07-07'},{id:uid(),name:'RapidHaul Logistics',csd:true,bbbee:'Level 1',expiry:'2026-12-01'},{id:uid(),name:'Northgate Catering',csd:false,bbbee:'Level 3',expiry:'2026-09-20'}],
+  }}
+};}
+
+let DB = (()=>{try{const r=store.getItem(DB_KEY);return r?JSON.parse(r):seed();}catch(e){return seed();}})();
+
+function save(){
+  try{store.setItem(DB_KEY,JSON.stringify(DB));}catch(e){toast('Storage full — remove some designs.');}
+  saveToCloud();
 }
 
-/* ── AUTH SCREEN ───────────────────────────────────────── */
-let authMode = 'in';
-function showAuth(){
-  document.getElementById('auth-screen').style.display = 'block';
-  document.getElementById('app-shell').style.display   = 'none';
-  document.getElementById('chat-fab').style.display    = 'none';
-  authMode = 'in';
-  document.getElementById('auth-go').textContent = 'Sign in';
-  document.getElementById('auth-swap').textContent = 'Sign up';
+async function saveToCloud(){
+  if(!supabaseUser) return;
+  try{
+    await sb.from('user_data').upsert({user_id:supabaseUser.id, data:DB, updated_at:new Date().toISOString()});
+  }catch(e){ /* silent */ }
 }
 
-document.getElementById('auth-swap').onclick = e => {
-  e.preventDefault();
-  authMode = authMode === 'in' ? 'up' : 'in';
-  document.getElementById('auth-go').textContent   = authMode === 'in' ? 'Sign in' : 'Sign up';
-  document.getElementById('auth-swap').textContent = authMode === 'in' ? 'Sign up' : 'Sign in';
-  document.getElementById('auth-err').textContent  = '';
-};
-
-document.getElementById('auth-go').onclick = async () => {
-  const email    = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-pass').value;
-  const errEl    = document.getElementById('auth-err');
-  errEl.textContent = '';
-  if(!email || !password){ errEl.textContent = 'Enter your email and password.'; return; }
-  const fn = authMode === 'in'
-    ? sb.auth.signInWithPassword({email, password})
-    : sb.auth.signUp({email, password});
-  const {error} = await fn;
-  if(error) errEl.textContent = error.message;
-  else if(authMode === 'up') errEl.textContent = 'Account created! Check inbox if confirmation is on.';
-};
-
-async function demoLogin(){
-  document.getElementById('auth-err').textContent = 'Signing in to demo…';
-  const {error} = await sb.auth.signInWithPassword({email: DEMO_EMAIL, password: DEMO_PASS});
-  if(error) document.getElementById('auth-err').textContent = error.message;
+async function loadFromCloud(){
+  if(!supabaseUser) return;
+  try{
+    const {data} = await sb.from('user_data').select('data').eq('user_id',supabaseUser.id).single();
+    if(data?.data){ DB=data.data; store.setItem(DB_KEY,JSON.stringify(DB)); }
+  }catch(e){ /* use local */ }
 }
+
+const E=()=>DB.events[DB.currentEvent];
+function allCrew(){const s=new Set();Object.values(DB.events).forEach(e=>e.labour.forEach(l=>s.add(l.name)));return [...s];}
+function costSubtotal(){return E().quote.reduce((s,q)=>s+q.cost*q.qty,0);}
+function quoteCalc(){const sub=costSubtotal(),p=E().pricing;const margin=sub*(p.marginPct/100),mgmt=sub*(p.mgmtFeePct/100);const pre=sub+margin+mgmt,discount=pre*(p.discountPct/100);const net=pre-discount,vat=net*((p.vatPct||0)/100),total=net+vat;return{sub,margin,mgmt,pre,discount,net,vat,total,grossProfit:margin+mgmt-discount};}
+function rippleCost(){const r=E().ripple,d=r.delay;return{labour:r.otRate*d,accom:r.accomRate*d,catering:r.cateringRate*d,fuel:r.fuelRate*d,total:(r.otRate+r.accomRate+r.cateringRate+r.fuelRate)*d};}
+
+const PAGES=[{id:'dashboard',ic:'🎯',label:'Director'},{id:'quote',ic:'🧾',label:'Quotation'},{id:'finance',ic:'💰',label:'Finance'},{id:'designs',ic:'🎨',label:'Designs'},{id:'schedule',ic:'🗓️',label:'Schedule'},{id:'ripple',ic:'⚡',label:'Ripple Engine'},{id:'workforce',ic:'👷',label:'Workforce'},{id:'logistics',ic:'🚚',label:'Logistics'},{id:'compliance',ic:'🛡️',label:'Compliance'}];
+let page='dashboard', fieldTab='duties';
+
+/* ═══ ROUTER ════════════════════════════════════════════════ */
+function render(){
+  if(!supabaseUser){ return renderAuth(); }
+  if(!session){ return renderRoleSelect(); }
+  if(session.type==='field'){ return renderField(); }
+  renderAdmin();
+  document.getElementById('chat-fab').style.display='flex';
+}
+
+/* ═══ SUPABASE AUTH SCREEN ══════════════════════════════════ */
+let authTab='in';
+function renderAuth(){
+  document.getElementById('chat-fab').style.display='none';
+  document.getElementById('app').style.cssText='display:block';
+  document.getElementById('app').innerHTML=`
+    <div class="auth-screen"><div class="auth-box">
+      <div class="auth-brand"><span class="m">⚡</span>EventOps<span class="grad">ERP</span></div>
+      <p style="color:var(--muted);font-size:.88rem">Sign in to access the full event management platform.</p>
+      <div class="auth-tabs">
+        <div class="auth-tab ${authTab==='in'?'on':''}" onclick="setAuthTab('in')">Sign in</div>
+        <div class="auth-tab ${authTab==='up'?'on':''}" onclick="setAuthTab('up')">Sign up</div>
+      </div>
+      <div class="auth-err" id="auth-err"></div>
+      <div class="form-row"><label class="fl">Email</label><input class="ipt" id="a-email" type="email" placeholder="you@company.co.za"></div>
+      <div class="form-row"><label class="fl">Password</label><input class="ipt" id="a-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-p" style="width:100%;padding:11px;margin-top:4px" onclick="doAuth()">${authTab==='in'?'Sign in →':'Create account →'}</button>
+      <div class="auth-demo">
+        <div class="auth-demo-title">🎯 Try with demo account</div>
+        <div class="demo-user" onclick="demoAuth()">
+          <div class="demo-av">SN</div>
+          <div><div class="nm">Sarah Naidoo — Event Director</div><div class="rl">Full ERP · pre-loaded demo event</div></div>
+          <span style="margin-left:auto;color:var(--muted)">→</span>
+        </div>
+      </div>
+    </div></div>`;
+}
+
+function setAuthTab(t){ authTab=t; renderAuth(); }
+
+async function doAuth(){
+  const email=document.getElementById('a-email').value.trim();
+  const pass=document.getElementById('a-pass').value;
+  const err=document.getElementById('auth-err');
+  err.textContent='';
+  if(!email||!pass){err.textContent='Enter email and password.';return;}
+  const fn = authTab==='in'
+    ? sb.auth.signInWithPassword({email,password:pass})
+    : sb.auth.signUp({email,password:pass});
+  const {data,error}=await fn;
+  if(error){err.textContent=error.message;return;}
+  if(authTab==='up'){err.style.color='var(--good)';err.textContent='Account created! Check inbox if confirmation is enabled.';}
+}
+
+async function demoAuth(){
+  document.getElementById('auth-err').textContent='Signing in…';
+  const {error}=await sb.auth.signInWithPassword({email:DEMO_EMAIL,password:DEMO_PASS});
+  if(error) document.getElementById('auth-err').textContent=error.message;
+}
+
+/* ═══ ROLE SELECT (after Supabase auth) ════════════════════ */
+function renderRoleSelect(){
+  document.getElementById('chat-fab').style.display='none';
+  document.getElementById('app').style.cssText='display:block';
+  const crew=allCrew();
+  document.getElementById('app').innerHTML=`
+    <div class="login"><div class="loginbox">
+      <div class="lh"><span class="m">⚡</span>EventOps<span class="grad">ERP</span></div>
+      <div style="color:var(--muted);font-size:.88rem;margin-bottom:4px">Welcome back. Choose your role view.</div>
+      <div style="font-size:.78rem;color:var(--accent2);margin-bottom:2px">${supabaseUser.email}</div>
+      <div class="lsec">Management</div>
+      <div class="luser" onclick="login('admin','${supabaseUser.email.split('@')[0]}','Event Director')">
+        <div class="av">${initials(supabaseUser.email)}</div>
+        <div><div class="nm">Event Director</div><div class="rl">Full ERP — all modules</div></div>
+        <div class="arr">→</div>
+      </div>
+      ${crew.length?`<div class="lsec">Crew & Technicians</div>${crew.map(c=>`<div class="luser" onclick="login('field','${c.replace(/'/g,'')}')"><div class="av">${initials(c)}</div><div><div class="nm">${c}</div><div class="rl">Field app · duties & uploads</div></div><div class="arr">→</div></div>`).join('')}`:''}
+      <div style="margin-top:16px;text-align:center"><button class="btn btn-g btn-sm" onclick="signOut()">↩ Sign out</button></div>
+    </div></div>`;
+}
+
+function login(type,name,role){session={type,name,role:role||name};if(role){DB.role=role;save();}page='dashboard';fieldTab='duties';render();}
 
 async function signOut(){
   await sb.auth.signOut();
-  currentEvent = null; events = []; items = [];
+  supabaseUser=null; session=null;
+  render();
 }
 
-/* ── SHOW APP ──────────────────────────────────────────── */
-async function showApp(user){
-  isDemo = user.email === DEMO_EMAIL;
-  document.getElementById('auth-screen').style.display      = 'none';
-  document.getElementById('app-shell').style.display        = 'flex';
-  document.getElementById('chat-fab').style.display         = 'flex';
-  document.getElementById('demo-chip').style.display        = isDemo ? 'inline-block' : 'none';
-  await loadEvents();
-  if(!localStorage.getItem('eo_wz_done')) showWizard();
-}
+function logout(){session=null;render();}
 
-/* ── DATA ──────────────────────────────────────────────── */
-async function loadEvents(){
-  const {data, error} = await sb.from('events').select('*').order('created_at', {ascending:false});
-  if(error){ alert('Error loading events: ' + error.message); return; }
-  events = data || [];
-  if(currentEvent && !events.find(e => e.id === currentEvent)) currentEvent = null;
-  renderSidebar();
-  if(currentEvent) await loadAndRenderQuote();
-  else renderMainEmpty();
-}
-
-async function loadAndRenderQuote(){
-  const {data} = await sb.from('quote_items').select('*').eq('event_id', currentEvent).order('created_at');
-  items = data || [];
-  renderMain();
-}
-
-/* ── SIDEBAR ───────────────────────────────────────────── */
-function renderSidebar(){
-  const list = document.getElementById('events-list');
-  if(!events.length){
-    list.innerHTML = `<div class="empty-events"><span class="arrow">↑</span>Fill in the form above and click <b>Create Event</b> to get started.</div>`;
-    return;
-  }
-  list.innerHTML = events.map(e => `
-    <div class="ev-item ${e.id===currentEvent?'sel':''}" onclick="selectEvent('${e.id}')">
-      <div class="ev-name">${e.name}</div>
-      <div class="ev-meta">${[e.venue, e.dates].filter(Boolean).join(' · ')|| '—'}</div>
-      <div class="ev-footer">
-        <span class="badge badge-${(e.status||'draft').toLowerCase()}">${e.status||'Draft'}</span>
-        <button class="x" onclick="event.stopPropagation();delEvent('${e.id}')">✕</button>
+/* ═══ ADMIN ERP ═════════════════════════════════════════════ */
+function renderAdmin(){
+  const evOpts=Object.values(DB.events).map(ev=>`<option value="${ev.id}" ${ev.id===DB.currentEvent?'selected':''}>${ev.name}</option>`).join('');
+  document.getElementById('app').style.cssText='display:flex';
+  document.getElementById('app').innerHTML=`
+    <div class="side">
+      <div class="brand"><span class="m">⚡</span> EventOps<span class="grad">ERP</span></div>
+      ${PAGES.map(p=>`<div class="nav-i ${p.id===page?'active':''}" onclick="go('${p.id}')"><span class="ic">${p.ic}</span>${p.label}</div>`).join('')}
+      <div class="side-foot">
+        <div style="margin-bottom:4px">${supabaseUser?.email||session.name}</div>
+        <div style="font-size:.7rem;color:var(--accent2)">☁ Cloud synced</div>
+        <button class="btn btn-g btn-sm logoutb" onclick="logout()">↩ Switch role</button>
+        <button class="btn btn-g btn-sm logoutb" onclick="signOut()" style="margin-top:4px">⏻ Sign out</button>
       </div>
-    </div>`).join('');
-}
-
-/* ── MAIN AREA ─────────────────────────────────────────── */
-function renderMainEmpty(){
-  document.getElementById('main').innerHTML = `<div class="main-inner"><div class="empty-main">
-    <div class="icon">📋</div>
-    <h2>${events.length ? 'Select an event' : 'Create your first event'}</h2>
-    <p>${events.length
-      ? 'Click an event in the left panel to open its quotation and line items.'
-      : 'Use the panel on the left to create an event, then click it to start building your quotation.'}</p>
-    <p class="arrow-left">← ${events.length ? 'Click an event' : 'Start there'}</p>
-  </div></div>`;
-}
-
-function renderMain(){
-  const e = events.find(x => x.id === currentEvent);
-  if(!e){ renderMainEmpty(); return; }
-  const sub    = items.reduce((s,i) => s + i.unit_cost*i.qty, 0);
-  const margin = sub*(e.margin_pct/100);
-  const mgmt   = sub*(e.mgmt_fee_pct/100);
-  const pre    = sub+margin+mgmt;
-  const disc   = pre*(e.discount_pct/100);
-  const net    = pre-disc;
-  const vat    = net*(e.vat_pct/100);
-  const total  = net+vat;
-
-  document.getElementById('main').innerHTML = `<div class="main-inner">
-    <div class="q-header">
-      <div>
-        <div class="q-title">${e.name}</div>
-        <div class="q-meta">${[e.venue, e.dates].filter(Boolean).join(' · ')}</div>
+    </div>
+    <div class="main">
+      <div class="top">
+        <div class="evt"><button class="hamb" onclick="document.querySelector('.side').classList.toggle('open')">☰</button><select onchange="DB.currentEvent=this.value;save();render()">${evOpts}</select><button class="btn btn-g btn-sm" onclick="newEvent()">+ New</button></div>
+        <div class="role-tag"><span>Viewing as</span><select onchange="DB.role=this.value;save();render()">${['Event Director','Operations Manager','Production Manager','Staff Coordinator','Risk Manager'].map(r=>`<option ${r===DB.role?'selected':''}>${r}</option>`).join('')}</select></div>
       </div>
-      <select class="status-sel" onchange="updateStatus('${e.id}',this.value)">
-        ${['Draft','Confirmed','Invoiced','Paid'].map(s=>`<option ${e.status===s?'selected':''}>${s}</option>`).join('')}
-      </select>
-    </div>
-
-    <div class="add-line-form">
-      <div class="field-wrap"><label class="fl">Category</label><input class="ipt" id="qi_cat" placeholder="e.g. Catering" autocomplete="off"></div>
-      <div class="field-wrap"><label class="fl">Vendor</label><input class="ipt" id="qi_vendor" placeholder="Supplier name" autocomplete="off"></div>
-      <div class="field-wrap" style="flex:2;min-width:150px"><label class="fl">Description</label><input class="ipt" id="qi_desc" placeholder="What is this line?" autocomplete="off"></div>
-      <div class="field-wrap sm"><label class="fl">Qty</label><input class="ipt" id="qi_qty" type="number" value="1" min="1"></div>
-      <div class="field-wrap md"><label class="fl">Unit cost (R)</label><input class="ipt" id="qi_cost" type="number" placeholder="0" min="0"></div>
-      <button class="btn-add-line" onclick="addItem()">+ Add line</button>
-    </div>
-
-    ${items.length ? `
-    <table>
-      <thead><tr><th>Category</th><th>Vendor</th><th>Description</th><th>Qty</th><th>Unit</th><th>Total</th><th></th></tr></thead>
-      <tbody>
-        ${items.map(i=>`<tr>
-          <td>${i.category||'—'}</td>
-          <td>${i.vendor||'—'}</td>
-          <td>${i.description||''}</td>
-          <td>${i.qty}</td>
-          <td>${fmt(i.unit_cost)}</td>
-          <td><b>${fmt(i.unit_cost*i.qty)}</b></td>
-          <td><button class="x" onclick="delItem('${i.id}')">✕</button></td>
-        </tr>`).join('')}
-      </tbody>
-    </table>
-    <div class="totals">
-      <div class="br"><span class="muted" style="color:var(--muted)">Subtotal</span><b>${fmt(sub)}</b></div>
-      <div class="br"><span style="color:var(--muted)">+ Margin (${e.margin_pct}%)</span><b>${fmt(margin)}</b></div>
-      <div class="br"><span style="color:var(--muted)">+ Mgmt fee (${e.mgmt_fee_pct}%)</span><b>${fmt(mgmt)}</b></div>
-      <div class="br"><span style="color:var(--muted)">− Discount (${e.discount_pct}%)</span><b style="color:var(--bad)">-${fmt(disc)}</b></div>
-      <div class="br"><span style="color:var(--muted)">+ VAT (${e.vat_pct}%)</span><b>${fmt(vat)}</b></div>
-      <div class="br tot"><span>Client total</span><span class="grad">${fmt(total)}</span></div>
-    </div>` : `<div class="no-items">No line items yet — use the form above to add your first cost line.</div>`}
-  </div>`;
+      <div class="content" id="content"></div>
+    </div>`;
+  ({dashboard:vDash,quote:vQuote,finance:vFin,designs:vDesigns,schedule:vSched,ripple:vRipple,workforce:vWork,logistics:vLog,compliance:vComp}[page])();
 }
 
-/* ── ACTIONS ───────────────────────────────────────────── */
-async function addEvent(){
-  const name = document.getElementById('ev_name').value.trim();
-  if(!name){ document.getElementById('ev_name').focus(); return; }
-  const venue = document.getElementById('ev_venue').value.trim();
-  const dates = document.getElementById('ev_dates').value.trim();
-  const {data, error} = await sb.from('events').insert({name,venue,dates}).select();
-  if(error){ alert(error.message); return; }
-  document.getElementById('ev_name').value  = '';
-  document.getElementById('ev_venue').value = '';
-  document.getElementById('ev_dates').value = '';
-  if(data?.[0]) currentEvent = data[0].id;
-  await loadEvents();
-}
+function go(p){page=p;renderAdmin();}
+function statusBadge(s){const m={Draft:'b-blue',Quoted:'b-amber',Accepted:'b-green',Contracted:'b-green'};return`<span class="badge ${m[s]||'b-blue'}">${s}</span>`;}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200);}
 
-async function delEvent(id){
-  if(!confirm('Delete this event and all its line items?')) return;
-  await sb.from('events').delete().eq('id', id);
-  if(currentEvent === id){ currentEvent = null; renderMainEmpty(); }
-  await loadEvents();
-}
+/* ═══ PAGE VIEWS ════════════════════════════════════════════ */
+function vDash(){const e=E(),q=quoteCalc(),rc=rippleCost(),vpct=q.net?(rc.total/q.net*100):0;document.getElementById('content').innerHTML=`<div class="pg-title">Master Controller</div><div class="pg-sub">${e.name} · ${e.venue} · ${e.dates} &nbsp;${statusBadge(e.status)}</div><div class="grid g4" style="margin-bottom:0"><div class="card kpi"><div class="lbl">Vendor Cost</div><div class="v">${fmt(q.sub)}</div><div class="d" style="color:var(--muted)">Compiled quotes</div></div><div class="card kpi"><div class="lbl">Client Quote (incl VAT)</div><div class="v grad">${fmt(q.total)}</div><div class="d" style="color:var(--muted)">${fmt(q.net)} + VAT</div></div><div class="card kpi"><div class="lbl">Gross Profit</div><div class="v pos">${fmt(q.grossProfit)}</div><div class="d pos">${q.sub?(q.grossProfit/q.sub*100).toFixed(1):0}% on cost</div></div><div class="card kpi"><div class="lbl">Ripple Impact</div><div class="v ${rc.total?'amb':''}">${fmt(rc.total)}</div><div class="d ${vpct>5?'neg':vpct>0?'amb':'pos'}">${vpct.toFixed(1)}% of quote</div></div></div><div class="card"><div class="sec-h"><h3>Triple-Match Accounting</h3><button class="btn btn-p btn-sm" onclick="addTriple()">+ Add line item</button></div><p style="color:var(--muted);font-size:.85rem;margin-bottom:14px">Scope → contracted PO → final invoice, with 5% variance flags.</p><table><tr><th>Line item</th><th>Scope</th><th>PO</th><th>Invoice</th><th>Variance</th><th>Status</th><th></th></tr>${e.triple.map(t=>{const base=t.scope||t.po,fin=t.invoice||t.po||t.scope,v=base?((fin-base)/base*100):0;const cls=Math.abs(v)>5?'b-red':(t.invoice?'b-green':'b-amber'),st=Math.abs(v)>5?'⚠ Over 5%':(t.invoice?'✓ Reconciled':'Awaiting invoice');return`<tr><td>${t.item}</td><td>${fmt(t.scope)}</td><td>${fmt(t.po)}</td><td>${t.invoice?fmt(t.invoice):'—'}</td><td class="${v>5?'neg':v<-5?'pos':'amb'}">${v>=0?'+':''}${v.toFixed(1)}%</td><td><span class="badge ${cls}">${st}</span></td><td><button class="x" onclick="del('triple','${t.id}')">✕</button></td></tr>`;}).join('')}</table></div>`;}
 
-async function selectEvent(id){
-  currentEvent = id;
-  renderSidebar();
-  await loadAndRenderQuote();
-}
+function vQuote(){const e=E(),p=e.pricing,q=quoteCalc();const byCat={};e.quote.forEach(i=>{(byCat[i.cat]=byCat[i.cat]||[]).push(i);});document.getElementById('content').innerHTML=`<div class="pg-title">Quotation Builder</div><div class="pg-sub">Compile every vendor quote, apply pricing & VAT, generate the client document. ${statusBadge(e.status)}</div><div class="grid g2" style="grid-template-columns:1.6fr 1fr"><div><div class="card"><div class="sec-h"><h3>Compiled costs</h3><button class="btn btn-p btn-sm" onclick="addQuote()">+ Add line item</button></div>${Object.keys(byCat).length?Object.keys(byCat).map(cat=>`<div style="margin-bottom:6px"><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent2);margin:10px 0 4px">${cat}</div><table><tr><th>Vendor</th><th>Description</th><th>Qty</th><th>Unit</th><th>Total</th><th></th></tr>${byCat[cat].map(i=>`<tr><td>${i.vendor}</td><td>${i.desc}</td><td>${i.qty}</td><td>${fmt(i.cost)}</td><td>${fmt(i.cost*i.qty)}</td><td><button class="x" onclick="del('quote','${i.id}')">✕</button></td></tr>`).join('')}</table></div>`).join(''):'<div class="empty">No line items yet. Click + Add line item to start.</div>'}</div></div><div><div class="card"><h3 style="margin-bottom:14px">Organiser pricing</h3>${[['marginPct','Margin / markup %'],['mgmtFeePct','Management fee %'],['discountPct','Client discount %'],['vatPct','VAT %']].map(([k,l])=>`<div class="form-row"><label class="fl">${l}</label><input class="ipt" type="number" value="${p[k]}" oninput="E().pricing.${k}=+this.value||0;save();vQuote()"></div>`).join('')}<div style="margin-top:12px"><div class="br"><span>Vendor cost subtotal</span><b>${fmt(q.sub)}</b></div><div class="br"><span>+ Margin (${p.marginPct}%)</span><b class="pos">${fmt(q.margin)}</b></div><div class="br"><span>+ Management fee (${p.mgmtFeePct}%)</span><b class="pos">${fmt(q.mgmt)}</b></div><div class="br"><span>− Discount (${p.discountPct}%)</span><b class="neg">-${fmt(q.discount)}</b></div><div class="br"><span>Net (excl. VAT)</span><b>${fmt(q.net)}</b></div><div class="br"><span>+ VAT (${p.vatPct}%)</span><b>${fmt(q.vat)}</b></div><div class="br tot"><span>Client total</span><span class="grad">${fmt(q.total)}</span></div></div><div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-g btn-sm" style="flex:1" onclick="genQuote()">📄 Quotation</button><button class="btn btn-p btn-sm" style="flex:1" onclick="acceptQuote()">✓ Accept → contract</button></div></div></div></div>`;}
 
-async function updateStatus(id, status){
-  await sb.from('events').update({status}).eq('id', id);
-  events = events.map(e => e.id===id ? {...e, status} : e);
-  renderSidebar();
-}
+function vFin(){const e=E(),q=quoteCalc(),inv=q.total;const invoiced=e.milestones.filter(m=>m.status!=='Pending').reduce((s,m)=>s+inv*m.pct/100,0);const paid=e.milestones.filter(m=>m.status==='Paid').reduce((s,m)=>s+inv*m.pct/100,0);document.getElementById('content').innerHTML=`<div class="pg-title">Finance & Invoicing</div><div class="pg-sub">Deposit and milestone invoicing against the contract value (incl VAT).</div><div class="grid g4" style="margin-bottom:0"><div class="card kpi"><div class="lbl">Contract value</div><div class="v grad">${fmt(inv)}</div><div class="d" style="color:var(--muted)">incl. VAT</div></div><div class="card kpi"><div class="lbl">Invoiced</div><div class="v">${fmt(invoiced)}</div><div class="d" style="color:var(--muted)">${inv?(invoiced/inv*100).toFixed(0):0}% issued</div></div><div class="card kpi"><div class="lbl">Paid</div><div class="v pos">${fmt(paid)}</div><div class="d pos">${inv?(paid/inv*100).toFixed(0):0}% received</div></div><div class="card kpi"><div class="lbl">Outstanding</div><div class="v ${inv-paid>0?'amb':'pos'}">${fmt(inv-paid)}</div><div class="d" style="color:var(--muted)">remaining</div></div></div><div class="card"><div class="sec-h"><h3>Payment milestones</h3><button class="btn btn-g btn-sm" onclick="addMilestone()">+ Add milestone</button></div><table><tr><th>Milestone</th><th>%</th><th>Amount (incl VAT)</th><th>Status</th><th>Actions</th></tr>${e.milestones.map(m=>{const amt=inv*m.pct/100;const cls=m.status==='Paid'?'b-green':m.status==='Invoiced'?'b-amber':'b-blue';return`<tr><td>${m.label}</td><td>${m.pct}%</td><td>${fmt(amt)}</td><td><span class="badge ${cls}">${m.status}</span></td><td style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-g btn-sm" onclick="genInvoice('${m.id}')">📄 Invoice</button><button class="btn btn-g btn-sm" onclick="cycleStatus('${m.id}')">${m.status==='Paid'?'↺ Reset':m.status==='Invoiced'?'✓ Mark paid':'Issue'}</button><button class="x" onclick="del('milestones','${m.id}')">✕</button></td></tr>`;}).join('')}</table><div class="note">Issuing or marking paid generates a live tax invoice document. The full build posts to an immutable audit trail.</div></div>`;}
 
-async function addItem(){
-  const category   = document.getElementById('qi_cat').value.trim();
-  const vendor     = document.getElementById('qi_vendor').value.trim();
-  const description= document.getElementById('qi_desc').value.trim();
-  const qty        = +document.getElementById('qi_qty').value || 1;
-  const unit_cost  = +document.getElementById('qi_cost').value || 0;
-  if(!description && !vendor){ document.getElementById('qi_desc').focus(); return; }
-  const {error} = await sb.from('quote_items').insert({event_id:currentEvent, category, vendor, description, qty, unit_cost});
-  if(error){ alert(error.message); return; }
-  await loadAndRenderQuote();
-}
+function vDesigns(){const e=E();document.getElementById('content').innerHTML=`<div class="pg-title">Designs & Renders</div><div class="pg-sub">Attach 3D renders, decor moodboards and stage/set plans — they appear on the client quotation.</div><div class="card"><div class="upbox" onclick="document.getElementById('upl').click()"><div style="font-size:1.6rem;margin-bottom:6px">⬆</div>Click to upload a render, moodboard or plan<div style="font-size:.75rem;margin-top:6px">Auto-resized & saved in this browser (demo only)</div></div><input type="file" id="upl" accept="image/*" style="display:none" onchange="uploadDesign(this)">${e.designs.length?`<div class="gallery" style="margin-top:18px">${e.designs.map(d=>`<div class="ga"><img src="${d.img}"><div class="cap"><div><div class="typ">${d.type}</div>${d.label}</div><button class="x" onclick="del('designs','${d.id}')">✕</button></div></div>`).join('')}</div>`:''}</div>`;}
+function uploadDesign(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const max=900;let w=img.width,h=img.height;if(w>max){h=h*max/w;w=max;}const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);const data=cv.toDataURL('image/jpeg',0.7);modal('Tag this design',[{k:'label',label:'Label',val:f.name.replace(/\.[^.]+$/,'')},{k:'type',label:'Type',val:'Render',select:['Render','Moodboard','Stage / Set Plan','Floorplan']}],v=>{E().designs.push({id:uid(),img:data,label:v.label||'Untitled',type:v.type});});};img.src=r.result;};r.readAsDataURL(f);inp.value='';}
 
-async function delItem(id){
-  await sb.from('quote_items').delete().eq('id', id);
-  await loadAndRenderQuote();
-}
+function vSched(){const e=E(),rows=[...e.schedule].sort((a,b)=>(a.day+a.time).localeCompare(b.day+b.time));document.getElementById('content').innerHTML=`<div class="pg-title">Production Schedule</div><div class="pg-sub">Automated run sheet — sorted by day and time, assigned to crew.</div><div class="card"><div class="sec-h"><h3>Run sheet</h3><button class="btn btn-p btn-sm" onclick="addSched()">+ Add item</button></div><table><tr><th>Day</th><th>Time</th><th>Activity</th><th>Dept</th><th>Assigned to</th><th>Confirmed</th><th></th></tr>${rows.length?rows.map(s=>`<tr><td>${s.day}</td><td>${s.time}</td><td>${s.activity}</td><td><span class="pill">${s.owner}</span></td><td>${s.assignee||'—'}</td><td>${s.confirmed?'<span class="badge b-green">✓ Yes</span>':'<span class="badge b-blue">Pending</span>'}</td><td><button class="x" onclick="del('schedule','${s.id}')">✕</button></td></tr>`).join(''):'<tr><td colspan="7"><div class="empty">No items yet.</div></td></tr>'}</table></div>`;}
 
-/* ── WIZARD ────────────────────────────────────────────── */
-const WZ = [
-  {
-    title:'Welcome to EventOps ⚡',
-    sub:'Your all-in-one event quoting platform',
-    body:`<p>EventOps helps you manage multiple events and build accurate quotations with automatic margin, fee, discount and VAT calculations.</p>
-    <div class="wz-feat"><div class="wz-icon">📋</div><div><b>Events sidebar (left)</b><br><span style="font-size:.8rem;color:var(--muted)">Create and switch between events. Each event is private to your account via row-level security.</span></div></div>
-    <div class="wz-feat"><div class="wz-icon">💰</div><div><b>Quotation panel (right)</b><br><span style="font-size:.8rem;color:var(--muted)">Add cost lines and watch margin, fees, discounts and VAT calculate live.</span></div></div>
-    <div class="wz-feat"><div class="wz-icon">🔒</div><div><b>Your data stays private</b><br><span style="font-size:.8rem;color:var(--muted)">Row-level security ensures only you can see your events, even on a shared database.</span></div></div>`
-  },
-  {
-    title:'Building a Quote',
-    sub:'Add line items to generate accurate client pricing',
-    body:`<p>Click any event on the left to open its quotation. Then add cost lines using the form at the top of the main panel.</p>
-    <div class="wz-feat"><div class="wz-icon">➕</div><div><b>Fill the form, click Add line</b><br><span style="font-size:.8rem;color:var(--muted)">Category, Vendor, Description, Qty and Unit Cost. The totals update instantly.</span></div></div>
-    <div class="wz-feat"><div class="wz-icon">📊</div><div><b>Automatic markup</b><br><span style="font-size:.8rem;color:var(--muted)">Margin %, Mgmt fee %, Discount % and VAT % are applied per event. Edit defaults in Supabase → Table Editor → events.</span></div></div>
-    <div class="wz-feat"><div class="wz-icon">🏷</div><div><b>Status tracking</b><br><span style="font-size:.8rem;color:var(--muted)">Use the status dropdown (Draft → Confirmed → Invoiced → Paid) at the top of each quotation.</span></div></div>`
-  },
-  {
-    title:'Demo Account',
-    sub:'Explore 3 pre-loaded South African events',
-    body:`<p>Want to see the platform with real data? Log in with the demo account to explore three fully built events.</p>
-    <div class="wz-feat"><div class="wz-icon">🎯</div><div><b>Demo credentials</b><br><span style="font-size:.8rem;color:var(--muted)">Email: <code>demo@eventops.app</code><br>Password: <code>Demo1234!</code><br>Or click <b>Try Demo</b> on the sign-in page.</span></div></div>
-    <div class="wz-feat"><div class="wz-icon">🏨</div><div><b>Sample events</b><br><span style="font-size:.8rem;color:var(--muted)">Apex Summit 2025 · Brand Launch Lumix SA · Staff Year-End Gala — each with realistic vendors and totals.</span></div></div>
-    <div class="wz-feat"><div class="wz-icon">💬</div><div><b>Need help?</b><br><span style="font-size:.8rem;color:var(--muted)">The 💬 button (bottom-right) opens the EventOps AI assistant for instant answers and troubleshooting.</span></div></div>`
+function vRipple(){const e=E(),r=e.ripple,rc=rippleCost(),q=quoteCalc(),vpct=q.net?(rc.total/q.net*100):0;document.getElementById('content').innerHTML=`<div class="pg-title">⚡ Real-Time Ripple Engine</div><div class="pg-sub">Change one field — every dependent cost recalculates across the project.</div><div class="grid g2"><div class="card"><h3 style="margin-bottom:16px">Setup delay simulation</h3><label class="fl">Delay: <b class="amb">${r.delay} hour${r.delay===1?'':'s'}</b></label><input type="range" min="0" max="10" value="${r.delay}" oninput="E().ripple.delay=+this.value;save();vRipple()"><table style="margin-top:18px"><tr><th>Cascade</th><th>Added cost</th></tr><tr><td>👷 Local labour overtime</td><td class="${rc.labour?'amb':''}">${fmt(rc.labour)}</td></tr><tr><td>✈️ Technician accommodation</td><td class="${rc.accom?'amb':''}">${fmt(rc.accom)}</td></tr><tr><td>🍽️ Catering & welfare</td><td class="${rc.catering?'amb':''}">${fmt(rc.catering)}</td></tr><tr><td>⛽ Transport & fuel</td><td class="${rc.fuel?'amb':''}">${fmt(rc.fuel)}</td></tr></table><div class="ripple-flag ${vpct>5?'b-red':'b-green'}">${vpct>5?'⚠':'✓'} Ripple is ${vpct.toFixed(1)}% of the quote — ${vpct>5?'exceeds 5% threshold. Director alerted.':'within threshold.'}</div></div><div class="card"><h3 style="margin-bottom:16px">Cascade rates (per hour)</h3>${[['otRate','Labour overtime'],['accomRate','Accommodation'],['cateringRate','Catering'],['fuelRate','Transport & fuel']].map(([k,l])=>`<div class="form-row"><label class="fl">${l}</label><input class="ipt" type="number" value="${r[k]}" oninput="E().ripple.${k}=+this.value||0;save();vRipple()"></div>`).join('')}<div class="note">In the full build these rates derive automatically from Workforce, Logistics and Catering.</div></div></div>`;}
+
+function vWork(){const e=E(),total=e.labour.reduce((s,l)=>s+l.rate*l.hours,0);document.getElementById('content').innerHTML=`<div class="pg-title">Workforce & Labour</div><div class="pg-sub">Technician rates, hours and rostered cost.</div><div class="card"><div class="sec-h"><h3>Crew roster · ${fmt(total)} total</h3><button class="btn btn-p btn-sm" onclick="addLabour()">+ Add crew</button></div><table><tr><th>Role</th><th>Rate / hr</th><th>Hours</th><th>Cost</th><th></th></tr>${e.labour.length?e.labour.map(l=>`<tr><td>${l.name}</td><td>${fmt(l.rate)}</td><td>${l.hours}</td><td>${fmt(l.rate*l.hours)}</td><td><button class="x" onclick="del('labour','${l.id}')">✕</button></td></tr>`).join(''):'<tr><td colspan="5"><div class="empty">No crew yet.</div></td></tr>'}</table><div class="note">Crew added here can log in to the field app and be assigned on the Schedule.</div></div>`;}
+
+function vLog(){const e=E();document.getElementById('content').innerHTML=`<div class="pg-title">Operations & Logistics</div><div class="pg-sub">Bump-in/out tasks, deliveries and status.</div><div class="card"><div class="sec-h"><h3>Logistics tasks</h3><button class="btn btn-p btn-sm" onclick="addLog()">+ Add task</button></div><table><tr><th>Task</th><th>Status</th><th></th></tr>${e.logistics.length?e.logistics.map(t=>`<tr><td>${t.task}</td><td><select class="ipt" style="width:auto;padding:5px 8px" onchange="E().logistics.find(x=>x.id==='${t.id}').status=this.value;save()">${['Scheduled','On time','Delayed','Complete'].map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></td><td><button class="x" onclick="del('logistics','${t.id}')">✕</button></td></tr>`).join(''):'<tr><td colspan="3"><div class="empty">No tasks yet.</div></td></tr>'}</table></div>`;}
+
+function vComp(){const e=E(),today=new Date();document.getElementById('content').innerHTML=`<div class="pg-title">Supplier Compliance</div><div class="pg-sub">CSD registration, tax status, and B-BBEE affidavit tracking.</div><div class="card"><div class="sec-h"><h3>Vendors</h3><button class="btn btn-p btn-sm" onclick="addVendor()">+ Add vendor</button></div><table><tr><th>Vendor</th><th>CSD</th><th>B-BBEE</th><th>Affidavit expiry</th><th>Status</th><th></th></tr>${e.vendors.map(v=>{const exp=new Date(v.expiry),days=Math.round((exp-today)/86400000);let cls,txt;if(!v.csd){cls='b-red';txt='CSD / tax issue';}else if(days<0){cls='b-red';txt='Affidavit expired';}else if(days<30){cls='b-amber';txt='Expiring ('+days+'d)';}else{cls='b-green';txt='Compliant';}return`<tr><td>${v.name}</td><td><span class="badge ${v.csd?'b-green':'b-red'}">${v.csd?'Verified':'Not found'}</span></td><td>${v.bbbee}</td><td>${v.expiry}</td><td><span class="badge ${cls}">${txt}</span></td><td><button class="x" onclick="del('vendors','${v.id}')">✕</button></td></tr>`;}).join('')}</table></div>`;}
+
+/* ═══ FIELD APP ═════════════════════════════════════════════ */
+function renderField(){
+  const s=session,e=E(),evs=Object.values(DB.events);
+  document.getElementById('chat-fab').style.display='flex';
+  document.getElementById('app').style.cssText='display:block';
+  document.getElementById('app').innerHTML=`
+    <div class="fieldapp">
+      <div class="fbar"><div><div class="fapp">EVENTOPS FIELD</div><div class="fev">${e.name}</div><div class="fmeta">${e.venue} · ${e.dates}</div></div><div class="favatar" title="${s.name}">${initials(s.name)}</div></div>
+      ${evs.length>1?`<div class="fevsel"><select class="ipt" onchange="DB.currentEvent=this.value;save();renderField()">${evs.map(ev=>`<option value="${ev.id}" ${ev.id===DB.currentEvent?'selected':''}>${ev.name}</option>`).join('')}</select></div>`:''}
+      <div class="fbody" id="fbody"></div>
+      <div class="botnav">
+        ${[['duties','📋','Duties'],['uploads','⬆','Uploads'],['runsheet','🗓','Run sheet'],['account','👤','Account']].map(([t,ic,l])=>`<div class="bn ${fieldTab===t?'active':''}" onclick="fieldTab='${t}';renderField()"><span class="ic">${ic}</span>${l}</div>`).join('')}
+      </div>
+    </div>`;
+  renderFieldTab();
+}
+function renderFieldTab(){
+  const s=session,e=E(),b=document.getElementById('fbody');
+  if(fieldTab==='duties'){
+    const mine=[...e.schedule].filter(x=>x.assignee===s.name).sort((a,b)=>(a.day+a.time).localeCompare(b.day+b.time));
+    const done=mine.filter(x=>x.confirmed).length;
+    b.innerHTML=`<div class="ptab">My call sheet — ${s.name}</div>${mine.length?`<div style="font-size:.82rem;color:var(--muted);margin-bottom:12px">${done}/${mine.length} duties confirmed</div>`+mine.map(x=>`<div class="duty"><div class="dt"><div class="tm">${x.day} · ${x.time}</div><button class="confbtn ${x.confirmed?'b-green':'b-blue'}" onclick="confirmDuty('${x.id}')">${x.confirmed?'✓ Confirmed':'Confirm'}</button></div><div class="ac">${x.activity}</div><div class="ow">Dept: ${x.owner}</div></div>`).join(''):'<div class="empty">No duties assigned to you on this event yet.</div>'}`;
+  }else if(fieldTab==='uploads'){
+    b.innerHTML=`<div class="ptab">Upload from site</div><div class="upgrid"><div class="upbtn" onclick="fieldUpload('Quote')"><span class="ic">🧾</span>Quote</div><div class="upbtn" onclick="fieldUpload('Invoice')"><span class="ic">📑</span>Invoice</div><div class="upbtn" onclick="fieldUpload('Purchase Order')"><span class="ic">📋</span>PO</div><div class="upbtn" onclick="fieldUpload('Contract')"><span class="ic">✍️</span>Contract</div><div class="upbtn" onclick="fieldUpload('Site photo')"><span class="ic">📸</span>Site photo</div><div class="upbtn" onclick="fieldUpload('Damage report')"><span class="ic">⚠️</span>Damage</div></div><div class="note" style="margin-top:14px">In production these open your phone camera or file picker and upload directly to the event project.</div>`;
+  }else if(fieldTab==='runsheet'){
+    const rows=[...e.schedule].sort((a,b)=>(a.day+a.time).localeCompare(b.day+b.time));
+    b.innerHTML=`<div class="ptab">Full run sheet</div>${rows.map(x=>`<div class="duty" style="${x.assignee===s.name?'border-color:var(--accent)':''}"><div class="dt"><div class="tm">${x.day} · ${x.time}</div><span class="pill">${x.owner}</span></div><div class="ac">${x.activity}</div><div class="ow">${x.assignee||'Unassigned'}${x.assignee===s.name?' · you':''}</div></div>`).join('')}`;
+  }else{
+    b.innerHTML=`<div class="ptab">Account</div><div class="card"><div style="display:flex;align-items:center;gap:12px"><div class="favatar" style="background:var(--grad)">${initials(s.name)}</div><div><div style="font-weight:700">${s.name}</div><div style="font-size:.8rem;color:var(--muted)">Field crew · ${supabaseUser?.email||''}</div></div></div></div><div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-g" style="flex:1" onclick="logout()">↩ Switch role</button><button class="btn btn-g" style="flex:1" onclick="signOut()">⏻ Sign out</button></div><div class="note" style="margin-top:14px">Tip: on a phone, use "Add to Home Screen" to open this like an installed app.</div>`;
   }
+}
+function confirmDuty(id){const s=E().schedule.find(x=>x.id===id);s.confirmed=!s.confirmed;save();renderFieldTab();toast(s.confirmed?'Duty confirmed ✓':'Confirmation removed');}
+function fieldUpload(t){toast(t+' — opens camera / files in production');}
+
+/* ═══ SHARED ACTIONS ════════════════════════════════════════ */
+function del(coll,id){E()[coll]=E()[coll].filter(x=>x.id!==id);save();renderAdmin();}
+function modal(title,fields,onSave){const m=document.getElementById('modal');m.innerHTML=`<h3>${title}</h3>${fields.map(f=>f.select?`<div class="form-row"><label class="fl">${f.label}</label><select class="ipt" id="f_${f.k}">${f.select.map(o=>`<option ${o===f.val?'selected':''}>${o}</option>`).join('')}</select></div>`:`<div class="form-row"><label class="fl">${f.label}</label><input class="ipt" id="f_${f.k}" type="${f.type||'text'}" value="${f.val||''}" placeholder="${f.ph||''}"></div>`).join('')}<div class="modal-acts"><button class="btn btn-g" onclick="closeModal()">Cancel</button><button class="btn btn-p" id="mSave">Save</button></div>`;document.getElementById('modalBg').classList.add('show');document.getElementById('mSave').onclick=()=>{const vals={};fields.forEach(f=>vals[f.k]=f.type==='number'?(+document.getElementById('f_'+f.k).value||0):document.getElementById('f_'+f.k).value.trim());onSave(vals);closeModal();save();renderAdmin();};}
+function closeModal(){document.getElementById('modalBg').classList.remove('show');}
+document.getElementById('modalBg').onclick=e=>{if(e.target.id==='modalBg')closeModal();};
+
+function addQuote(){modal('Add line item',[{k:'cat',label:'Category',val:'Venue',select:CATS},{k:'vendor',label:'Vendor / resource'},{k:'desc',label:'Description'},{k:'qty',label:'Quantity',type:'number',val:1},{k:'cost',label:'Unit cost (R)',type:'number'}],v=>{if(v.vendor||v.desc)E().quote.push({id:uid(),cat:v.cat,vendor:v.vendor||'—',desc:v.desc||'',qty:v.qty||1,cost:v.cost||0});});}
+function addTriple(){modal('Add line item',[{k:'item',label:'Line item'},{k:'scope',label:'Scope (R)',type:'number'},{k:'po',label:'PO (R)',type:'number'},{k:'invoice',label:'Invoice (R, optional)',type:'number'}],v=>{if(v.item)E().triple.push({id:uid(),...v});});}
+function addMilestone(){modal('Add milestone',[{k:'label',label:'Description'},{k:'pct',label:'Percentage of total',type:'number'}],v=>{if(v.label)E().milestones.push({id:uid(),label:v.label,pct:v.pct||0,status:'Pending'});});}
+function cycleStatus(id){const m=E().milestones.find(x=>x.id===id);m.status=m.status==='Pending'?'Invoiced':m.status==='Invoiced'?'Paid':'Pending';save();renderAdmin();}
+function addSched(){const crew=E().labour.map(l=>l.name);modal('Add schedule item',[{k:'day',label:'Day',ph:'12 Aug'},{k:'time',label:'Time',ph:'07:00'},{k:'activity',label:'Activity'},{k:'owner',label:'Department',val:'Production',select:['Event Director','Operations','Production','Staging','Catering','Risk']},{k:'assignee',label:'Assign to crew',val:crew[0]||'',select:crew.length?crew:['—']}],v=>{if(v.activity)E().schedule.push({id:uid(),day:v.day||'TBD',time:v.time||'',activity:v.activity,owner:v.owner,assignee:v.assignee,confirmed:false});});}
+function addLabour(){modal('Add crew',[{k:'name',label:'Role / name'},{k:'rate',label:'Rate per hour (R)',type:'number'},{k:'hours',label:'Hours',type:'number'}],v=>{if(v.name)E().labour.push({id:uid(),...v});});}
+function addLog(){modal('Add logistics task',[{k:'task',label:'Task'}],v=>{if(v.task)E().logistics.push({id:uid(),task:v.task,status:'Scheduled'});});}
+function addVendor(){modal('Add vendor',[{k:'name',label:'Vendor name'},{k:'bbbee',label:'B-BBEE level',ph:'Level 1'},{k:'expiry',label:'Affidavit expiry',type:'date'}],v=>{if(v.name)E().vendors.push({id:uid(),name:v.name,csd:true,bbbee:v.bbbee||'—',expiry:v.expiry||'2026-12-31'});});}
+function newEvent(){modal('New event',[{k:'name',label:'Event name'},{k:'venue',label:'Venue'},{k:'dates',label:'Dates'}],v=>{if(!v.name)return;const id=uid();DB.events[id]={id,name:v.name,venue:v.venue||'',dates:v.dates||'',scope:0,status:'Draft',pricing:{marginPct:18,mgmtFeePct:8,discountPct:0,vatPct:15},milestones:[{id:uid(),label:'Deposit on signature',pct:50,status:'Pending'},{id:uid(),label:'Pre-event payment',pct:40,status:'Pending'},{id:uid(),label:'Final on reconciliation',pct:10,status:'Pending'}],ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},quote:[],triple:[],schedule:[],designs:[],labour:[],logistics:[],vendors:[]};DB.currentEvent=id;page='quote';});}
+
+/* ═══ DOCUMENTS ═════════════════════════════════════════════ */
+function showDoc(html){document.getElementById('paper').innerHTML=html;document.getElementById('doc').classList.add('show');}
+function closeDoc(){document.getElementById('doc').classList.remove('show');}
+function genQuote(){const e=E(),q=quoteCalc(),p=e.pricing;const byCat={};e.quote.forEach(i=>{(byCat[i.cat]=byCat[i.cat]||[]).push(i);});const ref='Q-'+e.id.toUpperCase()+'-'+new Date().getFullYear();e.status='Quoted';save();showDoc(`<div class="paper"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>QUOTATION</h1><div class="ph">${ref} · ${new Date().toLocaleDateString('en-ZA')}</div></div><div style="text-align:right"><b>${DB.org.name}</b><br><span class="ph">Prepared for ${DB.org.client}</span></div></div><h2>${e.name}</h2><div class="ph">${e.venue} · ${e.dates}</div>${Object.keys(byCat).map(cat=>`<h2>${cat}</h2><table><tr><th>Description</th><th>Qty</th><th style="text-align:right">Amount</th></tr>${byCat[cat].map(i=>`<tr><td>${i.desc} <span class="ph">(${i.vendor})</span></td><td>${i.qty}</td><td style="text-align:right">${fmt(i.cost*i.qty)}</td></tr>`).join('')}</table>`).join('')}${e.designs.length?`<h2>Designs & Concepts</h2><div class="imgrow">${e.designs.slice(0,4).map(d=>`<div><img src="${d.img}"><div class="ph" style="font-size:11px;margin-top:3px">${d.type}: ${d.label}</div></div>`).join('')}</div>`:''}<h2>Investment Summary</h2><div class="pbr"><span>Subtotal (production & resources)</span><span>${fmt(q.sub)}</span></div><div class="pbr"><span>Project margin (${p.marginPct}%)</span><span>${fmt(q.margin)}</span></div><div class="pbr"><span>Management fee (${p.mgmtFeePct}%)</span><span>${fmt(q.mgmt)}</span></div><div class="pbr"><span>Discount (${p.discountPct}%)</span><span>-${fmt(q.discount)}</span></div><div class="pbr"><span>Net (excl. VAT)</span><span>${fmt(q.net)}</span></div><div class="pbr"><span>VAT (${p.vatPct}%)</span><span>${fmt(q.vat)}</span></div><div class="pbr t"><span>Total (incl. VAT)</span><span>${fmt(q.total)}</span></div><p class="ph" style="margin-top:16px">Valid 30 days. Acceptance generates a binding contract and an auditable purchase-order trail.</p></div>`);}
+function acceptQuote(){const e=E(),q=quoteCalc();e.status='Contracted';if(!e.triple.length){e.quote.forEach(i=>e.triple.push({id:uid(),item:i.desc,scope:i.cost*i.qty,po:i.cost*i.qty,invoice:0}));}e.scope=q.net;save();const ref='C-'+e.id.toUpperCase()+'-'+new Date().getFullYear();showDoc(`<div class="paper"><h1>EVENT SERVICES CONTRACT</h1><div class="ph">${ref} · ${new Date().toLocaleDateString('en-ZA')}</div><h2>Parties</h2><p><b>Service Provider:</b> ${DB.org.name}<br><b>Client:</b> ${DB.org.client}</p><h2>Scope of Work</h2><p>Delivery of <b>${e.name}</b> at ${e.venue} on ${e.dates}, per accepted quotation, including venue, production, staging, decor, catering, transport and crew as specified.</p><h2>Contract Value</h2><div class="pbr"><span>Net (excl. VAT)</span><span>${fmt(q.net)}</span></div><div class="pbr"><span>VAT (${e.pricing.vatPct}%)</span><span>${fmt(q.vat)}</span></div><div class="pbr t"><span>Total contract value</span><span>${fmt(q.total)}</span></div><h2>Payment Schedule</h2><table><tr><th>Milestone</th><th>%</th><th style="text-align:right">Amount</th></tr>${e.milestones.map(m=>`<tr><td>${m.label}</td><td>${m.pct}%</td><td style="text-align:right">${fmt(q.total*m.pct/100)}</td></tr>`).join('')}</table><h2>Financial Workflow & Audit Trail</h2><p>All vendor purchase orders are issued against this contract value. Each PO and invoice is reconciled via Triple-Match accounting; variances exceeding 5% require Event Director approval and are logged to an immutable audit trail.</p><div class="sig"><div>Service Provider · Date</div><div>Client · Date</div></div></div>`);setTimeout(()=>renderAdmin(),50);}
+function genInvoice(id){const e=E(),q=quoteCalc(),m=e.milestones.find(x=>x.id===id);if(m.status==='Pending'){m.status='Invoiced';save();}const amt=q.total*m.pct/100,net=amt/(1+(e.pricing.vatPct/100)),vat=amt-net;const ref='INV-'+e.id.toUpperCase()+'-'+m.pct;showDoc(`<div class="paper"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>TAX INVOICE</h1><div class="ph">${ref} · ${new Date().toLocaleDateString('en-ZA')}</div></div><div style="text-align:right"><b>${DB.org.name}</b><br><span class="ph">VAT-registered supplier</span></div></div><h2>Bill To</h2><p>${DB.org.client}</p><h2>${m.label} — ${e.name}</h2><table><tr><th>Description</th><th style="text-align:right">Amount</th></tr><tr><td>${m.label} (${m.pct}% of contract value)<br><span class="ph">${e.venue} · ${e.dates}</span></td><td style="text-align:right">${fmt(net)}</td></tr></table><div style="margin-top:12px"><div class="pbr"><span>Net</span><span>${fmt(net)}</span></div><div class="pbr"><span>VAT (${e.pricing.vatPct}%)</span><span>${fmt(vat)}</span></div><div class="pbr t"><span>Amount due</span><span>${fmt(amt)}</span></div></div><p class="ph" style="margin-top:16px">Payment due within 14 days. Reconciled against contract on the audit trail.</p></div>`);setTimeout(()=>renderAdmin(),50);}
+
+/* ═══ CHAT ══════════════════════════════════════════════════ */
+const KB=[
+  {k:['dashboard','director','kpi','overview'],a:'The <b>Director</b> view shows KPIs (vendor cost, client quote, gross profit, ripple impact) and the Triple-Match accounting table. Switch events with the dropdown at the top.'},
+  {k:['quote','line item','add line','vendor cost'],a:'Go to <b>Quotation</b> in the sidebar. Click <b>+ Add line item</b> to add vendor costs by category. Adjust Margin %, Mgmt fee %, Discount % and VAT % on the right — the client total updates instantly.'},
+  {k:['invoice','milestone','payment','finance'],a:'Go to <b>Finance</b>. Click <b>Issue</b> on a milestone to generate a tax invoice PDF, then <b>Mark paid</b> when received. Add new milestones with <b>+ Add milestone</b>.'},
+  {k:['triple','match','po','scope','reconcil'],a:'Triple-Match on the Dashboard tracks Scope → PO → Invoice per line item. Variances over 5% show a red flag. Click <b>+ Add line item</b> to add rows, or they auto-populate when you Accept a quote.'},
+  {k:['ripple','delay','cascade','overtime'],a:'The <b>Ripple Engine</b> simulates what a setup delay costs across labour, accommodation, catering and fuel. Drag the slider to set delay hours — all costs cascade instantly.'},
+  {k:['crew','staff','labour','workforce','technician'],a:'Go to <b>Workforce</b> to add crew with hourly rates and hours. Crew added here appear in the Schedule assignee list and can log into the Field app to see their duties.'},
+  {k:['field','mobile','phone','app','crew login'],a:'Crew members log in from the role selector screen after Supabase auth. They see the Field app with their personal call sheet, run sheet, and upload shortcuts. On mobile, use "Add to Home Screen" to install it.'},
+  {k:['schedule','run sheet','duty','assign'],a:'Go to <b>Schedule</b> and click <b>+ Add item</b>. Set the day, time, activity, department and assign to a crew member. Crew see their assigned items in the Field app and can confirm them.'},
+  {k:['design','render','moodboard','image','upload'],a:'Go to <b>Designs</b> and click the upload box. Images are auto-resized and tagged (Render, Moodboard, Stage Plan, Floorplan). They appear in the generated quotation PDF.'},
+  {k:['compliance','vendor','csd','bbbee','affidavit'],a:'Go to <b>Compliance</b> to track vendor CSD status, B-BBEE level and affidavit expiry. Items expiring within 30 days show amber; expired or missing CSD shows red.'},
+  {k:['logistics','task','bump','delivery'],a:'Go to <b>Logistics</b> for bump-in/out tasks. Set status per task (Scheduled, On time, Delayed, Complete). Delayed items feed into Ripple Engine risk.'},
+  {k:['new event','create event','add event'],a:'Click <b>+ New</b> next to the event dropdown at the top. Enter name, venue and dates. A new event is created with default pricing and empty modules ready to fill.'},
+  {k:['save','cloud','sync','data','lost'],a:'Your data saves to localStorage instantly and syncs to Supabase cloud on every change. Sign in on any device with the same account to pick up where you left off.'},
+  {k:['sign out','logout','account','email'],a:'Use <b>Switch role</b> to go back to the role selector, or <b>Sign out</b> to fully log out of your Supabase account. Your data is saved to the cloud.'},
+  {k:['print','pdf','document','contract','quotation doc'],a:'Click <b>📄 Quotation</b> on the Quote page to generate the client document, or <b>📄 Invoice</b> on the Finance page per milestone. In the document view, click <b>🖨 Print / Save PDF</b>.'},
 ];
-let wzStep = 0;
-function showWizard(){
-  wzStep = 0; renderWz();
-  document.getElementById('wizard').style.display = 'flex';
-}
-function closeWizard(){
-  document.getElementById('wizard').style.display = 'none';
-  localStorage.setItem('eo_wz_done','1');
-}
-function renderWz(){
-  const s = WZ[wzStep];
-  document.getElementById('wz-title').textContent = s.title;
-  document.getElementById('wz-sub').textContent   = s.sub;
-  document.getElementById('wz-body').innerHTML    = s.body;
-  document.getElementById('wz-prog').textContent  = `${wzStep+1} of ${WZ.length}`;
-  document.getElementById('wz-next').textContent  = wzStep === WZ.length-1 ? 'Get started →' : 'Next →';
-  document.getElementById('wz-dots').innerHTML    = WZ.map((_,i)=>`<div class="wz-dot${i===wzStep?' on':''}"></div>`).join('');
-}
-function wzNext(){ wzStep < WZ.length-1 ? (wzStep++, renderWz()) : closeWizard(); }
+const CHIPS_INIT=['How do I add a quote?','Finance & invoicing','Ripple engine','Field app for crew','Generate a PDF'];
+let chatOpen=false,chatStarted=false;
+function toggleChat(){chatOpen=!chatOpen;document.getElementById('chat-panel').classList.toggle('hidden',!chatOpen);if(chatOpen&&!chatStarted){chatStarted=true;initChat();}}
+function initChat(){addBotMsg('Hi! 👋 I\'m the EventOps assistant. Ask me about any module — quotations, finance, ripple engine, field app, crew, compliance, or generating documents.');renderChips(CHIPS_INIT);}
+function renderChips(chips){document.getElementById('chat-chips').innerHTML=chips.map(c=>`<span class="chip" onclick="chipSend('${c}')">${c}</span>`).join('');}
+function chipSend(t){document.getElementById('chat-chips').innerHTML='';addUserMsg(t);answerChat(t);}
+function addBotMsg(html){appendMsg('bot',html);}
+function addUserMsg(t){appendMsg('user',t,true);}
+function appendMsg(cls,content,isText=false){const m=document.createElement('div');m.className='msg '+cls;if(isText)m.textContent=content;else m.innerHTML=content;const box=document.getElementById('chat-msgs');box.appendChild(m);box.scrollTop=box.scrollHeight;}
+function showTyping(){const m=document.createElement('div');m.className='msg bot typing';m.id='typ';m.innerHTML='<span></span><span></span><span></span>';document.getElementById('chat-msgs').appendChild(m);document.getElementById('chat-msgs').scrollTop=99999;}
+function hideTyping(){const t=document.getElementById('typ');if(t)t.remove();}
+function answerChat(text){showTyping();const q=text.toLowerCase();let ans=null;for(const e of KB){if(e.k.some(k=>q.includes(k))){ans=e.a;break;}}if(!ans)ans='I don\'t have a specific answer for that, but try:<br>• Use the <b>sidebar</b> to navigate to any module<br>• The <b>Director</b> page shows your financial overview<br>• Click <b>+ Add</b> buttons within each module to add data<br>• All changes save to Supabase cloud automatically';setTimeout(()=>{hideTyping();addBotMsg(ans);renderChips(['Add quote lines','Generate invoice PDF','Ripple engine','Field crew app']);},600+Math.random()*400);}
+function sendChat(){const ipt=document.getElementById('chat-ipt');const t=ipt.value.trim();if(!t)return;ipt.value='';document.getElementById('chat-chips').innerHTML='';addUserMsg(t);answerChat(t);}
 
-/* ── CHAT ──────────────────────────────────────────────── */
-const KB = [
-  {k:['add event','create event','new event'],a:'In the <b>left sidebar</b>, fill in the Event name field (required), Venue and Dates, then click <b>Create Event</b>. The event appears in the list and opens automatically so you can start adding line items.'},
-  {k:['add line','line item','add item','cost line','quote item'],a:'Once an event is open, use the <b>form at the top of the main panel</b> — fill in Category, Vendor, Description, Qty and Unit Cost, then click <b>+ Add line</b>. Totals update instantly.'},
-  {k:['margin','markup','fee','percentage','vat','discount','rate'],a:'Each event stores its own Margin %, Management fee %, Discount % and VAT %. They auto-apply to all line items. To change them, go to Supabase → Table Editor → events and edit the row directly.'},
-  {k:['status','draft','confirmed','invoiced','paid'],a:'The <b>status dropdown</b> is top-right of the quotation panel. Change it from Draft → Confirmed → Invoiced → Paid. The badge in the sidebar updates immediately.'},
-  {k:['delete','remove'],a:'Click the <b>✕</b> next to any event (sidebar) or line item (table) to delete it. Deleting an event permanently removes all its line items too.'},
-  {k:['demo','sample','test','example'],a:'The demo has 3 pre-built SA events. Sign in with <b>demo@eventops.app</b> / <b>Demo1234!</b>, or click <b>Try Demo</b> on the login screen.'},
-  {k:['sign up','register','account'],a:'Click <b>Sign up</b> on the login screen. Enter email and password. Once confirmed (check inbox if needed), sign in to access your private workspace.'},
-  {k:['error','not working','broken','failed','problem','issue','blank','empty','nothing'],a:'Common fixes:<br>1. <b>No events?</b> Create one in the left sidebar.<br>2. <b>Can\'t add lines?</b> Click an event first to open it.<br>3. <b>Data errors?</b> Check Supabase → Table Editor for the events table.<br>4. <b>JS errors?</b> Open browser console (F12) and share the error.'},
-  {k:['rls','permission','access','security'],a:'Row-Level Security restricts each user to their own rows. If you see permission errors, check Supabase → Authentication → Policies — the three policies (own profile, own events, own quote_items) must exist.'},
-  {k:['total','calculation','formula','how is','price'],a:'Formula: <b>Subtotal → + Margin% → + Mgmt fee% → − Discount% → + VAT%</b>. Discount applies after markup, before VAT. All values update live.'},
-  {k:['vercel','deploy','host','url','domain'],a:'Your live URL is <b>eventops-tau.vercel.app</b>. To redeploy after code changes, run <code>npx vercel --prod</code> in the eventops folder.'},
-  {k:['export','pdf','print','download'],a:'Use <b>Ctrl+P / Cmd+P</b> to print or save as PDF. Full export is on the roadmap.'},
-  {k:['help','feature','tour','wizard','what can'],a:'Re-launch the tour with the <b>? Tour</b> button (top-right). I can help with: creating events, adding line items, pricing formulas, fixing errors, Supabase setup, and demo credentials.'},
-  {k:['select','click','open','see','view'],a:'To open an event\'s quotation, click on it in the <b>left sidebar</b>. The main panel on the right will load its line items and totals.'},
-];
-const CHIPS_INIT = ['How do I add an event?','Add line items','Pricing formula','Demo login','Fix an error'];
-
-let chatOpen = false, chatStarted = false;
-function toggleChat(){
-  chatOpen = !chatOpen;
-  document.getElementById('chat-panel').classList.toggle('hidden', !chatOpen);
-  if(chatOpen && !chatStarted){ chatStarted=true; initChat(); }
+/* ═══ INIT ══════════════════════════════════════════════════ */
+async function init(){
+  const {data:{session:s}} = await sb.auth.getSession();
+  if(s){
+    supabaseUser = s.user;
+    await loadFromCloud();
+  }
+  sb.auth.onAuthStateChange(async(_e, s)=>{
+    const wasLoggedIn = !!supabaseUser;
+    supabaseUser = s?.user || null;
+    if(supabaseUser && !wasLoggedIn){
+      await loadFromCloud();
+      render();
+    } else if(!supabaseUser){
+      session = null;
+      render();
+    }
+  });
+  render();
 }
-function initChat(){
-  addBotMsg('Hi! 👋 I\'m the EventOps assistant. Ask me anything about using the platform — adding events, quotations, fixing errors, or how pricing works.');
-  renderChips(CHIPS_INIT);
-}
-function renderChips(chips){
-  document.getElementById('chat-chips').innerHTML = chips.map(c=>`<span class="chip" onclick="chipSend('${c}')">${c}</span>`).join('');
-}
-function chipSend(t){ document.getElementById('chat-chips').innerHTML=''; addUserMsg(t); answer(t); }
-function addBotMsg(html){ appendMsg('bot', html); }
-function addUserMsg(t){ appendMsg('user', t, true); }
-function appendMsg(cls, content, isText=false){
-  const m = document.createElement('div');
-  m.className = 'msg '+cls;
-  if(isText) m.textContent = content; else m.innerHTML = content;
-  const box = document.getElementById('chat-msgs');
-  box.appendChild(m); box.scrollTop = box.scrollHeight;
-}
-function showTyping(){ const m=document.createElement('div'); m.className='msg bot typing'; m.id='typ'; m.innerHTML='<span></span><span></span><span></span>'; document.getElementById('chat-msgs').appendChild(m); document.getElementById('chat-msgs').scrollTop=99999; }
-function hideTyping(){ const t=document.getElementById('typ'); if(t) t.remove(); }
-function answer(text){
-  showTyping();
-  const q = text.toLowerCase();
-  let ans = null;
-  for(const e of KB){ if(e.k.some(k=>q.includes(k))){ ans=e.a; break; } }
-  if(!ans) ans = `I don\'t have a specific answer for that yet, but here are some tips:<br>• <b>No dashboard?</b> Make sure you\'re signed in and have created an event in the left sidebar.<br>• <b>Can\'t add data?</b> Click an event first, then use the form at the top of the right panel.<br>• <b>Other issues?</b> Open browser console (F12) for error details, or re-run the SQL schema in Supabase.`;
-  setTimeout(()=>{ hideTyping(); addBotMsg(ans); renderChips(['Add line items','Pricing formula','Fix an error','Demo login']); }, 600+Math.random()*400);
-}
-function sendChat(){
-  const ipt = document.getElementById('chat-ipt');
-  const t = ipt.value.trim(); if(!t) return;
-  ipt.value = ''; document.getElementById('chat-chips').innerHTML = '';
-  addUserMsg(t); answer(t);
-}
-
 init();
 </script>
 </body>
