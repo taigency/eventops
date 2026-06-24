@@ -233,7 +233,7 @@ const initials=n=>n.split(/[\s(]/).filter(Boolean).slice(0,2).map(w=>w[0]).join(
 const CATS=['Venue','AV & Production','Decor & Styling','Staging & Set','Catering','Transport & Logistics','Labour & Crew','Other'];
 
 function seed(){return{
-  currentEvent:'e1',role:'Event Director',org:{name:'Your Event Company',client:'Acme Corporate'},
+  currentEvent:'e1',role:'Event Director',org:{name:'Your Event Company',tagline:'Professional Event Management',client:'Acme Corporate',logo:null,logoPos:'left',address:'',phone:'',email:'',vatNo:'',regNo:'',banking:'',accentColor:'#6d6bff',quoteTerms:'• This quotation is valid for 30 days from the date of issue.\n• Prices are subject to change until a signed contract is received.\n• A 50% deposit is required to confirm the booking.\n• All prices exclude VAT unless otherwise stated.',invoiceTerms:'• Payment is due within 14 days of invoice date.\n• Interest of 2% per month will be charged on overdue amounts.\n• Queries must be raised within 5 business days of receipt.\n• Banking details are provided above — please use invoice number as reference.',poTerms:'• This Purchase Order constitutes a binding commitment to supply.\n• Goods/services must be delivered as specified.\n• Invoices must reference this PO number.\n• Any variation to scope requires written approval before proceeding.',contractTerms:'• This contract is binding upon signature by both parties.\n• Cancellation within 30 days of the event forfeits the full deposit.\n• The service provider retains the right to subcontract with prior written notice.\n• Disputes will be resolved via arbitration under South African law.'},
   events:{e1:{
     id:'e1',name:'TechExpo Cape Town',venue:'CTICC · Hall 4',dates:'12–14 Aug 2026',scope:420000,status:'Draft',
     pricing:{marginPct:18,mgmtFeePct:8,discountPct:5,vatPct:15},
@@ -275,6 +275,8 @@ function migrateDB(){
   if(!DB.events) DB.events={};
   if(!DB.org) DB.org={name:'EventOps',client:'Client'};
   if(!DB.role) DB.role='Event Director';
+  const orgDef={tagline:'',logo:null,logoPos:'left',address:'',phone:'',email:'',vatNo:'',regNo:'',banking:'',accentColor:'#6d6bff',quoteTerms:'• Valid for 30 days.\n• 50% deposit required to confirm.\n• Prices exclude VAT unless stated.',invoiceTerms:'• Payment due within 14 days.\n• Use invoice number as payment reference.',poTerms:'• This PO is a binding commitment to supply.\n• Invoices must reference this PO number.',contractTerms:'• Binding upon signature by both parties.\n• Disputes resolved via arbitration under South African law.'};
+  Object.keys(orgDef).forEach(k=>{if(DB.org[k]===undefined) DB.org[k]=orgDef[k];});
   const evIds=Object.keys(DB.events);
   if(!DB.currentEvent||!DB.events[DB.currentEvent]) DB.currentEvent=evIds[0]||null;
   const def={pricing:{marginPct:18,mgmtFeePct:8,discountPct:0,vatPct:15},milestones:[],ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},quote:[],triple:[],schedule:[],designs:[],labour:[],logistics:[],vendors:[],status:'Draft'};
@@ -294,7 +296,7 @@ function costSubtotal(){return E().quote.reduce((s,q)=>s+q.cost*q.qty,0)+labourS
 function quoteCalc(){const sub=costSubtotal(),p=E().pricing;const margin=sub*(p.marginPct/100),mgmt=sub*(p.mgmtFeePct/100);const pre=sub+margin+mgmt,discount=pre*(p.discountPct/100);const net=pre-discount,vat=net*((p.vatPct||0)/100),total=net+vat;return{sub,margin,mgmt,pre,discount,net,vat,total,grossProfit:margin+mgmt-discount};}
 function rippleCost(){const r=E().ripple,d=r.delay;return{labour:r.otRate*d,accom:r.accomRate*d,catering:r.cateringRate*d,fuel:r.fuelRate*d,total:(r.otRate+r.accomRate+r.cateringRate+r.fuelRate)*d};}
 
-const PAGES=[{id:'dashboard',ic:'🎯',label:'Director'},{id:'quote',ic:'🧾',label:'Quotation'},{id:'finance',ic:'💰',label:'Finance'},{id:'designs',ic:'🎨',label:'Designs'},{id:'schedule',ic:'🗓️',label:'Schedule'},{id:'ripple',ic:'⚡',label:'Ripple Engine'},{id:'workforce',ic:'👷',label:'Workforce'},{id:'logistics',ic:'🚚',label:'Logistics'},{id:'compliance',ic:'🛡️',label:'Compliance'}];
+const PAGES=[{id:'dashboard',ic:'🎯',label:'Director'},{id:'quote',ic:'🧾',label:'Quotation'},{id:'finance',ic:'💰',label:'Finance'},{id:'designs',ic:'🎨',label:'Designs'},{id:'schedule',ic:'🗓️',label:'Schedule'},{id:'ripple',ic:'⚡',label:'Ripple Engine'},{id:'workforce',ic:'👷',label:'Workforce'},{id:'logistics',ic:'🚚',label:'Logistics'},{id:'compliance',ic:'🛡️',label:'Compliance'},{id:'settings',ic:'⚙️',label:'Settings & Branding'}];
 let page='dashboard', fieldTab='duties';
 
 /* ═══ ROUTER ════════════════════════════════════════════════ */
@@ -409,7 +411,7 @@ function renderAdmin(){
       </div>
       <div class="content" id="content"></div>
     </div>`;
-  ({dashboard:vDash,quote:vQuote,finance:vFin,designs:vDesigns,schedule:vSched,ripple:vRipple,workforce:vWork,logistics:vLog,compliance:vComp}[page])();
+  ({dashboard:vDash,quote:vQuote,finance:vFin,designs:vDesigns,schedule:vSched,ripple:vRipple,workforce:vWork,logistics:vLog,compliance:vComp,settings:vSettings}[page])();
 }
 
 function go(p){page=p;renderAdmin();}
@@ -417,7 +419,7 @@ function statusBadge(s){const m={Draft:'b-blue',Quoted:'b-amber',Accepted:'b-gre
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200);}
 
 /* ═══ PAGE VIEWS ════════════════════════════════════════════ */
-function vDash(){const e=E(),q=quoteCalc(),rc=rippleCost(),vpct=q.net?(rc.total/q.net*100):0;document.getElementById('content').innerHTML=`<div class="pg-title">Master Controller</div><div class="pg-sub">${e.name} · ${e.venue} · ${e.dates} &nbsp;${statusBadge(e.status)}</div><div class="grid g4" style="margin-bottom:0"><div class="card kpi"><div class="lbl">Vendor Cost</div><div class="v">${fmt(q.sub)}</div><div class="d" style="color:var(--muted)">Compiled quotes</div></div><div class="card kpi"><div class="lbl">Client Quote (incl VAT)</div><div class="v grad">${fmt(q.total)}</div><div class="d" style="color:var(--muted)">${fmt(q.net)} + VAT</div></div><div class="card kpi"><div class="lbl">Gross Profit</div><div class="v pos">${fmt(q.grossProfit)}</div><div class="d pos">${q.sub?(q.grossProfit/q.sub*100).toFixed(1):0}% on cost</div></div><div class="card kpi"><div class="lbl">Ripple Impact</div><div class="v ${rc.total?'amb':''}">${fmt(rc.total)}</div><div class="d ${vpct>5?'neg':vpct>0?'amb':'pos'}">${vpct.toFixed(1)}% of quote</div></div></div><div class="card"><div class="sec-h"><h3>Triple-Match Accounting</h3><button class="btn btn-p btn-sm" onclick="addTriple()">+ Add line item</button></div><p style="color:var(--muted);font-size:.85rem;margin-bottom:14px">Scope → contracted PO → final invoice, with 5% variance flags.</p><table><tr><th>Line item</th><th>Scope</th><th>PO</th><th>Invoice</th><th>Variance</th><th>Status</th><th></th></tr>${e.triple.map(t=>{const base=t.scope||t.po,fin=t.invoice||t.po||t.scope,v=base?((fin-base)/base*100):0;const cls=Math.abs(v)>5?'b-red':(t.invoice?'b-green':'b-amber'),st=Math.abs(v)>5?'⚠ Over 5%':(t.invoice?'✓ Reconciled':'Awaiting invoice');return`<tr><td>${t.item}</td><td>${fmt(t.scope)}</td><td>${fmt(t.po)}</td><td>${t.invoice?fmt(t.invoice):'—'}</td><td class="${v>5?'neg':v<-5?'pos':'amb'}">${v>=0?'+':''}${v.toFixed(1)}%</td><td><span class="badge ${cls}">${st}</span></td><td><button class="x" onclick="del('triple','${t.id}')">✕</button></td></tr>`;}).join('')}</table></div>`;}
+function vDash(){const e=E(),q=quoteCalc(),rc=rippleCost(),vpct=q.net?(rc.total/q.net*100):0;document.getElementById('content').innerHTML=`<div class="pg-title">Master Controller</div><div class="pg-sub">${e.name} · ${e.venue} · ${e.dates} &nbsp;${statusBadge(e.status)}</div><div class="grid g4" style="margin-bottom:0"><div class="card kpi"><div class="lbl">Vendor Cost</div><div class="v">${fmt(q.sub)}</div><div class="d" style="color:var(--muted)">Compiled quotes</div></div><div class="card kpi"><div class="lbl">Client Quote (incl VAT)</div><div class="v grad">${fmt(q.total)}</div><div class="d" style="color:var(--muted)">${fmt(q.net)} + VAT</div></div><div class="card kpi"><div class="lbl">Gross Profit</div><div class="v pos">${fmt(q.grossProfit)}</div><div class="d pos">${q.sub?(q.grossProfit/q.sub*100).toFixed(1):0}% on cost</div></div><div class="card kpi"><div class="lbl">Ripple Impact</div><div class="v ${rc.total?'amb':''}">${fmt(rc.total)}</div><div class="d ${vpct>5?'neg':vpct>0?'amb':'pos'}">${vpct.toFixed(1)}% of quote</div></div></div><div class="card"><div class="sec-h"><h3>Triple-Match Accounting</h3><button class="btn btn-p btn-sm" onclick="addTriple()">+ Add line item</button></div><p style="color:var(--muted);font-size:.85rem;margin-bottom:14px">Scope → contracted PO → final invoice, with 5% variance flags.</p><table><tr><th>Line item</th><th>Scope</th><th>PO</th><th>Invoice</th><th>Variance</th><th>Status</th><th></th></tr>${e.triple.map(t=>{const base=t.scope||t.po,fin=t.invoice||t.po||t.scope,v=base?((fin-base)/base*100):0;const cls=Math.abs(v)>5?'b-red':(t.invoice?'b-green':'b-amber'),st=Math.abs(v)>5?'⚠ Over 5%':(t.invoice?'✓ Reconciled':'Awaiting invoice');return`<tr><td>${t.item}</td><td>${fmt(t.scope)}</td><td>${fmt(t.po)}</td><td>${t.invoice?fmt(t.invoice):'—'}</td><td class="${v>5?'neg':v<-5?'pos':'amb'}">${v>=0?'+':''}${v.toFixed(1)}%</td><td><span class="badge ${cls}">${st}</span></td><td style="display:flex;gap:5px"><button class="btn btn-g btn-sm" onclick="genPO('${t.item.replace(/'/g,'')}','${t.item.replace(/'/g,'')}',${t.po||t.scope||0})">📋 PO</button><button class="x" onclick="del('triple','${t.id}')">✕</button></td></tr>`;}).join('')}</table></div>`;}
 
 function vQuote(){const e=E(),p=e.pricing,q=quoteCalc(),ls=labourSubtotal();const byCat={};e.quote.forEach(i=>{(byCat[i.cat]=byCat[i.cat]||[]).push(i);});const vendorSub=e.quote.reduce((s,i)=>s+i.cost*i.qty,0);document.getElementById('content').innerHTML=`<div class="pg-title">Quotation Builder</div><div class="pg-sub">Compile every vendor quote and workforce cost, apply pricing & VAT, generate the client document. ${statusBadge(e.status)}</div><div class="grid g2" style="grid-template-columns:1.6fr 1fr"><div><div class="card"><div class="sec-h"><h3>Compiled costs</h3><button class="btn btn-p btn-sm" onclick="addQuote()">+ Add line item</button></div>${Object.keys(byCat).length?Object.keys(byCat).map(cat=>`<div style="margin-bottom:6px"><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent2);margin:10px 0 4px">${cat}</div><table><tr><th>Vendor</th><th>Description</th><th>Qty</th><th>Unit</th><th>Total</th><th></th></tr>${byCat[cat].map(i=>`<tr><td>${i.vendor}</td><td>${i.desc}</td><td>${i.qty}</td><td>${fmt(i.cost)}</td><td>${fmt(i.cost*i.qty)}</td><td><button class="x" onclick="del('quote','${i.id}')">✕</button></td></tr>`).join('')}</table></div>`).join(''):'<div class="empty">No vendor line items yet. Click + Add line item to start.</div>'}${e.labour.length?`<div style="margin-bottom:6px"><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--warn);margin:14px 0 4px">👷 Labour & Crew <span style="color:var(--muted);font-weight:400;text-transform:none">(from Workforce)</span></div><table><tr><th>Role</th><th>Rate/hr</th><th>Hours</th><th>Cost</th><th></th></tr>${e.labour.map(l=>`<tr><td>${l.name}</td><td>${fmt(l.rate)}</td><td>${l.hours}</td><td>${fmt(l.rate*l.hours)}</td><td><button class="btn btn-g btn-sm" onclick="go('workforce')">Edit</button></td></tr>`).join('')}<tr style="border-top:1px solid var(--line)"><td colspan="3" style="font-weight:700">Labour subtotal</td><td style="font-weight:700">${fmt(ls)}</td><td></td></tr></table></div>`:'<div class="note" style="margin-top:12px">Add crew on the <b>Workforce</b> page — labour costs will appear here automatically.</div>'}</div></div><div><div class="card"><h3 style="margin-bottom:14px">Organiser pricing</h3>${[['marginPct','Margin / markup %'],['mgmtFeePct','Management fee %'],['discountPct','Client discount %'],['vatPct','VAT %']].map(([k,l])=>`<div class="form-row"><label class="fl">${l}</label><input class="ipt" type="number" value="${p[k]}" oninput="E().pricing.${k}=+this.value||0;save();vQuote()"></div>`).join('')}<div style="margin-top:12px"><div class="br"><span>Vendor costs</span><b>${fmt(vendorSub)}</b></div><div class="br"><span>Labour & crew</span><b class="amb">${fmt(ls)}</b></div><div class="br" style="border-top:1px solid var(--line);padding-top:10px"><span><b>Total cost base</b></span><b>${fmt(q.sub)}</b></div><div class="br"><span>+ Margin (${p.marginPct}%)</span><b class="pos">${fmt(q.margin)}</b></div><div class="br"><span>+ Management fee (${p.mgmtFeePct}%)</span><b class="pos">${fmt(q.mgmt)}</b></div><div class="br"><span>− Discount (${p.discountPct}%)</span><b class="neg">-${fmt(q.discount)}</b></div><div class="br"><span>Net (excl. VAT)</span><b>${fmt(q.net)}</b></div><div class="br"><span>+ VAT (${p.vatPct}%)</span><b>${fmt(q.vat)}</b></div><div class="br tot"><span>Client total</span><span class="grad">${fmt(q.total)}</span></div></div><div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-g btn-sm" style="flex:1" onclick="genQuote()">📄 Quotation</button><button class="btn btn-p btn-sm" style="flex:1" onclick="acceptQuote()">✓ Accept → contract</button></div></div></div></div>`;}
 
@@ -464,6 +466,112 @@ function vWork(){
 function vLog(){const e=E();document.getElementById('content').innerHTML=`<div class="pg-title">Operations & Logistics</div><div class="pg-sub">Bump-in/out tasks, deliveries and status.</div><div class="card"><div class="sec-h"><h3>Logistics tasks</h3><button class="btn btn-p btn-sm" onclick="addLog()">+ Add task</button></div><table><tr><th>Task</th><th>Status</th><th></th></tr>${e.logistics.length?e.logistics.map(t=>`<tr><td>${t.task}</td><td><select class="ipt" style="width:auto;padding:5px 8px" onchange="E().logistics.find(x=>x.id==='${t.id}').status=this.value;save()">${['Scheduled','On time','Delayed','Complete'].map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></td><td><button class="x" onclick="del('logistics','${t.id}')">✕</button></td></tr>`).join(''):'<tr><td colspan="3"><div class="empty">No tasks yet.</div></td></tr>'}</table></div>`;}
 
 function vComp(){const e=E(),today=new Date();document.getElementById('content').innerHTML=`<div class="pg-title">Supplier Compliance</div><div class="pg-sub">CSD registration, tax status, and B-BBEE affidavit tracking.</div><div class="card"><div class="sec-h"><h3>Vendors</h3><button class="btn btn-p btn-sm" onclick="addVendor()">+ Add vendor</button></div><table><tr><th>Vendor</th><th>CSD</th><th>B-BBEE</th><th>Affidavit expiry</th><th>Status</th><th></th></tr>${e.vendors.map(v=>{const exp=new Date(v.expiry),days=Math.round((exp-today)/86400000);let cls,txt;if(!v.csd){cls='b-red';txt='CSD / tax issue';}else if(days<0){cls='b-red';txt='Affidavit expired';}else if(days<30){cls='b-amber';txt='Expiring ('+days+'d)';}else{cls='b-green';txt='Compliant';}return`<tr><td>${v.name}</td><td><span class="badge ${v.csd?'b-green':'b-red'}">${v.csd?'Verified':'Not found'}</span></td><td>${v.bbbee}</td><td>${v.expiry}</td><td><span class="badge ${cls}">${txt}</span></td><td><button class="x" onclick="del('vendors','${v.id}')">✕</button></td></tr>`;}).join('')}</table></div>`;}
+
+/* ═══ SETTINGS & BRANDING ══════════════════════════════════ */
+function vSettings(){
+  const o=DB.org;
+  const logoHtml=o.logo?`<img src="${o.logo}" style="max-height:70px;max-width:200px;object-fit:contain;border-radius:6px">`:
+    `<div style="width:120px;height:60px;background:var(--bg2);border:1.5px dashed var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.75rem">No logo</div>`;
+  const acc=o.accentColor||'#6d6bff';
+  document.getElementById('content').innerHTML=`
+  <div class="pg-title">Settings & Branding</div>
+  <div class="pg-sub">White-label your documents — logos, colours, terms and company details applied to all generated quotes, invoices, POs and contracts.</div>
+
+  <div class="grid g2">
+  <div>
+    <!-- ORGANISATION -->
+    <div class="card">
+      <div class="sec-h"><h3>Organisation details</h3></div>
+      ${[['name','Company / trading name'],['tagline','Tagline (shown under logo)'],['address','Address (use line breaks)'],['phone','Phone'],['email','Email'],['vatNo','VAT registration number'],['regNo','Company reg number'],['banking','Banking details (shown on invoices)']].map(([k,l])=>
+        k==='address'||k==='banking'
+          ?`<div class="form-row"><label class="fl">${l}</label><textarea class="ipt" rows="2" oninput="DB.org.${k}=this.value;save()">${o[k]||''}</textarea></div>`
+          :`<div class="form-row"><label class="fl">${l}</label><input class="ipt" value="${(o[k]||'').replace(/"/g,'&quot;')}" oninput="DB.org.${k}=this.value;save()"></div>`
+      ).join('')}
+    </div>
+
+    <!-- LOGO -->
+    <div class="card">
+      <div class="sec-h"><h3>Logo</h3><div style="display:flex;gap:8px">${o.logo?`<button class="btn btn-g btn-sm" onclick="DB.org.logo=null;save();vSettings()">✕ Remove</button>`:''}
+      <button class="btn btn-p btn-sm" onclick="document.getElementById('logo-upl').click()">⬆ Upload logo</button></div></div>
+      <input type="file" id="logo-upl" accept="image/*" style="display:none" onchange="uploadLogo(this)">
+      <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+        <div>${logoHtml}</div>
+        <div>
+          <label class="fl">Logo position on documents</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            ${['left','center','right'].map(p=>`<button class="btn ${o.logoPos===p?'btn-p':'btn-g'} btn-sm" onclick="DB.org.logoPos='${p}';save();vSettings()">${p.charAt(0).toUpperCase()+p.slice(1)}</button>`).join('')}
+          </div>
+          <div class="form-row" style="margin-top:14px"><label class="fl">Document accent colour</label>
+            <div style="display:flex;align-items:center;gap:10px">
+              <input type="color" value="${acc}" oninput="DB.org.accentColor=this.value;save()" style="width:44px;height:34px;border-radius:8px;border:1px solid var(--line);background:none;cursor:pointer;padding:2px">
+              <span style="font-size:.82rem;color:var(--muted)">${acc} — used for headings & rule lines</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <!-- DOCUMENT PREVIEW -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="sec-h"><h3>Document header preview</h3></div>
+      <div style="background:#fff;color:#1a1d29;border-radius:10px;padding:22px 24px;font-size:13px">
+        <div style="display:flex;align-items:flex-start;justify-content:${o.logoPos==='center'?'center':o.logoPos==='right'?'flex-end':'space-between'}">
+          ${o.logoPos==='left'?`<div>${o.logo?`<img src="${o.logo}" style="max-height:56px;max-width:160px;object-fit:contain">`:''}<div style="font-size:1.1rem;font-weight:800;color:#10142a;margin-top:${o.logo?4:0}px">${o.name||'Your Company'}</div>${o.tagline?`<div style="color:#888;font-size:11px">${o.tagline}</div>`:''}</div><div style="text-align:right;font-size:11px;color:#888">${[o.address,o.phone,o.email,o.vatNo?'VAT: '+o.vatNo:''].filter(Boolean).join('<br>')}</div>`:
+            o.logoPos==='center'?`<div style="text-align:center">${o.logo?`<img src="${o.logo}" style="max-height:56px;max-width:160px;object-fit:contain;display:block;margin:0 auto">`:''}<div style="font-size:1.1rem;font-weight:800;color:#10142a;margin-top:4px">${o.name||'Your Company'}</div>${o.tagline?`<div style="color:#888;font-size:11px">${o.tagline}</div>`:''}</div>`:
+            `<div style="font-size:11px;color:#888">${[o.address,o.phone,o.email,o.vatNo?'VAT: '+o.vatNo:''].filter(Boolean).join('<br>')}</div><div style="text-align:right">${o.logo?`<img src="${o.logo}" style="max-height:56px;max-width:160px;object-fit:contain;display:block;margin-left:auto">`:''}<div style="font-size:1.1rem;font-weight:800;color:#10142a;margin-top:4px">${o.name||'Your Company'}</div>${o.tagline?`<div style="color:#888;font-size:11px">${o.tagline}</div>`:''}</div>`}
+        </div>
+        <div style="border-top:2.5px solid ${acc};margin-top:14px;padding-top:10px;font-size:1.25rem;font-weight:800;color:#10142a">QUOTATION <span style="font-size:.8rem;font-weight:400;color:#888">Q-DEMO-2026 · ${new Date().toLocaleDateString('en-ZA')}</span></div>
+      </div>
+    </div>
+
+    <!-- TERMS EDITORS -->
+    <div class="card">
+      <div class="sec-h"><h3>Document terms</h3><span style="font-size:.78rem;color:var(--muted)">One bullet per line — printed at the bottom of each document</span></div>
+      ${[['quoteTerms','📄 Quotation terms'],['invoiceTerms','💳 Invoice terms'],['poTerms','📋 Purchase Order terms'],['contractTerms','✍️ Contract terms']].map(([k,l])=>`
+        <div style="margin-bottom:18px">
+          <label class="fl" style="font-size:.8rem;font-weight:700;color:var(--accent2);margin-bottom:6px">${l}</label>
+          <textarea class="ipt" rows="4" style="font-size:.82rem;line-height:1.6" oninput="DB.org.${k}=this.value;save()">${(o[k]||'').replace(/</g,'&lt;')}</textarea>
+        </div>`).join('')}
+    </div>
+  </div>
+  </div>`;
+}
+
+function uploadLogo(inp){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=400;let w=img.width,h=img.height;
+      if(w>max){h=h*max/w;w=max;}
+      const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      DB.org.logo=cv.toDataURL('image/png');
+      save();vSettings();
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(f);inp.value='';
+}
+
+/* doc header helper */
+function docHeader(docType,refNo){
+  const o=DB.org,acc=o.accentColor||'#6d6bff';
+  const logoImg=o.logo?`<img src="${o.logo}" style="max-height:64px;max-width:180px;object-fit:contain;display:block${o.logoPos==='center'?';margin:0 auto':o.logoPos==='right'?';margin-left:auto':''}">`:''
+  const orgBlock=`${logoImg}<div style="font-size:1.2rem;font-weight:800;color:#10142a;margin-top:${o.logo?4:0}px;text-align:${o.logoPos==='center'?'center':o.logoPos==='right'?'right':'left'}">${o.name||'Your Company'}</div>${o.tagline?`<div style="color:#888;font-size:11px;text-align:${o.logoPos==='center'?'center':o.logoPos==='right'?'right':'left'}">${o.tagline}</div>`:''}`;
+  const contactBlock=`<div style="text-align:${o.logoPos==='right'?'left':'right'};font-size:11.5px;color:#555;line-height:1.7">${[o.address,o.phone,o.email,o.vatNo?'VAT: '+o.vatNo:'',o.regNo?'Reg: '+o.regNo:''].filter(Boolean).join('<br>')}</div>`;
+  const flex=o.logoPos==='center'?`<div style="text-align:center">${orgBlock}</div>`:`<div style="display:flex;justify-content:space-between;align-items:flex-start">${o.logoPos==='right'?contactBlock+`<div style="text-align:right">${orgBlock}</div>`:`<div>${orgBlock}</div>`+contactBlock}</div>`;
+  return`${flex}<div style="border-top:2.5px solid ${acc};margin-top:16px;padding-top:12px"><h1 style="font-size:1.6rem;color:#10142a;margin-bottom:2px">${docType}</h1><div style="color:#888;font-size:12px">${refNo} · ${new Date().toLocaleDateString('en-ZA')}</div></div>`;
+}
+
+function docTerms(termsKey){
+  const lines=(DB.org[termsKey]||'').split('\n').filter(Boolean);
+  if(!lines.length) return '';
+  return`<div style="margin-top:28px;padding-top:14px;border-top:1px solid #e0e0e0"><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:7px">Terms & Conditions</div><div style="font-size:11px;color:#555;line-height:1.8">${lines.map(l=>`<div>${l}</div>`).join('')}</div></div>`;
+}
 
 /* ═══ FIELD APP ═════════════════════════════════════════════ */
 function renderField(){
@@ -768,9 +876,104 @@ async function refreshAppCounts(){
 /* ═══ DOCUMENTS ═════════════════════════════════════════════ */
 function showDoc(html){document.getElementById('paper').innerHTML=html;document.getElementById('doc').classList.add('show');}
 function closeDoc(){document.getElementById('doc').classList.remove('show');}
-function genQuote(){const e=E(),q=quoteCalc(),p=e.pricing,ls=labourSubtotal(),vs=e.quote.reduce((s,i)=>s+i.cost*i.qty,0);const byCat={};e.quote.forEach(i=>{(byCat[i.cat]=byCat[i.cat]||[]).push(i);});const ref='Q-'+e.id.toUpperCase()+'-'+new Date().getFullYear();e.status='Quoted';save();showDoc(`<div class="paper"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>QUOTATION</h1><div class="ph">${ref} · ${new Date().toLocaleDateString('en-ZA')}</div></div><div style="text-align:right"><b>${DB.org.name}</b><br><span class="ph">Prepared for ${DB.org.client}</span></div></div><h2>${e.name}</h2><div class="ph">${e.venue} · ${e.dates}</div>${Object.keys(byCat).map(cat=>`<h2>${cat}</h2><table><tr><th>Description</th><th>Qty</th><th style="text-align:right">Amount</th></tr>${byCat[cat].map(i=>`<tr><td>${i.desc} <span class="ph">(${i.vendor})</span></td><td>${i.qty}</td><td style="text-align:right">${fmt(i.cost*i.qty)}</td></tr>`).join('')}</table>`).join('')}${e.labour.length?`<h2>Labour & Crew</h2><table><tr><th>Role</th><th>Rate / hr</th><th>Hours</th><th style="text-align:right">Cost</th></tr>${e.labour.map(l=>`<tr><td>${l.name}</td><td>${fmt(l.rate)}</td><td>${l.hours}</td><td style="text-align:right">${fmt(l.rate*l.hours)}</td></tr>`).join('')}</table>`:''}${e.designs.length?`<h2>Designs & Concepts</h2><div class="imgrow">${e.designs.slice(0,4).map(d=>`<div><img src="${d.img}"><div class="ph" style="font-size:11px;margin-top:3px">${d.type}: ${d.label}</div></div>`).join('')}</div>`:''}<h2>Investment Summary</h2><div class="pbr"><span>Vendor & production costs</span><span>${fmt(vs)}</span></div>${ls?`<div class="pbr"><span>Labour & crew costs</span><span>${fmt(ls)}</span></div>`:''}${ls||vs?`<div class="pbr" style="border-top:1px solid #ddd;padding-top:8px"><span>Total cost base</span><span>${fmt(q.sub)}</span></div>`:''}<div class="pbr"><span>Project margin (${p.marginPct}%)</span><span>${fmt(q.margin)}</span></div><div class="pbr"><span>Management fee (${p.mgmtFeePct}%)</span><span>${fmt(q.mgmt)}</span></div><div class="pbr"><span>Discount (${p.discountPct}%)</span><span>-${fmt(q.discount)}</span></div><div class="pbr"><span>Net (excl. VAT)</span><span>${fmt(q.net)}</span></div><div class="pbr"><span>VAT (${p.vatPct}%)</span><span>${fmt(q.vat)}</span></div><div class="pbr t"><span>Total (incl. VAT)</span><span>${fmt(q.total)}</span></div><p class="ph" style="margin-top:16px">Valid 30 days. Acceptance generates a binding contract and an auditable purchase-order trail.</p></div>`);}
-function acceptQuote(){const e=E(),q=quoteCalc();e.status='Contracted';if(!e.triple.length){e.quote.forEach(i=>e.triple.push({id:uid(),item:i.desc,scope:i.cost*i.qty,po:i.cost*i.qty,invoice:0}));}e.scope=q.net;save();const ref='C-'+e.id.toUpperCase()+'-'+new Date().getFullYear();showDoc(`<div class="paper"><h1>EVENT SERVICES CONTRACT</h1><div class="ph">${ref} · ${new Date().toLocaleDateString('en-ZA')}</div><h2>Parties</h2><p><b>Service Provider:</b> ${DB.org.name}<br><b>Client:</b> ${DB.org.client}</p><h2>Scope of Work</h2><p>Delivery of <b>${e.name}</b> at ${e.venue} on ${e.dates}, per accepted quotation, including venue, production, staging, decor, catering, transport and crew as specified.</p><h2>Contract Value</h2><div class="pbr"><span>Net (excl. VAT)</span><span>${fmt(q.net)}</span></div><div class="pbr"><span>VAT (${e.pricing.vatPct}%)</span><span>${fmt(q.vat)}</span></div><div class="pbr t"><span>Total contract value</span><span>${fmt(q.total)}</span></div><h2>Payment Schedule</h2><table><tr><th>Milestone</th><th>%</th><th style="text-align:right">Amount</th></tr>${e.milestones.map(m=>`<tr><td>${m.label}</td><td>${m.pct}%</td><td style="text-align:right">${fmt(q.total*m.pct/100)}</td></tr>`).join('')}</table><h2>Financial Workflow & Audit Trail</h2><p>All vendor purchase orders are issued against this contract value. Each PO and invoice is reconciled via Triple-Match accounting; variances exceeding 5% require Event Director approval and are logged to an immutable audit trail.</p><div class="sig"><div>Service Provider · Date</div><div>Client · Date</div></div></div>`);setTimeout(()=>renderAdmin(),50);}
-function genInvoice(id){const e=E(),q=quoteCalc(),m=e.milestones.find(x=>x.id===id);if(m.status==='Pending'){m.status='Invoiced';save();}const amt=q.total*m.pct/100,net=amt/(1+(e.pricing.vatPct/100)),vat=amt-net;const ref='INV-'+e.id.toUpperCase()+'-'+m.pct;showDoc(`<div class="paper"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>TAX INVOICE</h1><div class="ph">${ref} · ${new Date().toLocaleDateString('en-ZA')}</div></div><div style="text-align:right"><b>${DB.org.name}</b><br><span class="ph">VAT-registered supplier</span></div></div><h2>Bill To</h2><p>${DB.org.client}</p><h2>${m.label} — ${e.name}</h2><table><tr><th>Description</th><th style="text-align:right">Amount</th></tr><tr><td>${m.label} (${m.pct}% of contract value)<br><span class="ph">${e.venue} · ${e.dates}</span></td><td style="text-align:right">${fmt(net)}</td></tr></table><div style="margin-top:12px"><div class="pbr"><span>Net</span><span>${fmt(net)}</span></div><div class="pbr"><span>VAT (${e.pricing.vatPct}%)</span><span>${fmt(vat)}</span></div><div class="pbr t"><span>Amount due</span><span>${fmt(amt)}</span></div></div><p class="ph" style="margin-top:16px">Payment due within 14 days. Reconciled against contract on the audit trail.</p></div>`);setTimeout(()=>renderAdmin(),50);}
+function genQuote(){
+  const e=E(),q=quoteCalc(),p=e.pricing,ls=labourSubtotal(),vs=e.quote.reduce((s,i)=>s+i.cost*i.qty,0);
+  const byCat={};e.quote.forEach(i=>{(byCat[i.cat]=byCat[i.cat]||[]).push(i);});
+  const ref='Q-'+e.id.toUpperCase()+'-'+new Date().getFullYear();
+  const acc=DB.org.accentColor||'#6d6bff';
+  e.status='Quoted';save();
+  showDoc(`<div class="paper">
+    ${docHeader('QUOTATION',ref)}
+    <h2>Prepared for: ${DB.org.client||'Client'}</h2>
+    <p><b>${e.name}</b> &nbsp;·&nbsp; ${e.venue} &nbsp;·&nbsp; ${e.dates}</p>
+    ${Object.keys(byCat).map(cat=>`<h2>${cat}</h2><table><tr><th>Description</th><th>Vendor</th><th>Qty</th><th style="text-align:right">Amount</th></tr>${byCat[cat].map(i=>`<tr><td>${i.desc}</td><td class="ph">${i.vendor}</td><td>${i.qty}</td><td style="text-align:right">${fmt(i.cost*i.qty)}</td></tr>`).join('')}</table>`).join('')}
+    ${e.labour.length?`<h2>Labour & Crew</h2><table><tr><th>Role</th><th>Rate / hr</th><th>Hours</th><th style="text-align:right">Cost</th></tr>${e.labour.map(l=>`<tr><td>${l.name}</td><td>${fmt(l.rate)}</td><td>${l.hours}</td><td style="text-align:right">${fmt(l.rate*l.hours)}</td></tr>`).join('')}</table>`:''}
+    ${e.designs.length?`<h2>Designs & Concepts</h2><div class="imgrow">${e.designs.slice(0,4).map(d=>`<div><img src="${d.img}"><div class="ph" style="font-size:11px;margin-top:3px">${d.type}: ${d.label}</div></div>`).join('')}</div>`:''}
+    <h2>Investment Summary</h2>
+    ${vs?`<div class="pbr"><span>Vendor & production costs</span><span>${fmt(vs)}</span></div>`:''}
+    ${ls?`<div class="pbr"><span>Labour & crew</span><span>${fmt(ls)}</span></div>`:''}
+    ${(ls+vs)>0?`<div class="pbr" style="border-top:1px solid #eee;padding-top:8px"><span><b>Total cost base</b></span><span><b>${fmt(q.sub)}</b></span></div>`:''}
+    <div class="pbr"><span>Project margin (${p.marginPct}%)</span><span>${fmt(q.margin)}</span></div>
+    <div class="pbr"><span>Management fee (${p.mgmtFeePct}%)</span><span>${fmt(q.mgmt)}</span></div>
+    ${q.discount?`<div class="pbr"><span>Discount (${p.discountPct}%)</span><span>-${fmt(q.discount)}</span></div>`:''}
+    <div class="pbr"><span>Net (excl. VAT)</span><span>${fmt(q.net)}</span></div>
+    <div class="pbr"><span>VAT (${p.vatPct}%)</span><span>${fmt(q.vat)}</span></div>
+    <div class="pbr t"><span>Total (incl. VAT)</span><span>${fmt(q.total)}</span></div>
+    ${docTerms('quoteTerms')}
+  </div>`);
+}
+function acceptQuote(){
+  const e=E(),q=quoteCalc();
+  e.status='Contracted';
+  if(!e.triple.length){e.quote.forEach(i=>e.triple.push({id:uid(),item:i.desc,scope:i.cost*i.qty,po:i.cost*i.qty,invoice:0}));}
+  e.scope=q.net;save();
+  const ref='C-'+e.id.toUpperCase()+'-'+new Date().getFullYear();
+  showDoc(`<div class="paper">
+    ${docHeader('EVENT SERVICES CONTRACT',ref)}
+    <h2>Parties</h2>
+    <p><b>Service Provider:</b> ${DB.org.name||'Your Company'}</p>
+    ${DB.org.address?`<p style="color:#555;font-size:12px;margin-top:-8px">${DB.org.address.replace(/\n/g,', ')}</p>`:''}
+    <p><b>Client:</b> ${DB.org.client||'Client'}</p>
+    <h2>Scope of Work</h2>
+    <p>Delivery of <b>${e.name}</b> at ${e.venue} on ${e.dates}, per accepted quotation, including venue, production, staging, decor, catering, transport and crew as specified.</p>
+    <h2>Contract Value</h2>
+    <div class="pbr"><span>Net (excl. VAT)</span><span>${fmt(q.net)}</span></div>
+    <div class="pbr"><span>VAT (${e.pricing.vatPct}%)</span><span>${fmt(q.vat)}</span></div>
+    <div class="pbr t"><span>Total contract value</span><span>${fmt(q.total)}</span></div>
+    <h2>Payment Schedule</h2>
+    <table><tr><th>Milestone</th><th>%</th><th style="text-align:right">Amount</th></tr>
+    ${e.milestones.map(m=>`<tr><td>${m.label}</td><td>${m.pct}%</td><td style="text-align:right">${fmt(q.total*m.pct/100)}</td></tr>`).join('')}</table>
+    <h2>Financial Workflow & Audit Trail</h2>
+    <p>All vendor purchase orders are issued against this contract value. Each PO and invoice is reconciled via Triple-Match accounting; variances exceeding 5% require Event Director approval and are logged to an immutable audit trail.</p>
+    <div class="sig"><div>${DB.org.name||'Service Provider'} · Date</div><div>${DB.org.client||'Client'} · Date</div></div>
+    ${docTerms('contractTerms')}
+  </div>`);
+  setTimeout(()=>renderAdmin(),50);
+}
+
+function genInvoice(id){
+  const e=E(),q=quoteCalc(),m=e.milestones.find(x=>x.id===id);
+  if(m.status==='Pending'){m.status='Invoiced';save();}
+  const amt=q.total*m.pct/100,net=amt/(1+(e.pricing.vatPct/100)),vat=amt-net;
+  const ref='INV-'+e.id.toUpperCase()+'-'+Date.now().toString(36).toUpperCase();
+  showDoc(`<div class="paper">
+    ${docHeader('TAX INVOICE',ref)}
+    <h2>Bill To</h2>
+    <p><b>${DB.org.client||'Client'}</b></p>
+    <h2>${m.label} — ${e.name}</h2>
+    <table><tr><th>Description</th><th style="text-align:right">Amount (excl. VAT)</th></tr>
+    <tr><td>${m.label} — ${m.pct}% of contract value<br><span class="ph">${e.venue} · ${e.dates}</span></td><td style="text-align:right">${fmt(net)}</td></tr></table>
+    <div style="margin-top:12px">
+      <div class="pbr"><span>Net (excl. VAT)</span><span>${fmt(net)}</span></div>
+      <div class="pbr"><span>VAT (${e.pricing.vatPct}%)</span><span>${fmt(vat)}</span></div>
+      <div class="pbr t"><span>Amount due</span><span>${fmt(amt)}</span></div>
+    </div>
+    ${DB.org.banking?`<div style="margin-top:18px;padding:12px 14px;background:#f8f8f8;border-radius:8px;font-size:12px"><b>Banking details:</b><br>${DB.org.banking.replace(/\n/g,'<br>')}</div>`:''}
+    ${docTerms('invoiceTerms')}
+  </div>`);
+  setTimeout(()=>renderAdmin(),50);
+}
+
+function genPO(vendor,desc,amount){
+  const e=E();
+  const ref='PO-'+e.id.toUpperCase()+'-'+Date.now().toString(36).toUpperCase();
+  const net=amount,vat=net*(e.pricing.vatPct/100),total=net+vat;
+  showDoc(`<div class="paper">
+    ${docHeader('PURCHASE ORDER',ref)}
+    <h2>Supplier</h2>
+    <p><b>${vendor}</b></p>
+    <h2>Order Details — ${e.name}</h2>
+    <table><tr><th>Description</th><th style="text-align:right">Amount (excl. VAT)</th></tr>
+    <tr><td>${desc}<br><span class="ph">${e.venue} · ${e.dates}</span></td><td style="text-align:right">${fmt(net)}</td></tr></table>
+    <div style="margin-top:12px">
+      <div class="pbr"><span>Net (excl. VAT)</span><span>${fmt(net)}</span></div>
+      <div class="pbr"><span>VAT (${e.pricing.vatPct}%)</span><span>${fmt(vat)}</span></div>
+      <div class="pbr t"><span>PO value (incl. VAT)</span><span>${fmt(total)}</span></div>
+    </div>
+    <div style="margin-top:16px;padding:12px 14px;background:#f8f8f8;border-radius:8px;font-size:12px"><b>Issued by:</b> ${DB.org.name||'Your Company'}${DB.org.vatNo?'  ·  VAT: '+DB.org.vatNo:''}</div>
+    ${docTerms('poTerms')}
+  </div>`);
+}
 
 /* ═══ CHAT ══════════════════════════════════════════════════ */
 const KB=[
