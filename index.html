@@ -6,476 +6,583 @@
 <title>EventOps — ERP</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#070912;--bg2:#0c1020;--panel:#10142a;--panel2:#161b36;--line:rgba(255,255,255,.08);--txt:#eef1f8;--muted:#9aa3bd;--accent:#6d6bff;--accent2:#22d3ee;--good:#34d399;--bad:#fb7185;--grad:linear-gradient(120deg,#6d6bff,#22d3ee);}
+:root{--bg:#070912;--bg2:#0c1020;--panel:#10142a;--panel2:#161b36;--line:rgba(255,255,255,.08);--txt:#eef1f8;--muted:#9aa3bd;--accent:#6d6bff;--accent2:#22d3ee;--good:#34d399;--bad:#fb7185;--warn:#fbbf24;--grad:linear-gradient(120deg,#6d6bff,#22d3ee);}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--txt);font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;font-size:14px;min-height:100vh}
-button{font-family:inherit;cursor:pointer}input,select,textarea{font-family:inherit}
+html,body{height:100%}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;font-size:14px;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.wrap{max-width:960px;margin:0 auto;padding:24px}
-.center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px}
-.box{max-width:420px;width:100%}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.2rem;margin-bottom:6px}
-.brand .m{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;font-size:15px;color:#fff;flex-shrink:0}
-.ipt{background:var(--bg2);border:1px solid var(--line);color:var(--txt);padding:10px 12px;border-radius:9px;width:100%;font-size:.9rem;margin-bottom:10px}
-.ipt:focus{outline:none;border-color:var(--accent)}
-label.fl{font-size:.78rem;color:var(--muted);display:block;margin-bottom:5px}
-.btn{padding:10px 18px;border-radius:10px;font-weight:600;font-size:.88rem;border:none;transition:.2s;cursor:pointer}
-.btn-p{background:var(--grad);color:#fff;width:100%}.btn-p:hover{filter:brightness(1.1)}
+
+/* ── TOP BAR ─────────────────────────────────────────────── */
+.topbar{height:54px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:10}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.05rem}
+.brand .m{width:28px;height:28px;border-radius:8px;background:var(--grad);display:grid;place-items:center;font-size:13px;color:#fff;flex-shrink:0}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn{padding:7px 14px;border-radius:9px;font-weight:600;font-size:.82rem;border:none;transition:.15s;cursor:pointer;white-space:nowrap}
+.btn-p{background:var(--grad);color:#fff}.btn-p:hover{filter:brightness(1.1)}
 .btn-g{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}.btn-g:hover{background:#1d2342}
-.btn-sm{padding:6px 12px;font-size:.8rem;border-radius:8px}
-.row{display:flex;gap:8px}.row .ipt{margin-bottom:0}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-table{width:100%;border-collapse:collapse;font-size:.88rem}
-th{text-align:left;color:var(--muted);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding:9px 10px;border-bottom:1px solid var(--line)}
-td{padding:10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
-tr:last-child td{border-bottom:none}
-.ev{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;cursor:pointer;background:var(--bg2);transition:.15s}
-.ev:hover{border-color:var(--accent)}.ev.sel{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
-.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:600}
+.btn-bad{background:rgba(251,113,133,.15);color:var(--bad);border:1px solid rgba(251,113,133,.2)}.btn-bad:hover{background:rgba(251,113,133,.25)}
+.demo-chip{background:linear-gradient(90deg,rgba(109,107,255,.2),rgba(34,211,238,.15));border:1px solid rgba(109,107,255,.4);border-radius:20px;padding:3px 10px;font-size:.75rem;color:var(--accent2);font-weight:600}
+
+/* ── MAIN LAYOUT ─────────────────────────────────────────── */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.sidebar{width:260px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);flex-shrink:0}
+.sidebar-head h3{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+.add-event-form{display:flex;flex-direction:column;gap:6px}
+.ipt{background:var(--panel);border:1px solid var(--line);color:var(--txt);padding:8px 10px;border-radius:8px;width:100%;font-size:.83rem}
+.ipt:focus{outline:none;border-color:var(--accent)}
+.ipt::placeholder{color:var(--muted)}
+.btn-add-event{background:var(--grad);color:#fff;border:none;border-radius:8px;padding:8px;font-weight:600;font-size:.82rem;width:100%;cursor:pointer}
+.btn-add-event:hover{filter:brightness(1.1)}
+.events-list{flex:1;overflow-y:auto;padding:10px 10px}
+.events-list::-webkit-scrollbar{width:4px}
+.events-list::-webkit-scrollbar-track{background:transparent}
+.events-list::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+.ev-item{padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:.15s;background:var(--panel)}
+.ev-item:hover{border-color:var(--accent);background:var(--panel2)}
+.ev-item.sel{border-color:var(--accent);background:var(--panel2);box-shadow:inset 3px 0 0 var(--accent)}
+.ev-name{font-weight:700;font-size:.88rem;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-meta{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-footer{display:flex;justify-content:space-between;align-items:center;margin-top:5px}
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:.68rem;font-weight:700}
 .badge-confirmed{background:rgba(52,211,153,.15);color:var(--good)}
 .badge-draft{background:rgba(155,163,189,.1);color:var(--muted)}
-.x{background:none;border:none;color:var(--bad);font-size:.95rem;cursor:pointer;padding:2px 6px;border-radius:5px}
-.x:hover{background:rgba(251,113,133,.1)}
-.err{color:var(--bad);font-size:.82rem;margin-bottom:10px;min-height:18px}
-.muted{color:var(--muted)}.empty{color:var(--muted);text-align:center;padding:24px}
-.br{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}.br:last-child{border:none}
-.br.tot{border-top:2px solid var(--accent);font-weight:800;font-size:1.1rem;margin-top:6px;padding-top:12px}
-.note{font-size:.8rem;color:var(--muted);background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:14px}
-code{background:var(--bg2);padding:2px 6px;border-radius:5px;font-size:.85em}
-.demo-banner{background:linear-gradient(90deg,rgba(109,107,255,.15),rgba(34,211,238,.1));border:1px solid rgba(109,107,255,.3);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:.82rem;display:flex;align-items:center;gap:8px}
+.badge-invoiced{background:rgba(251,191,36,.15);color:var(--warn)}
+.badge-paid{background:rgba(52,211,153,.2);color:var(--good)}
+.x{background:none;border:none;color:var(--bad);font-size:.8rem;cursor:pointer;padding:2px 5px;border-radius:4px;opacity:.6}
+.x:hover{opacity:1;background:rgba(251,113,133,.1)}
+.empty-events{padding:20px 12px;text-align:center;color:var(--muted);font-size:.82rem;line-height:1.6}
+.empty-events .arrow{font-size:1.4rem;margin-bottom:8px;display:block}
 
-/* ── WIZARD ────────────────────────────── */
-.wz-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center}
-.wz-box{background:var(--panel);border:1px solid var(--line);border-radius:20px;width:520px;max-width:95vw;overflow:hidden}
-.wz-header{background:var(--grad);padding:28px 28px 22px;position:relative}
-.wz-header h2{color:#fff;font-size:1.4rem;font-weight:800;margin-bottom:4px}
-.wz-header p{color:rgba(255,255,255,.8);font-size:.88rem}
-.wz-step-dots{display:flex;gap:6px;margin-top:14px}
-.wz-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);transition:.3s}
-.wz-dot.active{background:#fff;width:24px;border-radius:4px}
-.wz-body{padding:24px 28px}
-.wz-body h3{font-size:1rem;font-weight:700;margin-bottom:8px}
-.wz-body p{color:var(--muted);font-size:.88rem;line-height:1.6;margin-bottom:12px}
-.wz-feature{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
-.wz-feature:last-child{border:none}
-.wz-icon{width:36px;height:36px;border-radius:10px;background:var(--bg2);display:grid;place-items:center;font-size:18px;flex-shrink:0}
-.wz-footer{padding:16px 28px 24px;display:flex;justify-content:space-between;align-items:center}
-.wz-progress{font-size:.78rem;color:var(--muted)}
-.wz-btns{display:flex;gap:8px}
-.wz-skip{background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer}
+/* ── MAIN PANEL ──────────────────────────────────────────── */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.main::-webkit-scrollbar{width:5px}
+.main::-webkit-scrollbar-track{background:transparent}
+.main::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+.main-inner{padding:20px 24px;flex:1}
+
+/* ── EMPTY STATE ─────────────────────────────────────────── */
+.empty-main{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:12px;padding:40px}
+.empty-main .icon{font-size:3rem;margin-bottom:4px}
+.empty-main h2{font-size:1.1rem;font-weight:700}
+.empty-main p{color:var(--muted);font-size:.88rem;max-width:320px;line-height:1.6}
+.arrow-left{font-size:1.2rem;color:var(--accent2)}
+
+/* ── QUOTATION AREA ──────────────────────────────────────── */
+.q-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.q-title{font-size:1rem;font-weight:800}
+.q-meta{font-size:.78rem;color:var(--muted)}
+.status-sel{background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:5px 10px;border-radius:8px;font-size:.8rem;cursor:pointer;outline:none}
+.add-line-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
+.add-line-form .ipt{margin:0;flex:1;min-width:110px}
+.fl{font-size:.72rem;color:var(--muted);display:block;margin-bottom:4px}
+.field-wrap{display:flex;flex-direction:column;flex:1;min-width:100px}
+.field-wrap.sm{flex:0 0 70px;min-width:70px}
+.field-wrap.md{flex:0 0 110px;min-width:110px}
+.btn-add-line{background:var(--grad);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:.83rem;font-weight:600;cursor:pointer;white-space:nowrap;align-self:flex-end}
+.btn-add-line:hover{filter:brightness(1.1)}
+table{width:100%;border-collapse:collapse;font-size:.84rem;background:var(--panel);border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.totals{margin-left:auto;max-width:320px;margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.br{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:.85rem}
+.br:last-child{border:none}
+.br.tot{border-top:2px solid var(--accent);font-weight:800;font-size:1.05rem;margin-top:4px;padding-top:12px}
+.no-items{color:var(--muted);text-align:center;padding:32px;font-size:.85rem}
+
+/* ── AUTH ────────────────────────────────────────────────── */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+.auth-box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px;width:100%;max-width:400px}
+.err-msg{color:var(--bad);font-size:.82rem;margin-bottom:10px;min-height:18px}
+
+/* ── WIZARD ──────────────────────────────────────────────── */
+.wz-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center}
+.wz-box{background:var(--panel);border:1px solid var(--line);border-radius:20px;width:500px;max-width:94vw;overflow:hidden}
+.wz-head{background:var(--grad);padding:26px 28px 18px}
+.wz-head h2{color:#fff;font-size:1.25rem;font-weight:800;margin-bottom:3px}
+.wz-head p{color:rgba(255,255,255,.8);font-size:.85rem}
+.wz-dots{display:flex;gap:5px;margin-top:12px}
+.wz-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35);transition:.3s}
+.wz-dot.on{background:#fff;width:20px;border-radius:4px}
+.wz-body{padding:22px 28px}
+.wz-body h3{font-size:.95rem;font-weight:700;margin-bottom:6px}
+.wz-body p{color:var(--muted);font-size:.85rem;line-height:1.6;margin-bottom:10px}
+.wz-feat{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--line)}
+.wz-feat:last-child{border:none}
+.wz-icon{width:34px;height:34px;border-radius:9px;background:var(--bg2);display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.wz-foot{padding:14px 28px 22px;display:flex;justify-content:space-between;align-items:center}
+.wz-skip{background:none;border:none;color:var(--muted);font-size:.8rem;cursor:pointer}
 .wz-skip:hover{color:var(--txt)}
+.wz-btns{display:flex;gap:8px}
 
-/* ── CHAT ────────────────────────────── */
-.chat-btn{position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:var(--grad);border:none;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 24px rgba(109,107,255,.4);z-index:900;transition:.2s;display:flex;align-items:center;justify-content:center}
-.chat-btn:hover{transform:scale(1.08)}
-.chat-panel{position:fixed;bottom:90px;right:24px;width:360px;max-width:calc(100vw - 32px);background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.5);z-index:900;display:flex;flex-direction:column;overflow:hidden;transition:.25s;transform-origin:bottom right}
+/* ── CHAT ────────────────────────────────────────────────── */
+.chat-fab{position:fixed;bottom:22px;right:22px;width:52px;height:52px;border-radius:50%;background:var(--grad);border:none;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(109,107,255,.45);z-index:800;display:none;align-items:center;justify-content:center;transition:.2s}
+.chat-fab:hover{transform:scale(1.08)}
+.chat-panel{position:fixed;bottom:84px;right:22px;width:340px;max-width:calc(100vw - 28px);background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.55);z-index:800;display:flex;flex-direction:column;overflow:hidden;transition:.2s;transform-origin:bottom right}
 .chat-panel.hidden{transform:scale(.85);opacity:0;pointer-events:none}
-.chat-head{background:var(--grad);padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
-.chat-head span{color:#fff;font-weight:700;font-size:.95rem}
-.chat-close{background:none;border:none;color:rgba(255,255,255,.8);cursor:pointer;font-size:18px;line-height:1}
-.chat-messages{flex:1;height:300px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-.msg{max-width:88%;padding:9px 13px;border-radius:14px;font-size:.85rem;line-height:1.5}
-.msg.bot{background:var(--panel2);border-bottom-left-radius:4px;align-self:flex-start}
-.msg.user{background:var(--accent);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
-.msg.typing span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite}
+.chat-head{background:var(--grad);padding:13px 16px;display:flex;justify-content:space-between;align-items:center}
+.chat-head span{color:#fff;font-weight:700;font-size:.9rem}
+.chat-close{background:none;border:none;color:rgba(255,255,255,.85);cursor:pointer;font-size:16px}
+.chat-msgs{height:280px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.chat-msgs::-webkit-scrollbar{width:3px}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+.msg{max-width:90%;padding:8px 12px;border-radius:13px;font-size:.83rem;line-height:1.5}
+.msg.bot{background:var(--panel2);border-bottom-left-radius:3px;align-self:flex-start}
+.msg.user{background:var(--accent);color:#fff;border-bottom-right-radius:3px;align-self:flex-end}
+.msg.typing span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;margin:0 1px}
 .msg.typing span:nth-child(2){animation-delay:.2s}
 .msg.typing span:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
-.chat-input-row{padding:10px 12px;border-top:1px solid var(--line);display:flex;gap:8px}
-.chat-ipt{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 12px;font-size:.85rem;resize:none;outline:none}
-.chat-send{background:var(--accent);border:none;color:#fff;border-radius:10px;padding:8px 14px;font-size:.85rem;font-weight:600;cursor:pointer}
-.chat-send:hover{filter:brightness(1.1)}
-.chat-chips{padding:0 12px 10px;display:flex;flex-wrap:wrap;gap:6px}
-.chip{background:var(--bg2);border:1px solid var(--line);color:var(--muted);border-radius:20px;padding:4px 10px;font-size:.75rem;cursor:pointer;transition:.15s}
+.chat-chips{padding:0 10px 8px;display:flex;flex-wrap:wrap;gap:5px}
+.chip{background:var(--bg2);border:1px solid var(--line);color:var(--muted);border-radius:20px;padding:3px 9px;font-size:.73rem;cursor:pointer;transition:.15s}
 .chip:hover{border-color:var(--accent);color:var(--txt)}
+.chat-input-row{padding:8px 10px;border-top:1px solid var(--line);display:flex;gap:6px}
+.chat-ipt{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:7px 11px;font-size:.83rem;resize:none;outline:none}
+.chat-ipt:focus{border-color:var(--accent)}
+.chat-send{background:var(--accent);border:none;color:#fff;border-radius:9px;padding:7px 13px;font-size:.82rem;font-weight:600;cursor:pointer}
+.chat-send:hover{filter:brightness(1.1)}
+code{background:var(--bg2);padding:2px 5px;border-radius:4px;font-size:.82em}
 </style>
 </head>
 <body>
-<div id="app"></div>
 
-<!-- ── WIZARD ─────────────────────────── -->
-<div class="wz-overlay" id="wizard" style="display:none">
-  <div class="wz-box">
-    <div class="wz-header">
-      <h2 id="wz-title">Welcome to EventOps ⚡</h2>
-      <p id="wz-sub">Your all-in-one event quoting & management platform</p>
-      <div class="wz-step-dots" id="wz-dots"></div>
-    </div>
-    <div class="wz-body" id="wz-body"></div>
-    <div class="wz-footer">
-      <span class="wz-progress" id="wz-prog"></span>
-      <div class="wz-btns">
-        <button class="wz-skip" onclick="closeWizard()">Skip tour</button>
-        <button class="btn btn-p" style="width:auto;padding:8px 22px" id="wz-next" onclick="wzNext()">Next →</button>
+<!-- AUTH SCREEN (replaces body content) -->
+<div id="auth-screen" style="display:none">
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <div class="brand" style="margin-bottom:18px"><span class="m">⚡</span>EventOps <span class="grad">ERP</span></div>
+      <div class="err-msg" id="auth-err"></div>
+      <label class="fl">Email</label>
+      <input class="ipt" id="auth-email" type="email" placeholder="you@company.co.za" style="margin-bottom:10px">
+      <label class="fl">Password</label>
+      <input class="ipt" id="auth-pass" type="password" placeholder="••••••••" style="margin-bottom:12px">
+      <button class="btn btn-p" id="auth-go" style="width:100%;padding:10px">Sign in</button>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <p style="font-size:.82rem;color:var(--muted)">No account? <a href="#" id="auth-swap" style="color:var(--accent2)">Sign up</a></p>
+        <button class="btn btn-g" style="width:100%;padding:9px" onclick="demoLogin()">🎯 Try Demo — no sign-up needed</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ── CHAT ──────────────────────────── -->
-<button class="chat-btn" onclick="toggleChat()" id="chat-btn" style="display:none" title="EventOps Support">💬</button>
+<!-- APP SHELL -->
+<div id="app-shell" style="display:none;flex-direction:column;height:100%">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand"><span class="m">⚡</span>EventOps <span class="grad">ERP</span></div>
+    <span class="demo-chip" id="demo-chip" style="display:none">🎯 Demo mode</span>
+    <div class="topbar-right">
+      <button class="btn btn-g" onclick="showWizard()">? Tour</button>
+      <button class="btn btn-bad" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+
+  <!-- LAYOUT -->
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-head">
+        <h3>Events</h3>
+        <div class="add-event-form">
+          <input class="ipt" id="ev_name" placeholder="Event name *" autocomplete="off">
+          <input class="ipt" id="ev_venue" placeholder="Venue" autocomplete="off">
+          <input class="ipt" id="ev_dates" placeholder="Dates" autocomplete="off">
+          <button class="btn-add-event" onclick="addEvent()">+ Create Event</button>
+        </div>
+      </div>
+      <div class="events-list" id="events-list">
+        <div class="empty-events"><span class="arrow">↑</span>Fill in the form above and click <b>Create Event</b> to get started.</div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main" id="main">
+      <div class="main-inner">
+        <div class="empty-main">
+          <div class="icon">📋</div>
+          <h2>No event selected</h2>
+          <p>Create an event using the panel on the left, then click it to open its quotation.</p>
+          <p class="arrow-left">← Start there</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WIZARD -->
+<div class="wz-overlay" id="wizard" style="display:none">
+  <div class="wz-box">
+    <div class="wz-head">
+      <h2 id="wz-title"></h2>
+      <p id="wz-sub"></p>
+      <div class="wz-dots" id="wz-dots"></div>
+    </div>
+    <div class="wz-body" id="wz-body"></div>
+    <div class="wz-foot">
+      <span style="font-size:.76rem;color:var(--muted)" id="wz-prog"></span>
+      <div class="wz-btns">
+        <button class="wz-skip" onclick="closeWizard()">Skip tour</button>
+        <button class="btn btn-p" id="wz-next" onclick="wzNext()">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT FAB -->
+<button class="chat-fab" id="chat-fab" onclick="toggleChat()">💬</button>
 <div class="chat-panel hidden" id="chat-panel">
   <div class="chat-head">
     <span>⚡ EventOps Support</span>
     <button class="chat-close" onclick="toggleChat()">✕</button>
   </div>
-  <div class="chat-messages" id="chat-msgs"></div>
+  <div class="chat-msgs" id="chat-msgs"></div>
   <div class="chat-chips" id="chat-chips"></div>
   <div class="chat-input-row">
-    <textarea class="chat-ipt" id="chat-ipt" rows="1" placeholder="Ask anything…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+    <textarea class="chat-ipt" id="chat-ipt" rows="1" placeholder="Ask anything…"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
     <button class="chat-send" onclick="sendChat()">Send</button>
   </div>
 </div>
 
 <script>
-/* ═══ CONFIG ═══════════════════════════════════════════════════════ */
-const SUPABASE_URL = "https://awbtpgugmzitjqovlewr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3YnRwZ3VnbXppdGpxb3ZsZXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTkzMDYsImV4cCI6MjA5NzQzNTMwNn0.0SJMcy-B8tfoJHFDVwz4wQPuA03IU5NFWMBKe1_XNn0";
-const DEMO_EMAIL = "demo@eventops.app";
-const DEMO_PASS  = "Demo1234!";
-/* ════════════════════════════════════════════════════════════════════ */
+/* ═══ CONFIG ══════════════════════════════════════════════ */
+const SUPABASE_URL     = "https://awbtpgugmzitjqovlewr.supabase.co";
+const SUPABASE_ANON_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3YnRwZ3VnbXppdGpxb3ZsZXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTkzMDYsImV4cCI6MjA5NzQzNTMwNn0.0SJMcy-B8tfoJHFDVwz4wQPuA03IU5NFWMBKe1_XNn0";
+const DEMO_EMAIL       = "demo@eventops.app";
+const DEMO_PASS        = "Demo1234!";
+/* ═════════════════════════════════════════════════════════ */
 
 const fmt = n => 'R ' + Math.round(n||0).toLocaleString('en-ZA');
-let sb = null, currentEvent = null, events = [], items = [];
-function el(){ return document.getElementById('app'); }
+let sb, currentEvent = null, events = [], items = [], isDemo = false;
 
-/* ─── INIT ────────────────────────────────────────────────────────── */
+/* ── INIT ──────────────────────────────────────────────── */
 function init(){
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  sb.auth.getSession().then(({data}) => { data.session ? loadApp() : authScreen(); });
-  sb.auth.onAuthStateChange((_e, session) => { session ? loadApp() : authScreen(); });
+  sb.auth.getSession().then(({data}) => data.session ? showApp(data.session.user) : showAuth());
+  sb.auth.onAuthStateChange((_e, session) => session ? showApp(session.user) : showAuth());
 }
 
-/* ─── AUTH ────────────────────────────────────────────────────────── */
-function authScreen(mode='in'){
-  hideChatAndSupport();
-  el().innerHTML = `<div class="center"><div class="card box">
-    <div class="brand"><span class="m">⚡</span>EventOps <span class="grad">ERP</span></div>
-    <p class="muted" style="margin-bottom:16px">${mode==='in'?'Sign in to your workspace.':'Create your account.'}</p>
-    <div class="err" id="err"></div>
-    <label class="fl">Email</label><input class="ipt" id="email" type="email" placeholder="you@company.co.za">
-    <label class="fl">Password</label><input class="ipt" id="pass" type="password" placeholder="••••••••">
-    <button class="btn btn-p" id="go">${mode==='in'?'Sign in':'Sign up'}</button>
-    <div style="margin-top:14px;text-align:center">
-      <p class="muted" style="font-size:.85rem;margin-bottom:8px">${mode==='in'?'No account?':'Have an account?'} <a href="#" id="swap" style="color:var(--accent2)">${mode==='in'?'Sign up':'Sign in'}</a></p>
-      ${mode==='in'?`<button class="btn btn-g btn-sm" onclick="demoLogin()" style="width:100%;margin-top:4px">🎯 Try Demo (no sign-up needed)</button>`:''}
-    </div>
-  </div></div>`;
-  document.getElementById('swap').onclick = e => { e.preventDefault(); authScreen(mode==='in'?'up':'in'); };
-  document.getElementById('go').onclick = async () => {
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('pass').value;
-    const err = document.getElementById('err'); err.textContent = '';
-    try {
-      const fn = mode==='in' ? sb.auth.signInWithPassword({email,password}) : sb.auth.signUp({email,password});
-      const {error} = await fn; if(error) throw error;
-      if(mode==='up') err.textContent = 'Account created! Check your inbox if confirmation is enabled.';
-    } catch(e){ err.textContent = e.message || 'Something went wrong.'; }
-  };
+/* ── AUTH SCREEN ───────────────────────────────────────── */
+let authMode = 'in';
+function showAuth(){
+  document.getElementById('auth-screen').style.display = 'block';
+  document.getElementById('app-shell').style.display   = 'none';
+  document.getElementById('chat-fab').style.display    = 'none';
+  authMode = 'in';
+  document.getElementById('auth-go').textContent = 'Sign in';
+  document.getElementById('auth-swap').textContent = 'Sign up';
 }
+
+document.getElementById('auth-swap').onclick = e => {
+  e.preventDefault();
+  authMode = authMode === 'in' ? 'up' : 'in';
+  document.getElementById('auth-go').textContent   = authMode === 'in' ? 'Sign in' : 'Sign up';
+  document.getElementById('auth-swap').textContent = authMode === 'in' ? 'Sign up' : 'Sign in';
+  document.getElementById('auth-err').textContent  = '';
+};
+
+document.getElementById('auth-go').onclick = async () => {
+  const email    = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-pass').value;
+  const errEl    = document.getElementById('auth-err');
+  errEl.textContent = '';
+  if(!email || !password){ errEl.textContent = 'Enter your email and password.'; return; }
+  const fn = authMode === 'in'
+    ? sb.auth.signInWithPassword({email, password})
+    : sb.auth.signUp({email, password});
+  const {error} = await fn;
+  if(error) errEl.textContent = error.message;
+  else if(authMode === 'up') errEl.textContent = 'Account created! Check inbox if confirmation is on.';
+};
 
 async function demoLogin(){
-  const err = document.getElementById('err'); err.textContent = 'Signing in to demo…';
+  document.getElementById('auth-err').textContent = 'Signing in to demo…';
   const {error} = await sb.auth.signInWithPassword({email: DEMO_EMAIL, password: DEMO_PASS});
-  if(error) err.textContent = error.message;
+  if(error) document.getElementById('auth-err').textContent = error.message;
 }
 
-/* ─── LOAD APP ────────────────────────────────────────────────────── */
-async function loadApp(){
+async function signOut(){
+  await sb.auth.signOut();
+  currentEvent = null; events = []; items = [];
+}
+
+/* ── SHOW APP ──────────────────────────────────────────── */
+async function showApp(user){
+  isDemo = user.email === DEMO_EMAIL;
+  document.getElementById('auth-screen').style.display      = 'none';
+  document.getElementById('app-shell').style.display        = 'flex';
+  document.getElementById('chat-fab').style.display         = 'flex';
+  document.getElementById('demo-chip').style.display        = isDemo ? 'inline-block' : 'none';
+  await loadEvents();
+  if(!localStorage.getItem('eo_wz_done')) showWizard();
+}
+
+/* ── DATA ──────────────────────────────────────────────── */
+async function loadEvents(){
   const {data, error} = await sb.from('events').select('*').order('created_at', {ascending:false});
-  if(error){
-    el().innerHTML = `<div class="wrap"><div class="card"><div class="err">${error.message}</div>
-    <p class="muted">Check the Table Editor — did the SQL schema run?</p>
-    <button class="btn btn-g btn-sm" style="margin-top:12px" onclick="sb.auth.signOut()">Sign out</button></div></div>`;
-    return;
-  }
-  const {data:{user}} = await sb.auth.getUser();
-  const isDemo = user?.email === DEMO_EMAIL;
-
+  if(error){ alert('Error loading events: ' + error.message); return; }
   events = data || [];
-  if(!currentEvent || !events.find(e=>e.id===currentEvent))
-    currentEvent = events[0] ? events[0].id : null;
-  if(currentEvent) await loadItems(); else items = [];
-  renderApp(isDemo);
-
-  // show wizard on first visit
-  if(!localStorage.getItem('eo_wizard_done')) showWizard();
-  showChatAndSupport();
+  if(currentEvent && !events.find(e => e.id === currentEvent)) currentEvent = null;
+  renderSidebar();
+  if(currentEvent) await loadAndRenderQuote();
+  else renderMainEmpty();
 }
 
-async function loadItems(){
+async function loadAndRenderQuote(){
   const {data} = await sb.from('quote_items').select('*').eq('event_id', currentEvent).order('created_at');
   items = data || [];
+  renderMain();
 }
 
-function calc(){
-  const e = events.find(x=>x.id===currentEvent);
-  if(!e) return {sub:0,total:0};
-  const sub = items.reduce((s,i) => s + i.unit_cost*i.qty, 0);
-  const margin = sub*(e.margin_pct/100), mgmt = sub*(e.mgmt_fee_pct/100);
-  const pre = sub+margin+mgmt, disc = pre*(e.discount_pct/100), net = pre-disc, vat = net*(e.vat_pct/100);
-  return {sub,margin,mgmt,disc,net,vat,total:net+vat,e};
+/* ── SIDEBAR ───────────────────────────────────────────── */
+function renderSidebar(){
+  const list = document.getElementById('events-list');
+  if(!events.length){
+    list.innerHTML = `<div class="empty-events"><span class="arrow">↑</span>Fill in the form above and click <b>Create Event</b> to get started.</div>`;
+    return;
+  }
+  list.innerHTML = events.map(e => `
+    <div class="ev-item ${e.id===currentEvent?'sel':''}" onclick="selectEvent('${e.id}')">
+      <div class="ev-name">${e.name}</div>
+      <div class="ev-meta">${[e.venue, e.dates].filter(Boolean).join(' · ')|| '—'}</div>
+      <div class="ev-footer">
+        <span class="badge badge-${(e.status||'draft').toLowerCase()}">${e.status||'Draft'}</span>
+        <button class="x" onclick="event.stopPropagation();delEvent('${e.id}')">✕</button>
+      </div>
+    </div>`).join('');
 }
 
-/* ─── RENDER ──────────────────────────────────────────────────────── */
-function renderApp(isDemo){
-  const c = calc();
-  el().innerHTML = `<div class="wrap">
-    <div class="top">
-      <div class="brand"><span class="m">⚡</span>EventOps <span class="grad">ERP</span></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn btn-g btn-sm" onclick="showWizard()">? Tour</button>
-        <button class="btn btn-g btn-sm" onclick="sb.auth.signOut()">Sign out</button>
+/* ── MAIN AREA ─────────────────────────────────────────── */
+function renderMainEmpty(){
+  document.getElementById('main').innerHTML = `<div class="main-inner"><div class="empty-main">
+    <div class="icon">📋</div>
+    <h2>${events.length ? 'Select an event' : 'Create your first event'}</h2>
+    <p>${events.length
+      ? 'Click an event in the left panel to open its quotation and line items.'
+      : 'Use the panel on the left to create an event, then click it to start building your quotation.'}</p>
+    <p class="arrow-left">← ${events.length ? 'Click an event' : 'Start there'}</p>
+  </div></div>`;
+}
+
+function renderMain(){
+  const e = events.find(x => x.id === currentEvent);
+  if(!e){ renderMainEmpty(); return; }
+  const sub    = items.reduce((s,i) => s + i.unit_cost*i.qty, 0);
+  const margin = sub*(e.margin_pct/100);
+  const mgmt   = sub*(e.mgmt_fee_pct/100);
+  const pre    = sub+margin+mgmt;
+  const disc   = pre*(e.discount_pct/100);
+  const net    = pre-disc;
+  const vat    = net*(e.vat_pct/100);
+  const total  = net+vat;
+
+  document.getElementById('main').innerHTML = `<div class="main-inner">
+    <div class="q-header">
+      <div>
+        <div class="q-title">${e.name}</div>
+        <div class="q-meta">${[e.venue, e.dates].filter(Boolean).join(' · ')}</div>
       </div>
+      <select class="status-sel" onchange="updateStatus('${e.id}',this.value)">
+        ${['Draft','Confirmed','Invoiced','Paid'].map(s=>`<option ${e.status===s?'selected':''}>${s}</option>`).join('')}
+      </select>
     </div>
-    ${isDemo ? `<div class="demo-banner">🎯 <span><b>Demo mode</b> — pre-loaded with sample events & line items. Sign up for your own workspace.</span></div>` : ''}
-    <div class="card">
-      <div class="top" style="margin-bottom:14px"><h3>Events</h3></div>
-      <div class="row" style="margin-bottom:14px">
-        <input class="ipt" id="ev_name" placeholder="Event name">
-        <input class="ipt" id="ev_venue" placeholder="Venue">
-        <input class="ipt" id="ev_dates" placeholder="Dates">
-        <button class="btn btn-g btn-sm" onclick="addEvent()">+ Add</button>
-      </div>
-      ${events.length ? events.map(e=>`
-        <div class="ev ${e.id===currentEvent?'sel':''}" onclick="selectEvent('${e.id}')">
-          <div>
-            <b>${e.name}</b>
-            ${e.venue ? `<span class="muted"> · ${e.venue}</span>`:''}
-            ${e.dates ? `<span class="muted"> · ${e.dates}</span>`:''}
-            <span class="badge badge-${(e.status||'Draft').toLowerCase()}" style="margin-left:8px">${e.status||'Draft'}</span>
-          </div>
-          <button class="x" onclick="event.stopPropagation();delEvent('${e.id}')">✕</button>
-        </div>`).join('') : '<div class="empty">No events yet — add one above.</div>'}
+
+    <div class="add-line-form">
+      <div class="field-wrap"><label class="fl">Category</label><input class="ipt" id="qi_cat" placeholder="e.g. Catering" autocomplete="off"></div>
+      <div class="field-wrap"><label class="fl">Vendor</label><input class="ipt" id="qi_vendor" placeholder="Supplier name" autocomplete="off"></div>
+      <div class="field-wrap" style="flex:2;min-width:150px"><label class="fl">Description</label><input class="ipt" id="qi_desc" placeholder="What is this line?" autocomplete="off"></div>
+      <div class="field-wrap sm"><label class="fl">Qty</label><input class="ipt" id="qi_qty" type="number" value="1" min="1"></div>
+      <div class="field-wrap md"><label class="fl">Unit cost (R)</label><input class="ipt" id="qi_cost" type="number" placeholder="0" min="0"></div>
+      <button class="btn-add-line" onclick="addItem()">+ Add line</button>
     </div>
-    ${currentEvent ? `<div class="card">
-      <div class="top" style="margin-bottom:6px">
-        <h3>Quotation — ${c.e.name}</h3>
-        <div style="display:flex;gap:6px">
-          <select class="ipt" style="width:auto;margin:0;padding:5px 10px;font-size:.8rem" onchange="updateStatus('${c.e.id}',this.value)">
-            ${['Draft','Confirmed','Invoiced','Paid'].map(s=>`<option ${c.e.status===s?'selected':''}>${s}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-      <div class="row" style="margin-bottom:14px;flex-wrap:wrap">
-        <input class="ipt" id="qi_cat" placeholder="Category" style="flex:1;min-width:110px">
-        <input class="ipt" id="qi_vendor" placeholder="Vendor" style="flex:1;min-width:110px">
-        <input class="ipt" id="qi_desc" placeholder="Description" style="flex:2;min-width:150px">
-        <input class="ipt" id="qi_qty" type="number" value="1" style="width:65px">
-        <input class="ipt" id="qi_cost" type="number" placeholder="Unit cost" style="width:110px">
-        <button class="btn btn-g btn-sm" onclick="addItem()">+ Add line</button>
-      </div>
-      <table>
-        <tr><th>Category</th><th>Vendor</th><th>Description</th><th>Qty</th><th>Unit</th><th>Total</th><th></th></tr>
-        ${items.length ? items.map(i=>`
-          <tr>
-            <td>${i.category||''}</td>
-            <td>${i.vendor||''}</td>
-            <td>${i.description||''}</td>
-            <td>${i.qty}</td>
-            <td>${fmt(i.unit_cost)}</td>
-            <td><b>${fmt(i.unit_cost*i.qty)}</b></td>
-            <td><button class="x" onclick="delItem('${i.id}')">✕</button></td>
-          </tr>`).join('') : '<tr><td colspan="7"><div class="empty">No line items yet.</div></td></tr>'}
-      </table>
-      <div style="max-width:340px;margin-left:auto;margin-top:18px">
-        <div class="br"><span class="muted">Subtotal (cost)</span><b>${fmt(c.sub)}</b></div>
-        <div class="br"><span class="muted">+ Margin (${c.e.margin_pct}%)</span><b>${fmt(c.margin)}</b></div>
-        <div class="br"><span class="muted">+ Mgmt fee (${c.e.mgmt_fee_pct}%)</span><b>${fmt(c.mgmt)}</b></div>
-        <div class="br"><span class="muted">− Discount (${c.e.discount_pct}%)</span><b style="color:var(--bad)">-${fmt(c.disc)}</b></div>
-        <div class="br"><span class="muted">+ VAT (${c.e.vat_pct}%)</span><b>${fmt(c.vat)}</b></div>
-        <div class="br tot"><span>Client total</span><span class="grad">${fmt(c.total)}</span></div>
-      </div>
-    </div>` : ''}
-    <div class="note">✓ Live Supabase data secured by row-level security — your events follow you across devices.</div>
+
+    ${items.length ? `
+    <table>
+      <thead><tr><th>Category</th><th>Vendor</th><th>Description</th><th>Qty</th><th>Unit</th><th>Total</th><th></th></tr></thead>
+      <tbody>
+        ${items.map(i=>`<tr>
+          <td>${i.category||'—'}</td>
+          <td>${i.vendor||'—'}</td>
+          <td>${i.description||''}</td>
+          <td>${i.qty}</td>
+          <td>${fmt(i.unit_cost)}</td>
+          <td><b>${fmt(i.unit_cost*i.qty)}</b></td>
+          <td><button class="x" onclick="delItem('${i.id}')">✕</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="totals">
+      <div class="br"><span class="muted" style="color:var(--muted)">Subtotal</span><b>${fmt(sub)}</b></div>
+      <div class="br"><span style="color:var(--muted)">+ Margin (${e.margin_pct}%)</span><b>${fmt(margin)}</b></div>
+      <div class="br"><span style="color:var(--muted)">+ Mgmt fee (${e.mgmt_fee_pct}%)</span><b>${fmt(mgmt)}</b></div>
+      <div class="br"><span style="color:var(--muted)">− Discount (${e.discount_pct}%)</span><b style="color:var(--bad)">-${fmt(disc)}</b></div>
+      <div class="br"><span style="color:var(--muted)">+ VAT (${e.vat_pct}%)</span><b>${fmt(vat)}</b></div>
+      <div class="br tot"><span>Client total</span><span class="grad">${fmt(total)}</span></div>
+    </div>` : `<div class="no-items">No line items yet — use the form above to add your first cost line.</div>`}
   </div>`;
 }
 
-/* ─── EVENT ACTIONS ───────────────────────────────────────────────── */
+/* ── ACTIONS ───────────────────────────────────────────── */
 async function addEvent(){
   const name = document.getElementById('ev_name').value.trim();
-  if(!name) return;
+  if(!name){ document.getElementById('ev_name').focus(); return; }
   const venue = document.getElementById('ev_venue').value.trim();
   const dates = document.getElementById('ev_dates').value.trim();
-  const {error} = await sb.from('events').insert({name,venue,dates});
-  if(error) return alert(error.message);
-  await loadApp();
-}
-async function delEvent(id){
-  if(!confirm('Delete this event and all its line items?')) return;
-  await sb.from('events').delete().eq('id',id);
-  if(currentEvent===id) currentEvent = null;
-  await loadApp();
-}
-async function selectEvent(id){ currentEvent=id; await loadItems(); const {data:{user}}=await sb.auth.getUser(); renderApp(user?.email===DEMO_EMAIL); }
-async function updateStatus(id,status){ await sb.from('events').update({status}).eq('id',id); events=events.map(e=>e.id===id?{...e,status}:e); const {data:{user}}=await sb.auth.getUser(); renderApp(user?.email===DEMO_EMAIL); }
-async function addItem(){
-  const category=document.getElementById('qi_cat').value.trim();
-  const vendor=document.getElementById('qi_vendor').value.trim();
-  const description=document.getElementById('qi_desc').value.trim();
-  const qty=+document.getElementById('qi_qty').value||1;
-  const unit_cost=+document.getElementById('qi_cost').value||0;
-  if(!description&&!vendor) return;
-  const {error}=await sb.from('quote_items').insert({event_id:currentEvent,category,vendor,description,qty,unit_cost});
-  if(error) return alert(error.message);
-  await loadItems(); const {data:{user}}=await sb.auth.getUser(); renderApp(user?.email===DEMO_EMAIL);
-}
-async function delItem(id){
-  await sb.from('quote_items').delete().eq('id',id);
-  await loadItems(); const {data:{user}}=await sb.auth.getUser(); renderApp(user?.email===DEMO_EMAIL);
+  const {data, error} = await sb.from('events').insert({name,venue,dates}).select();
+  if(error){ alert(error.message); return; }
+  document.getElementById('ev_name').value  = '';
+  document.getElementById('ev_venue').value = '';
+  document.getElementById('ev_dates').value = '';
+  if(data?.[0]) currentEvent = data[0].id;
+  await loadEvents();
 }
 
-/* ─── WIZARD ──────────────────────────────────────────────────────── */
-const WZ_STEPS = [
+async function delEvent(id){
+  if(!confirm('Delete this event and all its line items?')) return;
+  await sb.from('events').delete().eq('id', id);
+  if(currentEvent === id){ currentEvent = null; renderMainEmpty(); }
+  await loadEvents();
+}
+
+async function selectEvent(id){
+  currentEvent = id;
+  renderSidebar();
+  await loadAndRenderQuote();
+}
+
+async function updateStatus(id, status){
+  await sb.from('events').update({status}).eq('id', id);
+  events = events.map(e => e.id===id ? {...e, status} : e);
+  renderSidebar();
+}
+
+async function addItem(){
+  const category   = document.getElementById('qi_cat').value.trim();
+  const vendor     = document.getElementById('qi_vendor').value.trim();
+  const description= document.getElementById('qi_desc').value.trim();
+  const qty        = +document.getElementById('qi_qty').value || 1;
+  const unit_cost  = +document.getElementById('qi_cost').value || 0;
+  if(!description && !vendor){ document.getElementById('qi_desc').focus(); return; }
+  const {error} = await sb.from('quote_items').insert({event_id:currentEvent, category, vendor, description, qty, unit_cost});
+  if(error){ alert(error.message); return; }
+  await loadAndRenderQuote();
+}
+
+async function delItem(id){
+  await sb.from('quote_items').delete().eq('id', id);
+  await loadAndRenderQuote();
+}
+
+/* ── WIZARD ────────────────────────────────────────────── */
+const WZ = [
   {
     title:'Welcome to EventOps ⚡',
-    sub:'Your all-in-one event quoting & management platform',
-    body:`<p>EventOps lets you manage multiple events, build accurate quotations, and track financials — all in one place, secured per-user.</p>
-    <div class="wz-feature"><div class="wz-icon">📋</div><div><b>Events panel</b><br><span class="muted" style="font-size:.83rem">Create and switch between multiple events. Each event is completely isolated and private to your account.</span></div></div>
-    <div class="wz-feature"><div class="wz-icon">💰</div><div><b>Live quotations</b><br><span class="muted" style="font-size:.83rem">Add line items and watch margin, management fees, discounts and VAT calculate in real-time.</span></div></div>
-    <div class="wz-feature"><div class="wz-icon">🔒</div><div><b>Your data, always private</b><br><span class="muted" style="font-size:.83rem">Row-level security means only you can see your events — even on shared databases.</span></div></div>`
+    sub:'Your all-in-one event quoting platform',
+    body:`<p>EventOps helps you manage multiple events and build accurate quotations with automatic margin, fee, discount and VAT calculations.</p>
+    <div class="wz-feat"><div class="wz-icon">📋</div><div><b>Events sidebar (left)</b><br><span style="font-size:.8rem;color:var(--muted)">Create and switch between events. Each event is private to your account via row-level security.</span></div></div>
+    <div class="wz-feat"><div class="wz-icon">💰</div><div><b>Quotation panel (right)</b><br><span style="font-size:.8rem;color:var(--muted)">Add cost lines and watch margin, fees, discounts and VAT calculate live.</span></div></div>
+    <div class="wz-feat"><div class="wz-icon">🔒</div><div><b>Your data stays private</b><br><span style="font-size:.8rem;color:var(--muted)">Row-level security ensures only you can see your events, even on a shared database.</span></div></div>`
   },
   {
-    title:'Building a Quotation',
+    title:'Building a Quote',
     sub:'Add line items to generate accurate client pricing',
-    body:`<p>For each event, add all your cost lines — venue, AV, catering, transfers, décor, etc.</p>
-    <div class="wz-feature"><div class="wz-icon">➕</div><div><b>Add line items</b><br><span class="muted" style="font-size:.83rem">Fill in Category, Vendor, Description, Qty and Unit Cost then click <b>+ Add line</b>. The quote updates instantly.</span></div></div>
-    <div class="wz-feature"><div class="wz-icon">📊</div><div><b>Automatic markup</b><br><span class="muted" style="font-size:.83rem">Margin %, Management fee %, Discount % and VAT % are applied automatically. Adjust them per event in the database or future settings panel.</span></div></div>
-    <div class="wz-feature"><div class="wz-icon">🏷</div><div><b>Status tracking</b><br><span class="muted" style="font-size:.83rem">Use the status dropdown (Draft → Confirmed → Invoiced → Paid) to track where each event is in the pipeline.</span></div></div>`
+    body:`<p>Click any event on the left to open its quotation. Then add cost lines using the form at the top of the main panel.</p>
+    <div class="wz-feat"><div class="wz-icon">➕</div><div><b>Fill the form, click Add line</b><br><span style="font-size:.8rem;color:var(--muted)">Category, Vendor, Description, Qty and Unit Cost. The totals update instantly.</span></div></div>
+    <div class="wz-feat"><div class="wz-icon">📊</div><div><b>Automatic markup</b><br><span style="font-size:.8rem;color:var(--muted)">Margin %, Mgmt fee %, Discount % and VAT % are applied per event. Edit defaults in Supabase → Table Editor → events.</span></div></div>
+    <div class="wz-feat"><div class="wz-icon">🏷</div><div><b>Status tracking</b><br><span style="font-size:.8rem;color:var(--muted)">Use the status dropdown (Draft → Confirmed → Invoiced → Paid) at the top of each quotation.</span></div></div>`
   },
   {
     title:'Demo Account',
-    sub:'Explore with real sample data',
-    body:`<p>This platform includes a pre-loaded demo account with three realistic South African events so you can explore every feature immediately.</p>
-    <div class="wz-feature"><div class="wz-icon">🎯</div><div><b>Demo login</b><br><span class="muted" style="font-size:.83rem">Email: <code>demo@eventops.app</code><br>Password: <code>Demo1234!</code></span></div></div>
-    <div class="wz-feature"><div class="wz-icon">🏨</div><div><b>Sample events included</b><br><span class="muted" style="font-size:.83rem">Apex Summit 2025 · Brand Launch Lumix SA · Staff Year-End Gala — each with realistic line items and totals.</span></div></div>
-    <div class="wz-feature"><div class="wz-icon">💬</div><div><b>Need help?</b><br><span class="muted" style="font-size:.83rem">Click the <b>💬</b> button (bottom-right) any time to ask the EventOps AI assistant a question or get troubleshooting help.</span></div></div>`
+    sub:'Explore 3 pre-loaded South African events',
+    body:`<p>Want to see the platform with real data? Log in with the demo account to explore three fully built events.</p>
+    <div class="wz-feat"><div class="wz-icon">🎯</div><div><b>Demo credentials</b><br><span style="font-size:.8rem;color:var(--muted)">Email: <code>demo@eventops.app</code><br>Password: <code>Demo1234!</code><br>Or click <b>Try Demo</b> on the sign-in page.</span></div></div>
+    <div class="wz-feat"><div class="wz-icon">🏨</div><div><b>Sample events</b><br><span style="font-size:.8rem;color:var(--muted)">Apex Summit 2025 · Brand Launch Lumix SA · Staff Year-End Gala — each with realistic vendors and totals.</span></div></div>
+    <div class="wz-feat"><div class="wz-icon">💬</div><div><b>Need help?</b><br><span style="font-size:.8rem;color:var(--muted)">The 💬 button (bottom-right) opens the EventOps AI assistant for instant answers and troubleshooting.</span></div></div>`
   }
 ];
-
 let wzStep = 0;
 function showWizard(){
-  wzStep = 0;
+  wzStep = 0; renderWz();
   document.getElementById('wizard').style.display = 'flex';
-  renderWzStep();
 }
 function closeWizard(){
   document.getElementById('wizard').style.display = 'none';
-  localStorage.setItem('eo_wizard_done','1');
+  localStorage.setItem('eo_wz_done','1');
 }
-function renderWzStep(){
-  const s = WZ_STEPS[wzStep];
+function renderWz(){
+  const s = WZ[wzStep];
   document.getElementById('wz-title').textContent = s.title;
-  document.getElementById('wz-sub').textContent = s.sub;
-  document.getElementById('wz-body').innerHTML = s.body;
-  document.getElementById('wz-prog').textContent = `Step ${wzStep+1} of ${WZ_STEPS.length}`;
-  document.getElementById('wz-next').textContent = wzStep===WZ_STEPS.length-1 ? 'Get started →' : 'Next →';
-  const dots = document.getElementById('wz-dots');
-  dots.innerHTML = WZ_STEPS.map((_,i)=>`<div class="wz-dot${i===wzStep?' active':''}"></div>`).join('');
+  document.getElementById('wz-sub').textContent   = s.sub;
+  document.getElementById('wz-body').innerHTML    = s.body;
+  document.getElementById('wz-prog').textContent  = `${wzStep+1} of ${WZ.length}`;
+  document.getElementById('wz-next').textContent  = wzStep === WZ.length-1 ? 'Get started →' : 'Next →';
+  document.getElementById('wz-dots').innerHTML    = WZ.map((_,i)=>`<div class="wz-dot${i===wzStep?' on':''}"></div>`).join('');
 }
-function wzNext(){
-  if(wzStep < WZ_STEPS.length-1){ wzStep++; renderWzStep(); }
-  else closeWizard();
-}
+function wzNext(){ wzStep < WZ.length-1 ? (wzStep++, renderWz()) : closeWizard(); }
 
-/* ─── CHAT ────────────────────────────────────────────────────────── */
+/* ── CHAT ──────────────────────────────────────────────── */
 const KB = [
-  {k:['add event','create event','new event'],a:'To add an event, fill in the Event name, Venue and Dates fields at the top of the Events panel, then click <b>+ Add</b>. The event appears instantly and you can click it to open its quotation.'},
-  {k:['add line','line item','add item','quote item'],a:'In the Quotation panel, fill in Category, Vendor, Description, Qty and Unit Cost — then click <b>+ Add line</b>. Subtotal and all markups update in real-time.'},
-  {k:['margin','markup','fee','percentage','vat','discount'],a:'Each event has its own Margin %, Management fee %, Discount % and VAT %. These are stored per event and auto-apply to all line items. To change them, update the event row in Supabase → Table Editor → events.'},
-  {k:['status','draft','confirmed','invoiced','paid'],a:'Use the status dropdown above the line-item table to move an event through <b>Draft → Confirmed → Invoiced → Paid</b>. The badge updates immediately across the events list.'},
-  {k:['delete','remove','undo'],a:'Click the <b>✕</b> next to any event or line item to delete it. Note: deleting an event permanently removes all its line items too (cascade delete).'},
-  {k:['demo','sample','test'],a:'The demo account is pre-loaded with three South African events: Apex Summit, Brand Launch Lumix SA, and Staff Year-End Gala — each with realistic vendors and line items. Log in with <b>demo@eventops.app</b> / <b>Demo1234!</b>.'},
-  {k:['sign up','register','account','create account'],a:'Click <b>Sign up</b> on the login screen, enter your email and a password, then submit. If email confirmation is enabled in Supabase, check your inbox. Once confirmed, sign in and your own private workspace is ready.'},
-  {k:['supabase','database','sql','schema','table'],a:'The schema creates three tables: <b>profiles</b>, <b>events</b> and <b>quote_items</b> — all protected by row-level security. Run the SQL block from the file\'s source comment in Supabase → SQL Editor if you\'re self-hosting.'},
-  {k:['error','not working','broken','failed','problem','issue'],a:'Common fixes: (1) Check the Supabase URL and anon key in the CONFIG. (2) Confirm the SQL schema ran — look for the <i>events</i> table in Supabase → Table Editor. (3) Check browser console (F12) for error messages. (4) Make sure RLS policies exist on all three tables.'},
-  {k:['rls','row level','security','permission','access'],a:'Row-Level Security (RLS) is enabled on all tables. Policies restrict each user to only their own rows using <code>auth.uid() = owner_id</code>. If you\'re getting permission errors, check that the policies were created in Supabase → Table Editor → Policies.'},
-  {k:['total','calculation','cost','price','how is'],a:'The client total is calculated as: Subtotal → + Margin % → + Mgmt fee % → − Discount % → + VAT %. The discount is applied on the post-markup pre-VAT amount. All values update live as you add or remove line items.'},
-  {k:['vercel','deploy','hosting','url','domain'],a:'EventOps is deployed on Vercel. Your live URL is <b>eventops-tau.vercel.app</b>. To redeploy after changes, run <code>npx vercel --prod</code> in the eventops folder, or push to the GitHub repo if you set up Git integration in Vercel.'},
-  {k:['export','pdf','download','print'],a:'PDF/export is on the roadmap. For now, you can print the quotation table using Ctrl+P / Cmd+P — the browser print dialog works well for this page. Full export functionality is a planned next module.'},
-  {k:['help','what can you','features','tour','wizard'],a:'I can help with: adding events & line items, understanding the pricing calculations, fixing errors, Supabase setup, account management, and what features are coming. You can also relaunch the tour by clicking the <b>? Tour</b> button in the top-right.'},
+  {k:['add event','create event','new event'],a:'In the <b>left sidebar</b>, fill in the Event name field (required), Venue and Dates, then click <b>Create Event</b>. The event appears in the list and opens automatically so you can start adding line items.'},
+  {k:['add line','line item','add item','cost line','quote item'],a:'Once an event is open, use the <b>form at the top of the main panel</b> — fill in Category, Vendor, Description, Qty and Unit Cost, then click <b>+ Add line</b>. Totals update instantly.'},
+  {k:['margin','markup','fee','percentage','vat','discount','rate'],a:'Each event stores its own Margin %, Management fee %, Discount % and VAT %. They auto-apply to all line items. To change them, go to Supabase → Table Editor → events and edit the row directly.'},
+  {k:['status','draft','confirmed','invoiced','paid'],a:'The <b>status dropdown</b> is top-right of the quotation panel. Change it from Draft → Confirmed → Invoiced → Paid. The badge in the sidebar updates immediately.'},
+  {k:['delete','remove'],a:'Click the <b>✕</b> next to any event (sidebar) or line item (table) to delete it. Deleting an event permanently removes all its line items too.'},
+  {k:['demo','sample','test','example'],a:'The demo has 3 pre-built SA events. Sign in with <b>demo@eventops.app</b> / <b>Demo1234!</b>, or click <b>Try Demo</b> on the login screen.'},
+  {k:['sign up','register','account'],a:'Click <b>Sign up</b> on the login screen. Enter email and password. Once confirmed (check inbox if needed), sign in to access your private workspace.'},
+  {k:['error','not working','broken','failed','problem','issue','blank','empty','nothing'],a:'Common fixes:<br>1. <b>No events?</b> Create one in the left sidebar.<br>2. <b>Can\'t add lines?</b> Click an event first to open it.<br>3. <b>Data errors?</b> Check Supabase → Table Editor for the events table.<br>4. <b>JS errors?</b> Open browser console (F12) and share the error.'},
+  {k:['rls','permission','access','security'],a:'Row-Level Security restricts each user to their own rows. If you see permission errors, check Supabase → Authentication → Policies — the three policies (own profile, own events, own quote_items) must exist.'},
+  {k:['total','calculation','formula','how is','price'],a:'Formula: <b>Subtotal → + Margin% → + Mgmt fee% → − Discount% → + VAT%</b>. Discount applies after markup, before VAT. All values update live.'},
+  {k:['vercel','deploy','host','url','domain'],a:'Your live URL is <b>eventops-tau.vercel.app</b>. To redeploy after code changes, run <code>npx vercel --prod</code> in the eventops folder.'},
+  {k:['export','pdf','print','download'],a:'Use <b>Ctrl+P / Cmd+P</b> to print or save as PDF. Full export is on the roadmap.'},
+  {k:['help','feature','tour','wizard','what can'],a:'Re-launch the tour with the <b>? Tour</b> button (top-right). I can help with: creating events, adding line items, pricing formulas, fixing errors, Supabase setup, and demo credentials.'},
+  {k:['select','click','open','see','view'],a:'To open an event\'s quotation, click on it in the <b>left sidebar</b>. The main panel on the right will load its line items and totals.'},
 ];
+const CHIPS_INIT = ['How do I add an event?','Add line items','Pricing formula','Demo login','Fix an error'];
 
-const CHIPS = ['Add an event','How does pricing work?','Demo account login','Fix an error','What\'s the total formula?'];
-
-let chatHistory = [];
-function showChatAndSupport(){
-  document.getElementById('chat-btn').style.display = 'flex';
-}
-function hideChatAndSupport(){
-  document.getElementById('chat-btn').style.display = 'none';
-  document.getElementById('chat-panel').classList.add('hidden');
-}
+let chatOpen = false, chatStarted = false;
 function toggleChat(){
-  const p = document.getElementById('chat-panel');
-  const open = p.classList.toggle('hidden');
-  if(!open && chatHistory.length===0) initChat();
+  chatOpen = !chatOpen;
+  document.getElementById('chat-panel').classList.toggle('hidden', !chatOpen);
+  if(chatOpen && !chatStarted){ chatStarted=true; initChat(); }
 }
 function initChat(){
-  addBotMsg('Hi! 👋 I\'m the EventOps assistant. I can help you use the platform, fix issues, or explain how the quoting works. What do you need?');
-  renderChips(CHIPS);
+  addBotMsg('Hi! 👋 I\'m the EventOps assistant. Ask me anything about using the platform — adding events, quotations, fixing errors, or how pricing works.');
+  renderChips(CHIPS_INIT);
 }
 function renderChips(chips){
-  document.getElementById('chat-chips').innerHTML = chips.map(c=>`<span class="chip" onclick="chipClick('${c}')">${c}</span>`).join('');
+  document.getElementById('chat-chips').innerHTML = chips.map(c=>`<span class="chip" onclick="chipSend('${c}')">${c}</span>`).join('');
 }
-function chipClick(text){
-  document.getElementById('chat-chips').innerHTML = '';
-  addUserMsg(text);
-  answerChat(text);
-}
-function addBotMsg(html){
+function chipSend(t){ document.getElementById('chat-chips').innerHTML=''; addUserMsg(t); answer(t); }
+function addBotMsg(html){ appendMsg('bot', html); }
+function addUserMsg(t){ appendMsg('user', t, true); }
+function appendMsg(cls, content, isText=false){
   const m = document.createElement('div');
-  m.className='msg bot'; m.innerHTML=html;
+  m.className = 'msg '+cls;
+  if(isText) m.textContent = content; else m.innerHTML = content;
   const box = document.getElementById('chat-msgs');
-  box.appendChild(m); box.scrollTop=box.scrollHeight;
-  chatHistory.push({role:'bot',text:html});
+  box.appendChild(m); box.scrollTop = box.scrollHeight;
 }
-function addUserMsg(text){
-  const m = document.createElement('div');
-  m.className='msg user'; m.textContent=text;
-  const box = document.getElementById('chat-msgs');
-  box.appendChild(m); box.scrollTop=box.scrollHeight;
-  chatHistory.push({role:'user',text});
-}
-function showTyping(){
-  const m = document.createElement('div');
-  m.className='msg bot typing'; m.id='typing-ind';
-  m.innerHTML='<span></span><span></span><span></span>';
-  document.getElementById('chat-msgs').appendChild(m);
-  document.getElementById('chat-msgs').scrollTop=99999;
-}
-function hideTyping(){ const t=document.getElementById('typing-ind'); if(t)t.remove(); }
-
-function answerChat(text){
+function showTyping(){ const m=document.createElement('div'); m.className='msg bot typing'; m.id='typ'; m.innerHTML='<span></span><span></span><span></span>'; document.getElementById('chat-msgs').appendChild(m); document.getElementById('chat-msgs').scrollTop=99999; }
+function hideTyping(){ const t=document.getElementById('typ'); if(t) t.remove(); }
+function answer(text){
   showTyping();
   const q = text.toLowerCase();
-  let answer = null;
-  for(const entry of KB){
-    if(entry.k.some(k => q.includes(k))){ answer=entry.a; break; }
-  }
-  if(!answer){
-    answer = `I don't have a specific answer for that yet. Here are a few things that might help:<br><br>
-    • Use the <b>? Tour</b> button to re-run the onboarding guide<br>
-    • Check Supabase → Table Editor to inspect your data directly<br>
-    • Common issues: missing SQL schema, incorrect API keys, or RLS policy errors<br><br>
-    Feel free to rephrase your question and I'll do my best to help!`;
-  }
-  setTimeout(()=>{
-    hideTyping();
-    addBotMsg(answer);
-    renderChips(['How does pricing work?','Fix an error','Supabase setup','Export options']);
-  }, 700 + Math.random()*400);
+  let ans = null;
+  for(const e of KB){ if(e.k.some(k=>q.includes(k))){ ans=e.a; break; } }
+  if(!ans) ans = `I don\'t have a specific answer for that yet, but here are some tips:<br>• <b>No dashboard?</b> Make sure you\'re signed in and have created an event in the left sidebar.<br>• <b>Can\'t add data?</b> Click an event first, then use the form at the top of the right panel.<br>• <b>Other issues?</b> Open browser console (F12) for error details, or re-run the SQL schema in Supabase.`;
+  setTimeout(()=>{ hideTyping(); addBotMsg(ans); renderChips(['Add line items','Pricing formula','Fix an error','Demo login']); }, 600+Math.random()*400);
 }
-
 function sendChat(){
   const ipt = document.getElementById('chat-ipt');
-  const text = ipt.value.trim();
-  if(!text) return;
-  ipt.value = '';
-  document.getElementById('chat-chips').innerHTML = '';
-  addUserMsg(text);
-  answerChat(text);
+  const t = ipt.value.trim(); if(!t) return;
+  ipt.value = ''; document.getElementById('chat-chips').innerHTML = '';
+  addUserMsg(t); answer(t);
 }
 
 init();
