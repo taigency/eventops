@@ -144,6 +144,33 @@
   .bn{flex:1;text-align:center;padding:9px 0 11px;color:var(--muted);font-size:.68rem;cursor:pointer}
   .bn .ic{display:block;font-size:1.2rem;margin-bottom:2px}
   .bn.active{color:var(--accent2)}
+  /* CREW BOARD */
+  .cb-screen{min-height:100vh;background:var(--bg)}
+  .cb-hero{background:var(--grad);padding:44px 30px 32px;text-align:center}
+  .cb-hero h1{font-size:2.2rem;font-weight:900;color:#fff;margin-bottom:8px}
+  .cb-hero p{color:rgba(255,255,255,.88);font-size:1rem;margin-bottom:18px}
+  .cb-hero .cb-link{font-size:.8rem;color:rgba(255,255,255,.7);margin-top:10px}
+  .cb-body{max-width:960px;margin:0 auto;padding:30px 20px}
+  .cb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+  .pos-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:10px;transition:.2s}
+  .pos-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .pos-card .ev{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--accent2);margin-bottom:2px}
+  .pos-card .role{font-size:1.15rem;font-weight:800}
+  .pos-card .meta{font-size:.82rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+  .pos-card .desc{font-size:.84rem;color:var(--muted);line-height:1.55;border-top:1px solid var(--line);padding-top:10px}
+  .pos-card .rate-row{display:flex;gap:10px}
+  .pos-card .rpill{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:6px 12px;font-size:.82rem;font-weight:700;flex:1;text-align:center}
+  .pos-card .rpill small{display:block;font-size:.65rem;color:var(--muted);font-weight:400;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em}
+  .app-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px}
+  .app-card .ac-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+  .app-card .ac-name{font-weight:700}.app-card .ac-email{font-size:.78rem;color:var(--muted)}
+  .app-card .ac-quote{font-size:1.15rem;font-weight:800;color:var(--good);white-space:nowrap}
+  .app-card .ac-msg{font-size:.82rem;color:var(--muted);line-height:1.5;margin:8px 0}
+  .app-card .ac-port{font-size:.78rem;color:var(--accent2)}
+  .app-card .ac-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .pub-badge{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:100px;white-space:nowrap;background:rgba(52,211,153,.15);color:var(--good)}
+  .draft-badge{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:100px;white-space:nowrap;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .cb-auth-box{max-width:420px;margin:32px auto;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:28px}
   /* CHAT */
   .chat-fab{position:fixed;bottom:22px;right:22px;width:52px;height:52px;border-radius:50%;background:var(--grad);border:none;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(109,107,255,.45);z-index:500;display:flex;align-items:center;justify-content:center;transition:.2s}
   .chat-fab:hover{transform:scale(1.08)}
@@ -387,7 +414,36 @@ function vSched(){const e=E(),rows=[...e.schedule].sort((a,b)=>(a.day+a.time).lo
 
 function vRipple(){const e=E(),r=e.ripple,rc=rippleCost(),q=quoteCalc(),vpct=q.net?(rc.total/q.net*100):0;document.getElementById('content').innerHTML=`<div class="pg-title">⚡ Real-Time Ripple Engine</div><div class="pg-sub">Change one field — every dependent cost recalculates across the project.</div><div class="grid g2"><div class="card"><h3 style="margin-bottom:16px">Setup delay simulation</h3><label class="fl">Delay: <b class="amb">${r.delay} hour${r.delay===1?'':'s'}</b></label><input type="range" min="0" max="10" value="${r.delay}" oninput="E().ripple.delay=+this.value;save();vRipple()"><table style="margin-top:18px"><tr><th>Cascade</th><th>Added cost</th></tr><tr><td>👷 Local labour overtime</td><td class="${rc.labour?'amb':''}">${fmt(rc.labour)}</td></tr><tr><td>✈️ Technician accommodation</td><td class="${rc.accom?'amb':''}">${fmt(rc.accom)}</td></tr><tr><td>🍽️ Catering & welfare</td><td class="${rc.catering?'amb':''}">${fmt(rc.catering)}</td></tr><tr><td>⛽ Transport & fuel</td><td class="${rc.fuel?'amb':''}">${fmt(rc.fuel)}</td></tr></table><div class="ripple-flag ${vpct>5?'b-red':'b-green'}">${vpct>5?'⚠':'✓'} Ripple is ${vpct.toFixed(1)}% of the quote — ${vpct>5?'exceeds 5% threshold. Director alerted.':'within threshold.'}</div></div><div class="card"><h3 style="margin-bottom:16px">Cascade rates (per hour)</h3>${[['otRate','Labour overtime'],['accomRate','Accommodation'],['cateringRate','Catering'],['fuelRate','Transport & fuel']].map(([k,l])=>`<div class="form-row"><label class="fl">${l}</label><input class="ipt" type="number" value="${r[k]}" oninput="E().ripple.${k}=+this.value||0;save();vRipple()"></div>`).join('')}<div class="note">In the full build these rates derive automatically from Workforce, Logistics and Catering.</div></div></div>`;}
 
-function vWork(){const e=E(),total=e.labour.reduce((s,l)=>s+l.rate*l.hours,0);document.getElementById('content').innerHTML=`<div class="pg-title">Workforce & Labour</div><div class="pg-sub">Technician rates, hours and rostered cost.</div><div class="card"><div class="sec-h"><h3>Crew roster · ${fmt(total)} total</h3><button class="btn btn-p btn-sm" onclick="addLabour()">+ Add crew</button></div><table><tr><th>Role</th><th>Rate / hr</th><th>Hours</th><th>Cost</th><th></th></tr>${e.labour.length?e.labour.map(l=>`<tr><td>${l.name}</td><td>${fmt(l.rate)}</td><td>${l.hours}</td><td>${fmt(l.rate*l.hours)}</td><td><button class="x" onclick="del('labour','${l.id}')">✕</button></td></tr>`).join(''):'<tr><td colspan="5"><div class="empty">No crew yet.</div></td></tr>'}</table><div class="note">Crew added here can log in to the field app and be assigned on the Schedule.</div></div>`;}
+function vWork(){
+  const e=E(),total=e.labour.reduce((s,l)=>s+l.rate*l.hours,0);
+  const boardUrl=window.location.origin+window.location.pathname+'#crewboard';
+  const rows=e.labour.length?e.labour.map(l=>{
+    const cost=l.rate*l.hours;
+    const pubBadge=l.published?`<span class="pub-badge">🟢 Live</span>`:`<span class="draft-badge">Draft</span>`;
+    const appCount=l.appCount?`<span class="badge b-blue" style="cursor:pointer" onclick="viewApplicants('${l.positionId}','${l.name.replace(/'/g,'')}')">${l.appCount} applicant${l.appCount===1?'':'s'} →</span>`:'';
+    const pubBtn=l.published
+      ?`<button class="btn btn-g btn-sm" onclick="unpublishPosition('${l.id}')">Unpublish</button>`
+      :`<button class="btn btn-p btn-sm" onclick="publishPosition('${l.id}')">🌐 Publish</button>`;
+    return`<tr>
+      <td><div style="font-weight:600">${l.name}</div>${l.desc?`<div style="font-size:.76rem;color:var(--muted)">${l.desc}</div>`:''}</td>
+      <td>${fmt(l.rate)}</td><td>${l.hours}</td><td>${fmt(cost)}</td>
+      <td>${pubBadge}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${appCount}${pubBtn}<button class="x" onclick="delLabour('${l.id}')">✕</button></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="6"><div class="empty">No crew yet. Click + Add crew to get started.</div></td></tr>';
+  document.getElementById('content').innerHTML=`
+    <div class="pg-title">Workforce & Labour</div>
+    <div class="pg-sub">Roster crew, set rates and hours — then publish open positions to the public Crew Board for applications.</div>
+    <div class="card" style="background:rgba(109,107,255,.1);border-color:rgba(109,107,255,.3);margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div><div style="font-weight:700;margin-bottom:3px">🌐 Crew Board</div><div style="font-size:.83rem;color:var(--muted)">Public page where freelance crew browse and apply for open positions.</div></div>
+        <div style="display:flex;gap:8px"><button class="btn btn-g btn-sm" onclick="navigator.clipboard.writeText('${boardUrl}');toast('Link copied!')">📋 Copy link</button><a href="#crewboard" target="_blank" class="btn btn-p btn-sm" style="text-decoration:none">Open board →</a></div>
+      </div>
+    </div>
+    <div class="card"><div class="sec-h"><h3>Crew roster · ${fmt(total)} total</h3><button class="btn btn-p btn-sm" onclick="addLabour()">+ Add crew</button></div>
+    <table><tr><th>Role / Description</th><th>Rate/hr</th><th>Hours</th><th>Cost</th><th>Board status</th><th>Actions</th></tr>${rows}</table>
+    <div class="note">Published positions appear on the public Crew Board. Applicants sign up and submit a quote — you review them here. Accepted crew can log into the Field app.</div></div>`;
+}
 
 function vLog(){const e=E();document.getElementById('content').innerHTML=`<div class="pg-title">Operations & Logistics</div><div class="pg-sub">Bump-in/out tasks, deliveries and status.</div><div class="card"><div class="sec-h"><h3>Logistics tasks</h3><button class="btn btn-p btn-sm" onclick="addLog()">+ Add task</button></div><table><tr><th>Task</th><th>Status</th><th></th></tr>${e.logistics.length?e.logistics.map(t=>`<tr><td>${t.task}</td><td><select class="ipt" style="width:auto;padding:5px 8px" onchange="E().logistics.find(x=>x.id==='${t.id}').status=this.value;save()">${['Scheduled','On time','Delayed','Complete'].map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></td><td><button class="x" onclick="del('logistics','${t.id}')">✕</button></td></tr>`).join(''):'<tr><td colspan="3"><div class="empty">No tasks yet.</div></td></tr>'}</table></div>`;}
 
@@ -438,10 +494,260 @@ function addTriple(){modal('Add line item',[{k:'item',label:'Line item'},{k:'sco
 function addMilestone(){modal('Add milestone',[{k:'label',label:'Description'},{k:'pct',label:'Percentage of total',type:'number'}],v=>{if(v.label)E().milestones.push({id:uid(),label:v.label,pct:v.pct||0,status:'Pending'});});}
 function cycleStatus(id){const m=E().milestones.find(x=>x.id===id);m.status=m.status==='Pending'?'Invoiced':m.status==='Invoiced'?'Paid':'Pending';save();renderAdmin();}
 function addSched(){const crew=E().labour.map(l=>l.name);modal('Add schedule item',[{k:'day',label:'Day',ph:'12 Aug'},{k:'time',label:'Time',ph:'07:00'},{k:'activity',label:'Activity'},{k:'owner',label:'Department',val:'Production',select:['Event Director','Operations','Production','Staging','Catering','Risk']},{k:'assignee',label:'Assign to crew',val:crew[0]||'',select:crew.length?crew:['—']}],v=>{if(v.activity)E().schedule.push({id:uid(),day:v.day||'TBD',time:v.time||'',activity:v.activity,owner:v.owner,assignee:v.assignee,confirmed:false});});}
-function addLabour(){modal('Add crew',[{k:'name',label:'Role / name'},{k:'rate',label:'Rate per hour (R)',type:'number'},{k:'hours',label:'Hours',type:'number'}],v=>{if(v.name)E().labour.push({id:uid(),...v});});}
+function addLabour(){
+  const m=document.getElementById('modal');
+  m.innerHTML=`<h3>Add crew / position</h3>
+    <div class="form-row"><label class="fl">Role / position title</label><input class="ipt" id="f_name" placeholder="e.g. AV Technician"></div>
+    <div class="form-row"><label class="fl">Description (shown on Crew Board)</label><textarea class="ipt" id="f_desc" rows="2" placeholder="Skills required, experience, responsibilities…"></textarea></div>
+    <div class="form-row"><label class="fl">Rate per hour (R)</label><input class="ipt" id="f_rate" type="number" placeholder="0"></div>
+    <div class="form-row"><label class="fl">Hours</label><input class="ipt" id="f_hours" type="number" placeholder="0"></div>
+    <div class="form-row" style="background:rgba(109,107,255,.08);border:1px solid rgba(109,107,255,.25);border-radius:10px;padding:12px">
+      <label class="fl" style="color:var(--accent2);margin-bottom:8px">🌐 Crew Board</label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.88rem">
+        <input type="checkbox" id="f_publish" style="width:16px;height:16px;accent-color:var(--accent)">
+        Publish this position — freelance crew can apply
+      </label>
+    </div>
+    <div class="modal-acts"><button class="btn btn-g" onclick="closeModal()">Cancel</button><button class="btn btn-p" id="mSave">Save</button></div>`;
+  document.getElementById('modalBg').classList.add('show');
+  document.getElementById('mSave').onclick=()=>{
+    const name=document.getElementById('f_name').value.trim();
+    if(!name){toast('Enter a role name');return;}
+    const l={id:uid(),name,desc:document.getElementById('f_desc').value.trim(),rate:+document.getElementById('f_rate').value||0,hours:+document.getElementById('f_hours').value||0,published:false,positionId:null,appCount:0};
+    E().labour.push(l);
+    closeModal();save();
+    if(document.getElementById('f_publish')?.checked) publishPosition(l.id);
+    else renderAdmin();
+  };
+}
 function addLog(){modal('Add logistics task',[{k:'task',label:'Task'}],v=>{if(v.task)E().logistics.push({id:uid(),task:v.task,status:'Scheduled'});});}
 function addVendor(){modal('Add vendor',[{k:'name',label:'Vendor name'},{k:'bbbee',label:'B-BBEE level',ph:'Level 1'},{k:'expiry',label:'Affidavit expiry',type:'date'}],v=>{if(v.name)E().vendors.push({id:uid(),name:v.name,csd:true,bbbee:v.bbbee||'—',expiry:v.expiry||'2026-12-31'});});}
 function newEvent(){modal('New event',[{k:'name',label:'Event name'},{k:'venue',label:'Venue'},{k:'dates',label:'Dates'}],v=>{if(!v.name)return;const id=uid();DB.events[id]={id,name:v.name,venue:v.venue||'',dates:v.dates||'',scope:0,status:'Draft',pricing:{marginPct:18,mgmtFeePct:8,discountPct:0,vatPct:15},milestones:[{id:uid(),label:'Deposit on signature',pct:50,status:'Pending'},{id:uid(),label:'Pre-event payment',pct:40,status:'Pending'},{id:uid(),label:'Final on reconciliation',pct:10,status:'Pending'}],ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},quote:[],triple:[],schedule:[],designs:[],labour:[],logistics:[],vendors:[]};DB.currentEvent=id;page='quote';});}
+
+/* ═══ CREW BOARD ════════════════════════════════════════════ */
+function delLabour(id){
+  const l=E().labour.find(x=>x.id===id);
+  if(l?.positionId) sb.from('crew_positions').update({published:false}).eq('id',l.positionId);
+  E().labour=E().labour.filter(x=>x.id!==id);
+  save();renderAdmin();
+}
+
+async function publishPosition(labourId){
+  if(!supabaseUser){toast('Sign in to publish');return;}
+  const e=E(),l=E().labour.find(x=>x.id===labourId);
+  if(!l)return;
+  if(!l.positionId) l.positionId=uid();
+  l.published=true;
+  save();
+  const {error}=await sb.from('crew_positions').upsert({
+    id:l.positionId,event_id:e.id,event_name:e.name,event_venue:e.venue,
+    event_dates:e.dates,role_name:l.name,rate:l.rate,hours:l.hours,
+    description:l.desc||'',published:true,director_user_id:supabaseUser.id
+  });
+  if(error){toast('Publish failed: '+error.message);return;}
+  toast('Position published to Crew Board ✓');
+  vWork();
+}
+
+async function unpublishPosition(labourId){
+  const l=E().labour.find(x=>x.id===labourId);
+  if(!l)return;
+  if(l.positionId) await sb.from('crew_positions').update({published:false}).eq('id',l.positionId);
+  l.published=false;
+  save();
+  toast('Position unpublished');
+  vWork();
+}
+
+async function viewApplicants(positionId,roleName){
+  const m=document.getElementById('modal');
+  m.style.maxWidth='700px';
+  m.innerHTML=`<h3>Applicants — ${roleName}</h3><div style="color:var(--muted);font-size:.85rem;margin-bottom:14px">Loading…</div>`;
+  document.getElementById('modalBg').classList.add('show');
+  const {data,error}=await sb.from('crew_applications').select('*').eq('position_id',positionId).order('created_at');
+  if(error||!data||!data.length){
+    m.innerHTML=`<h3>Applicants — ${roleName}</h3><div class="empty">No applications yet.</div><div class="modal-acts"><button class="btn btn-g" onclick="closeModal();m.style.maxWidth=''">Close</button></div>`;
+    return;
+  }
+  const rows=data.map(a=>{
+    const cls=a.status==='accepted'?'b-green':a.status==='rejected'?'b-red':'b-blue';
+    const st=a.status==='accepted'?'✓ Accepted':a.status==='rejected'?'Rejected':'Pending';
+    return`<div class="app-card">
+      <div class="ac-top">
+        <div><div class="ac-name">${a.applicant_name||'—'}</div><div class="ac-email">${a.applicant_email||''}</div></div>
+        <div style="text-align:right"><div class="ac-quote">${fmt(a.quote_amount||0)}</div><span class="badge ${cls}" style="font-size:.68rem">${st}</span></div>
+      </div>
+      ${a.message?`<div class="ac-msg">"${a.message}"</div>`:''}
+      ${a.portfolio_url?`<div class="ac-port"><a href="${a.portfolio_url}" target="_blank" style="color:var(--accent2)">${a.portfolio_url}</a></div>`:''}
+      <div class="ac-acts">
+        ${a.status!=='accepted'?`<button class="btn btn-p btn-sm" onclick="setAppStatus('${a.id}','${positionId}','${roleName}','accepted')">✓ Accept</button>`:''}
+        ${a.status!=='rejected'?`<button class="btn btn-g btn-sm" onclick="setAppStatus('${a.id}','${positionId}','${roleName}','rejected')">Reject</button>`:''}
+        <button class="btn btn-g btn-sm" onclick="navigator.clipboard.writeText('${a.applicant_email||''}');toast('Email copied')">📋 Copy email</button>
+      </div>
+    </div>`;
+  }).join('');
+  m.innerHTML=`<h3>Applicants — ${roleName} <span style="color:var(--muted);font-weight:400;font-size:.85rem">${data.length} received</span></h3>${rows}<div class="modal-acts"><button class="btn btn-g" onclick="closeModal();document.getElementById('modal').style.maxWidth=''">Close</button></div>`;
+}
+
+async function setAppStatus(appId,positionId,roleName,status){
+  await sb.from('crew_applications').update({status}).eq('id',appId);
+  if(status==='accepted'){
+    const {data}=await sb.from('crew_applications').select('applicant_name,quote_amount').eq('id',appId).single();
+    if(data){
+      const l=E().labour.find(x=>x.positionId===positionId);
+      if(l){l.acceptedCrew=data.applicant_name;l.acceptedQuote=data.quote_amount;}
+      save();
+    }
+  }
+  toast(status==='accepted'?'Applicant accepted ✓':'Application rejected');
+  viewApplicants(positionId,roleName);
+}
+
+/* ── PUBLIC CREW BOARD ──────────────────────────────────── */
+let cbAuthTab='in',cbPendingPos=null;
+
+async function renderCrewBoard(){
+  document.getElementById('chat-fab').style.display='none';
+  document.getElementById('app').style.cssText='display:block';
+  const {data:positions}=await sb.from('crew_positions').select('*').eq('published',true).order('created_at',{ascending:false});
+  const {data:{session:s}}=await sb.auth.getSession();
+  const boardUser=s?.user||null;
+  const cards=(positions||[]).length
+    ?positions.map(p=>`<div class="pos-card">
+        <div class="ev">${p.event_name}</div>
+        <div class="role">${p.role_name}</div>
+        <div class="meta"><span>📍 ${p.event_venue||'—'}</span><span>📅 ${p.event_dates||'—'}</span></div>
+        ${p.description?`<div class="desc">${p.description}</div>`:''}
+        <div class="rate-row">
+          <div class="rpill"><small>Rate/hr</small>${fmt(p.rate)}</div>
+          <div class="rpill"><small>Hours</small>${p.hours}</div>
+          <div class="rpill"><small>Total</small>${fmt(p.rate*p.hours)}</div>
+        </div>
+        <button class="btn btn-p apply-btn" onclick="openApplyModal(${JSON.stringify(p).replace(/"/g,'&quot;')})">Apply for this position →</button>
+      </div>`).join('')
+    :'<div class="empty" style="grid-column:1/-1;padding:60px 20px;color:var(--muted)">No open positions at the moment — check back soon.</div>';
+  document.getElementById('app').innerHTML=`
+    <div class="cb-screen">
+      <div class="cb-hero">
+        <h1>⚡ EventOps Crew Board</h1>
+        <p>Open positions for professional event crew. Apply directly — the Event Director reviews your quote.</p>
+        <div class="cb-link">Powered by EventOps ERP · Sign up to apply</div>
+      </div>
+      <div class="cb-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+          <div style="font-weight:700;font-size:1.1rem">${(positions||[]).length} open position${(positions||[]).length===1?'':'s'}</div>
+          <div style="display:flex;gap:8px">
+            ${boardUser?`<span style="font-size:.82rem;color:var(--muted);line-height:32px">Signed in as ${boardUser.email}</span><button class="btn btn-g btn-sm" onclick="sb.auth.signOut().then(()=>renderCrewBoard())">Sign out</button>`:`<button class="btn btn-p btn-sm" onclick="showCBAuth()">Sign in / Join to apply</button>`}
+            <a href="${window.location.origin+window.location.pathname}" class="btn btn-g btn-sm" style="text-decoration:none">← ERP Login</a>
+          </div>
+        </div>
+        <div class="cb-grid">${cards}</div>
+      </div>
+    </div>`;
+}
+
+function showCBAuth(pendingPos){
+  if(pendingPos) cbPendingPos=pendingPos;
+  const err=document.getElementById('cb-auth-err');
+  const existing=document.getElementById('cb-auth-overlay');
+  if(existing)existing.remove();
+  const overlay=document.createElement('div');
+  overlay.id='cb-auth-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML=`<div class="cb-auth-box">
+    <div style="font-weight:800;font-size:1.15rem;margin-bottom:6px">⚡ Join EventOps Crew</div>
+    <p style="color:var(--muted);font-size:.88rem;margin-bottom:16px">Create an account or sign in to apply for this position.</p>
+    <div class="auth-tabs"><div class="auth-tab ${cbAuthTab==='in'?'on':''}" onclick="cbAuthTab='in';showCBAuth()">Sign in</div><div class="auth-tab ${cbAuthTab==='up'?'on':''}" onclick="cbAuthTab='up';showCBAuth()">Join crew</div></div>
+    <div class="auth-err" id="cb-auth-err"></div>
+    <div class="form-row"><label class="fl">Your name</label><input class="ipt" id="cb-name" placeholder="Full name" ${cbAuthTab==='in'?'style="display:none"':''}></div>
+    <div class="form-row"><label class="fl">Email</label><input class="ipt" id="cb-email" type="email" placeholder="you@email.com"></div>
+    <div class="form-row"><label class="fl">Password</label><input class="ipt" id="cb-pass" type="password" placeholder="••••••••"></div>
+    <button class="btn btn-p" style="width:100%;padding:11px;margin-top:4px" onclick="doCBAuth()">${cbAuthTab==='in'?'Sign in →':'Create account →'}</button>
+    <button class="btn btn-g" style="width:100%;padding:9px;margin-top:8px" onclick="document.getElementById('cb-auth-overlay').remove()">Cancel</button>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function doCBAuth(){
+  const email=document.getElementById('cb-email').value.trim();
+  const pass=document.getElementById('cb-pass').value;
+  const name=document.getElementById('cb-name')?.value.trim()||'';
+  const err=document.getElementById('cb-auth-err');
+  err.textContent='';
+  if(!email||!pass){err.textContent='Enter email and password.';return;}
+  let res;
+  if(cbAuthTab==='up'){
+    res=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
+  } else {
+    res=await sb.auth.signInWithPassword({email,password:pass});
+  }
+  if(res.error){err.textContent=res.error.message;return;}
+  document.getElementById('cb-auth-overlay').remove();
+  if(cbPendingPos){const pos=cbPendingPos;cbPendingPos=null;openApplyModal(pos);}
+  else renderCrewBoard();
+}
+
+function openApplyModal(pos){
+  sb.auth.getSession().then(({data:{session:s}})=>{
+    if(!s){showCBAuth(pos);return;}
+    const u=s.user;
+    const existing=document.getElementById('cb-apply-overlay');
+    if(existing)existing.remove();
+    const overlay=document.createElement('div');
+    overlay.id='cb-apply-overlay';
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto';
+    overlay.innerHTML=`<div class="cb-auth-box" style="max-width:500px">
+      <div class="ev" style="color:var(--accent2);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${pos.event_name}</div>
+      <div style="font-weight:800;font-size:1.15rem;margin-bottom:2px">Apply: ${pos.role_name}</div>
+      <div style="font-size:.82rem;color:var(--muted);margin-bottom:16px">${pos.event_venue} · ${pos.event_dates} · ${fmt(pos.rate)}/hr · ${pos.hours}hrs</div>
+      <div class="auth-err" id="apply-err"></div>
+      <div class="form-row"><label class="fl">Your name</label><input class="ipt" id="ap-name" value="${u.user_metadata?.full_name||''}"></div>
+      <div class="form-row"><label class="fl">Email</label><input class="ipt" id="ap-email" value="${u.email}" readonly></div>
+      <div class="form-row"><label class="fl">Your quoted rate for this contract (R total)</label><input class="ipt" id="ap-quote" type="number" placeholder="${pos.rate*pos.hours}"></div>
+      <div class="form-row"><label class="fl">Cover note — experience, availability, why you're the right fit</label><textarea class="ipt" id="ap-msg" rows="3" placeholder="Tell the director about yourself…"></textarea></div>
+      <div class="form-row"><label class="fl">Portfolio / website URL (optional)</label><input class="ipt" id="ap-port" placeholder="https://"></div>
+      <button class="btn btn-p" style="width:100%;padding:11px;margin-top:4px" onclick="submitApplication('${pos.id}','${pos.role_name.replace(/'/g,'')}')">Submit application →</button>
+      <button class="btn btn-g" style="width:100%;padding:9px;margin-top:8px" onclick="document.getElementById('cb-apply-overlay').remove()">Cancel</button>
+    </div>`;
+    document.body.appendChild(overlay);
+  });
+}
+
+async function submitApplication(positionId,roleName){
+  const err=document.getElementById('apply-err');
+  err.textContent='';
+  const {data:{session:s}}=await sb.auth.getSession();
+  if(!s){err.textContent='Session expired. Please sign in again.';return;}
+  const app={
+    id:uid(),position_id:positionId,applicant_user_id:s.user.id,
+    applicant_name:document.getElementById('ap-name').value.trim(),
+    applicant_email:document.getElementById('ap-email').value.trim(),
+    quote_amount:+document.getElementById('ap-quote').value||0,
+    message:document.getElementById('ap-msg').value.trim(),
+    portfolio_url:document.getElementById('ap-port').value.trim(),
+    status:'pending'
+  };
+  if(!app.applicant_name){err.textContent='Enter your name.';return;}
+  const {error}=await sb.from('crew_applications').upsert(app,{onConflict:'position_id,applicant_user_id'});
+  if(error){err.textContent=error.message;return;}
+  document.getElementById('cb-apply-overlay').remove();
+  const conf=document.createElement('div');
+  conf.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px';
+  conf.innerHTML=`<div class="cb-auth-box" style="text-align:center"><div style="font-size:2.5rem;margin-bottom:12px">🎉</div><div style="font-weight:800;font-size:1.2rem;margin-bottom:8px">Application submitted!</div><div style="color:var(--muted);font-size:.9rem;margin-bottom:20px">The event director will review your quote for <b>${roleName}</b> and be in touch.</div><button class="btn btn-p" onclick="this.closest('div[style]').remove();renderCrewBoard()">Back to board</button></div>`;
+  document.body.appendChild(conf);
+}
+
+async function refreshAppCounts(){
+  if(!supabaseUser) return;
+  const e=E();
+  const posIds=e.labour.filter(l=>l.positionId).map(l=>l.positionId);
+  if(!posIds.length) return;
+  const {data}=await sb.from('crew_applications').select('position_id').in('position_id',posIds);
+  if(!data) return;
+  const counts={};
+  data.forEach(r=>{counts[r.position_id]=(counts[r.position_id]||0)+1;});
+  e.labour.forEach(l=>{if(l.positionId) l.appCount=counts[l.positionId]||0;});
+}
 
 /* ═══ DOCUMENTS ═════════════════════════════════════════════ */
 function showDoc(html){document.getElementById('paper').innerHTML=html;document.getElementById('doc').classList.add('show');}
@@ -483,17 +789,23 @@ function answerChat(text){showTyping();const q=text.toLowerCase();let ans=null;f
 function sendChat(){const ipt=document.getElementById('chat-ipt');const t=ipt.value.trim();if(!t)return;ipt.value='';document.getElementById('chat-chips').innerHTML='';addUserMsg(t);answerChat(t);}
 
 /* ═══ INIT ══════════════════════════════════════════════════ */
+function isCrewBoard(){ return window.location.hash==='#crewboard'; }
+
 async function init(){
+  if(isCrewBoard()){ renderCrewBoard(); return; }
   const {data:{session:s}} = await sb.auth.getSession();
   if(s){
     supabaseUser = s.user;
     await loadFromCloud();
+    await refreshAppCounts();
   }
   sb.auth.onAuthStateChange(async(_e, s)=>{
+    if(isCrewBoard()) return;
     const wasLoggedIn = !!supabaseUser;
     supabaseUser = s?.user || null;
     if(supabaseUser && !wasLoggedIn){
       await loadFromCloud();
+      await refreshAppCounts();
       render();
     } else if(!supabaseUser){
       session = null;
@@ -502,6 +814,7 @@ async function init(){
   });
   render();
 }
+window.addEventListener('hashchange',()=>{ if(isCrewBoard()) renderCrewBoard(); else { init(); } });
 init();
 </script>
 </body>
