@@ -334,6 +334,40 @@
   .chat-ipt{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:7px 11px;font-size:.83rem;resize:none;outline:none}
   .chat-ipt:focus{border-color:var(--accent)}
   .chat-send{background:var(--accent);border:none;color:#fff;border-radius:9px;padding:7px 13px;font-size:.82rem;font-weight:600;cursor:pointer}
+
+  /* ── ONBOARDING WIZARD ───────────────────────────────────── */
+  .wizard-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+  .wizard{background:var(--panel);border-radius:22px;padding:40px 44px;max-width:540px;width:100%;box-shadow:0 8px 48px rgba(0,0,0,.55)}
+  .wiz-progress{display:flex;gap:8px;margin-bottom:36px}
+  .wiz-step-bar{height:4px;flex:1;border-radius:4px;background:var(--line);transition:.35s}
+  .wiz-step-bar.done{background:var(--accent)}
+  .wiz-step-bar.active{background:var(--accent2)}
+  .wiz-eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px}
+  .wiz-title{font-size:1.5rem;font-weight:700;margin-bottom:8px;letter-spacing:-.02em}
+  .wiz-sub{color:var(--muted);font-size:.88rem;margin-bottom:28px;line-height:1.6}
+  .wiz-nav{display:flex;gap:10px;margin-top:28px}
+  .wiz-nav .btn{flex:1}
+  .team-card{background:var(--bg2);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:9px;display:flex;align-items:center;gap:12px;transition:.2s}
+  .team-card:hover{border-color:rgba(84,98,240,.4)}
+  .team-av{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:.85rem;flex-shrink:0;color:#fff}
+  .team-info{flex:1;min-width:0}
+  .team-nm{font-weight:600;font-size:.92rem}
+  .team-rl{color:var(--muted);font-size:.78rem;margin-top:1px}
+  .team-badge{display:inline-block;padding:2px 9px;border-radius:20px;background:rgba(84,98,240,.15);color:var(--accent);font-size:.72rem;font-weight:600;margin-top:3px}
+  .team-status-chip{font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:20px}
+  .team-status-chip.active{background:rgba(34,197,94,.15);color:var(--good)}
+  .team-status-chip.invited{background:rgba(245,158,11,.12);color:var(--warn)}
+  .wiz-add-form{background:var(--bg);border-radius:13px;border:1px dashed var(--line);padding:18px;margin-top:14px}
+  .wiz-add-form .form-row{margin-bottom:10px}
+  .wiz-add-form .form-row:last-child{margin-bottom:0}
+  .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+  .role-opt{background:var(--bg2);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;font-size:.83rem;font-weight:500;color:var(--muted);transition:.18s;text-align:left}
+  .role-opt:hover{border-color:rgba(84,98,240,.4);color:var(--txt)}
+  .role-opt.sel{border-color:var(--accent);background:rgba(84,98,240,.1);color:var(--txt);font-weight:600}
+  .respon-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .respon-tag{padding:3px 10px;border-radius:20px;background:rgba(11,181,204,.1);border:1px solid rgba(11,181,204,.25);color:var(--accent2);font-size:.75rem;cursor:pointer;font-weight:500;transition:.15s}
+  .respon-tag:hover,.respon-tag.sel{background:rgba(11,181,204,.25);border-color:var(--accent2);color:#fff}
+  .wiz-done-icon{width:72px;height:72px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-size:2rem;margin:0 auto 20px}
 </style>
 </head>
 <body>
@@ -408,7 +442,7 @@ const initials=n=>n.split(/[\s(]/).filter(Boolean).slice(0,2).map(w=>w[0]).join(
 const CATS=['Venue','AV & Production','Decor & Styling','Staging & Set','Catering','Transport & Logistics','Labour & Crew','Other'];
 
 function seed(){return{
-  currentEvent:'e1',role:'Event Director',org:{name:'Your Event Company',tagline:'Professional Event Management',client:'Acme Corporate',clientContact:'',clientPhone:'',clientEmail:'',logo:null,logoPos:'left',address:'',phone:'',email:'',vatNo:'',regNo:'',banking:'',accentColor:'#6d6bff',quoteTerms:'• This quotation is valid for 30 days from the date of issue.\n• Prices are subject to change until a signed contract is received.\n• A 50% deposit is required to confirm the booking.\n• All prices exclude VAT unless otherwise stated.',invoiceTerms:'• Payment is due within 14 days of invoice date.\n• Interest of 2% per month will be charged on overdue amounts.\n• Queries must be raised within 5 business days of receipt.\n• Banking details are provided above — please use invoice number as reference.',poTerms:'• This Purchase Order constitutes a binding commitment to supply.\n• Goods/services must be delivered as specified.\n• Invoices must reference this PO number.\n• Any variation to scope requires written approval before proceeding.',contractTerms:'• This contract is binding upon signature by both parties.\n• Cancellation within 30 days of the event forfeits the full deposit.\n• The service provider retains the right to subcontract with prior written notice.\n• Disputes will be resolved via arbitration under South African law.'},
+  currentEvent:'e1',role:'Event Director',onboardingDone:false,team:[],org:{name:'Your Event Company',tagline:'Professional Event Management',client:'Acme Corporate',clientContact:'',clientPhone:'',clientEmail:'',logo:null,logoPos:'left',address:'',phone:'',email:'',vatNo:'',regNo:'',banking:'',accentColor:'#6d6bff',quoteTerms:'• This quotation is valid for 30 days from the date of issue.\n• Prices are subject to change until a signed contract is received.\n• A 50% deposit is required to confirm the booking.\n• All prices exclude VAT unless otherwise stated.',invoiceTerms:'• Payment is due within 14 days of invoice date.\n• Interest of 2% per month will be charged on overdue amounts.\n• Queries must be raised within 5 business days of receipt.\n• Banking details are provided above — please use invoice number as reference.',poTerms:'• This Purchase Order constitutes a binding commitment to supply.\n• Goods/services must be delivered as specified.\n• Invoices must reference this PO number.\n• Any variation to scope requires written approval before proceeding.',contractTerms:'• This contract is binding upon signature by both parties.\n• Cancellation within 30 days of the event forfeits the full deposit.\n• The service provider retains the right to subcontract with prior written notice.\n• Disputes will be resolved via arbitration under South African law.'},
   events:{e1:{
     id:'e1',name:'TechExpo Cape Town',venue:'CTICC · Hall 4',dates:'12–14 Aug 2026',scope:420000,status:'Draft',
     pricing:{marginPct:18,mgmtFeePct:8,discountPct:5,vatPct:15},
@@ -453,6 +487,9 @@ function migrateDB(){
   if(!DB.events) DB.events={};
   if(!DB.org) DB.org={name:'EventOps',client:'Client'};
   if(!DB.role) DB.role='Event Director';
+  if(!DB.team) DB.team=[];
+  if(DB.onboardingDone===undefined) DB.onboardingDone=false;
+  if(!DB.org.ownerName) DB.org.ownerName='';
   const orgDef={tagline:'',logo:null,logoPos:'left',address:'',phone:'',email:'',vatNo:'',regNo:'',banking:'',accentColor:'#6d6bff',quoteTerms:'• Valid for 30 days.\n• 50% deposit required to confirm.\n• Prices exclude VAT unless stated.',invoiceTerms:'• Payment due within 14 days.\n• Use invoice number as payment reference.',poTerms:'• This PO is a binding commitment to supply.\n• Invoices must reference this PO number.',contractTerms:'• Binding upon signature by both parties.\n• Disputes resolved via arbitration under South African law.'};
   Object.keys(orgDef).forEach(k=>{if(DB.org[k]===undefined) DB.org[k]=orgDef[k];});
   const evIds=Object.keys(DB.events);
@@ -479,6 +516,11 @@ function labourSubtotal(){return E().labour.reduce((s,l)=>s+l.rate*l.hours,0);}
 function costSubtotal(){return E().quote.reduce((s,q)=>s+q.cost*q.qty,0)+labourSubtotal();}
 function quoteCalc(){const sub=costSubtotal(),p=E().pricing;const margin=sub*(p.marginPct/100),mgmt=sub*(p.mgmtFeePct/100);const pre=sub+margin+mgmt,discount=pre*(p.discountPct/100);const net=pre-discount,vat=net*((p.vatPct||0)/100),total=net+vat;return{sub,margin,mgmt,pre,discount,net,vat,total,grossProfit:margin+mgmt-discount};}
 function rippleCost(){const r=E().ripple,d=r.delay;return{labour:r.otRate*d,accom:r.accomRate*d,catering:r.cateringRate*d,fuel:r.fuelRate*d,total:(r.otRate+r.accomRate+r.cateringRate+r.fuelRate)*d};}
+
+const ROLES=['Event Director','Operations Manager','Production Manager','Stage Manager','Logistics Coordinator','Finance Manager','Creative Director','Technical Director','Marketing Coordinator','Catering Coordinator','Account Manager','Assistant Coordinator'];
+const RESP_OPTIONS=['Budgeting','Vendor management','Scheduling','On-site ops','Crew coordination','Client liaison','Design & decor','AV & production','Logistics','Compliance','Catering','Marketing','Finance','Contracts'];
+const TEAM_COLORS=['#5462F0','#0BB5CC','#8B5CF6','#F59E0B','#22C55E','#F43F5E','#EC4899','#14B8A6'];
+let _wiz = {step:1, name:'', myRole:'Event Director', company:'', tagline:'', team:[], showAddForm:false, editIdx:-1};
 
 const PAGES=[{id:'dashboard',ic:'🎯',label:'Director'},{id:'quote',ic:'🧾',label:'Quotation'},{id:'finance',ic:'💰',label:'Finance'},{id:'designs',ic:'🎨',label:'Designs'},{id:'schedule',ic:'🗓️',label:'Schedule'},{id:'ripple',ic:'⚡',label:'Ripple Engine'},{id:'workforce',ic:'👷',label:'Workforce'},{id:'logistics',ic:'🚚',label:'Logistics'},{id:'compliance',ic:'🛡️',label:'Compliance'},{id:'eventinfo',ic:'📋',label:'Event Info & Brief'},{id:'comms',ic:'💬',label:'Comms & Groups'},{id:'settings',ic:'⚙️',label:'Settings & Branding'}];
 let page='dashboard', fieldTab='duties';
@@ -517,11 +559,6 @@ function renderAuth(){
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         Continue with Google
       </button>
-      <button class="social-btn" onclick="doOAuth('github')">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-        Continue with GitHub
-      </button>
-
       <div class="auth-divider">or use email</div>
 
       <!-- MAGIC LINK -->
@@ -606,25 +643,221 @@ async function demoAuth(){
 /* ═══ ROLE SELECT (after Supabase auth) ════════════════════ */
 function renderRoleSelect(){
   document.getElementById('chat-fab').style.display='none';
+  document.getElementById('fb-fab').style.display='none';
   document.getElementById('app').style.cssText='display:block';
-  const crew=allCrew();
+
+  // Demo account — keep original crew selector
+  if(supabaseUser.email===DEMO_EMAIL){
+    const crew=allCrew();
+    document.getElementById('app').innerHTML=`
+      <div class="login"><div class="loginbox">
+        <div class="lh"><span class="m">⚡</span>EventOps<span class="grad">ERP</span></div>
+        <div style="color:var(--muted);font-size:.88rem;margin-bottom:4px">Demo mode — choose a role to explore.</div>
+        <div class="lsec">Management</div>
+        <div class="luser" onclick="login('admin','Sarah Naidoo','Event Director')">
+          <div class="av">SN</div><div><div class="nm">Event Director</div><div class="rl">Full ERP — all modules</div></div><div class="arr">→</div>
+        </div>
+        ${crew.length?`<div class="lsec">Crew & Technicians</div>${crew.map(c=>`<div class="luser" onclick="login('field','${c.replace(/'/g,'')}')"><div class="av">${initials(c)}</div><div><div class="nm">${c}</div><div class="rl">Field app · duties & uploads</div></div><div class="arr">→</div></div>`).join('')}`:''}
+        <div style="margin-top:16px;text-align:center"><button class="btn btn-g btn-sm" onclick="signOut()">↩ Sign out</button></div>
+      </div></div>`;
+    return;
+  }
+
+  // New account — show onboarding wizard
+  if(!DB.onboardingDone){
+    _wiz={step:1,name:'',myRole:'Event Director',company:DB.org.name!=='Your Event Company'?DB.org.name:'',tagline:DB.org.tagline||'',team:[],showAddForm:false,editIdx:-1};
+    return renderWizard();
+  }
+
+  // Existing account — real team selector
+  renderTeamSelect();
+}
+
+function renderTeamSelect(){
+  const teamHtml = DB.team.length ? DB.team.map((m,i)=>`
+    <div class="luser" onclick="loginAsTeamMember(${i})">
+      <div class="av" style="background:${TEAM_COLORS[i%TEAM_COLORS.length]}">${initials(m.name)}</div>
+      <div><div class="nm">${m.name}</div><div class="rl">${m.role}${m.status==='invited'?' · <span style=\'color:var(--warn)\'>Invite pending</span>':''}</div></div>
+      <div class="arr">→</div>
+    </div>`).join('') : '';
+
   document.getElementById('app').innerHTML=`
     <div class="login"><div class="loginbox">
       <div class="lh"><span class="m">⚡</span>EventOps<span class="grad">ERP</span></div>
-      <div style="color:var(--muted);font-size:.88rem;margin-bottom:4px">Welcome back. Choose your role view.</div>
-      <div style="font-size:.78rem;color:var(--accent2);margin-bottom:2px">${supabaseUser.email}</div>
+      <div style="color:var(--muted);font-size:.85rem;margin-bottom:2px">Welcome back to <b style="color:var(--txt)">${DB.org.name}</b></div>
+      <div style="font-size:.75rem;color:var(--accent2);margin-bottom:14px">${supabaseUser.email}</div>
       <div class="lsec">Management</div>
-      <div class="luser" onclick="login('admin','${supabaseUser.email.split('@')[0]}','Event Director')">
-        <div class="av">${initials(supabaseUser.email)}</div>
-        <div><div class="nm">Event Director</div><div class="rl">Full ERP — all modules</div></div>
+      <div class="luser" onclick="login('admin','${(DB.org.ownerName||supabaseUser.email.split('@')[0])}','${DB.role||'Event Director'}')">
+        <div class="av" style="background:var(--grad)">${initials(DB.org.ownerName||supabaseUser.email)}</div>
+        <div><div class="nm">${DB.org.ownerName||supabaseUser.email.split('@')[0]}</div><div class="rl">${DB.role||'Event Director'} · Full ERP</div></div>
         <div class="arr">→</div>
       </div>
-      ${crew.length?`<div class="lsec">Crew & Technicians</div>${crew.map(c=>`<div class="luser" onclick="login('field','${c.replace(/'/g,'')}')"><div class="av">${initials(c)}</div><div><div class="nm">${c}</div><div class="rl">Field app · duties & uploads</div></div><div class="arr">→</div></div>`).join('')}`:''}
-      <div style="margin-top:16px;text-align:center"><button class="btn btn-g btn-sm" onclick="signOut()">↩ Sign out</button></div>
+      ${DB.team.length?`<div class="lsec">Team members</div>${teamHtml}`:''}
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:center">
+        <button class="btn btn-g btn-sm" onclick="signOut()">↩ Sign out</button>
+        <button class="btn btn-p btn-sm" onclick="goManageTeam()">👥 Manage team</button>
+      </div>
     </div></div>`;
 }
 
+function loginAsTeamMember(idx){
+  const m=DB.team[idx];
+  session={type:'admin',name:m.name,role:m.role};
+  page='dashboard';render();
+}
+
+function goManageTeam(){
+  session={type:'admin',name:DB.org.ownerName||supabaseUser.email.split('@')[0],role:DB.role||'Event Director'};
+  page='settings';render();
+  setTimeout(()=>{ const el=document.getElementById('team-section'); if(el) el.scrollIntoView({behavior:'smooth'}); },300);
+}
+
 function login(type,name,role){session={type,name,role:role||name};if(role){DB.role=role;save();}page='dashboard';fieldTab='duties';render();}
+
+/* ═══ ONBOARDING WIZARD ════════════════════════════════════ */
+function renderWizard(){
+  document.getElementById('app').innerHTML=`<div class="wizard-wrap" id="wizard-wrap"></div>`;
+  drawWizard();
+}
+
+function drawWizard(){
+  const wrap=document.getElementById('wizard-wrap');
+  if(!wrap) return;
+  const steps=3;
+  const bars=Array.from({length:steps},(_,i)=>`<div class="wiz-step-bar ${i+1<_wiz.step?'done':i+1===_wiz.step?'active':''}"></div>`).join('');
+
+  if(_wiz.step===1){
+    wrap.innerHTML=`<div class="wizard">
+      <div class="wiz-progress">${bars}</div>
+      <div class="wiz-eyebrow">Step 1 of 3</div>
+      <div class="wiz-title">Set up your company</div>
+      <div class="wiz-sub">Personalise EventOps for your event company.</div>
+      <div class="form-row"><label class="fl">Company / Trading name <span style="color:var(--bad)">*</span></label>
+        <input class="ipt" id="wiz-company" placeholder="e.g. Apex Events (Pty) Ltd" value="${escHtml(_wiz.company)}">
+      </div>
+      <div class="form-row"><label class="fl">Tagline</label>
+        <input class="ipt" id="wiz-tagline" placeholder="e.g. Professional Event Management" value="${escHtml(_wiz.tagline)}">
+      </div>
+      <div class="form-row"><label class="fl">Your name <span style="color:var(--bad)">*</span></label>
+        <input class="ipt" id="wiz-name" placeholder="e.g. Sarah Naidoo" value="${escHtml(_wiz.name)}">
+      </div>
+      <div class="wiz-nav">
+        <button class="btn btn-g" onclick="signOut()">← Sign out</button>
+        <button class="btn btn-p" onclick="wizNext1()">Next: Your Role →</button>
+      </div>
+    </div>`;
+  }
+  else if(_wiz.step===2){
+    wrap.innerHTML=`<div class="wizard">
+      <div class="wiz-progress">${bars}</div>
+      <div class="wiz-eyebrow">Step 2 of 3</div>
+      <div class="wiz-title">Your role & team</div>
+      <div class="wiz-sub">Select your role and optionally add your team members. You can always do this later in Settings.</div>
+      <label class="fl">Your role</label>
+      <div class="role-grid" style="margin-bottom:22px">${ROLES.map(r=>`<button class="role-opt ${_wiz.myRole===r?'sel':''}" onclick="_wiz.myRole='${r}';drawWizard()">${r}</button>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <label class="fl" style="margin-bottom:0">Team members <span style="color:var(--muted);font-size:.75rem">(optional)</span></label>
+        <button class="btn btn-p btn-sm" onclick="_wiz.showAddForm=!_wiz.showAddForm;drawWizard()">+ Add member</button>
+      </div>
+      ${_wiz.team.map((m,i)=>`
+        <div class="team-card">
+          <div class="team-av" style="background:${TEAM_COLORS[i%TEAM_COLORS.length]}">${initials(m.name)}</div>
+          <div class="team-info"><div class="team-nm">${escHtml(m.name)}</div><div class="team-rl">${escHtml(m.role)}</div><div class="team-badge">${(m.responsibilities||[]).slice(0,2).join(' · ')}</div></div>
+          <button class="btn btn-g btn-sm" onclick="_wiz.team.splice(${i},1);drawWizard()" style="flex-shrink:0">✕</button>
+        </div>`).join('')}
+      ${_wiz.showAddForm?`
+        <div class="wiz-add-form">
+          <div style="font-size:.8rem;font-weight:700;color:var(--accent2);margin-bottom:12px">Add team member</div>
+          <div class="form-row"><label class="fl">Name <span style="color:var(--bad)">*</span></label><input class="ipt" id="wm-name" placeholder="Full name"></div>
+          <div class="form-row"><label class="fl">Email</label><input class="ipt" id="wm-email" type="email" placeholder="name@company.co.za"></div>
+          <div class="form-row"><label class="fl">Role</label>
+            <select class="ipt" id="wm-role">${ROLES.map(r=>`<option>${r}</option>`).join('')}</select>
+          </div>
+          <div class="form-row"><label class="fl">Responsibilities <span style="color:var(--muted);font-size:.75rem">(click to select)</span></label>
+            <div class="respon-tags" id="wm-resp">${RESP_OPTIONS.map(r=>`<span class="respon-tag" onclick="this.classList.toggle('sel')">${r}</span>`).join('')}</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button class="btn btn-g btn-sm" onclick="_wiz.showAddForm=false;drawWizard()">Cancel</button>
+            <button class="btn btn-p btn-sm" onclick="wizAddMember()">Add to team</button>
+          </div>
+        </div>`:'' }
+      <div class="wiz-nav" style="margin-top:20px">
+        <button class="btn btn-g" onclick="_wiz.step=1;drawWizard()">← Back</button>
+        <button class="btn btn-p" onclick="wizNext2()">Next: Review →</button>
+      </div>
+    </div>`;
+  }
+  else{
+    wrap.innerHTML=`<div class="wizard" style="text-align:center">
+      <div class="wiz-progress">${bars}</div>
+      <div class="wiz-done-icon">🚀</div>
+      <div class="wiz-title">You're all set!</div>
+      <div class="wiz-sub">
+        <b style="color:var(--txt)">${escHtml(_wiz.company)}</b> is ready to go.<br>
+        You're logged in as <b style="color:var(--txt)">${escHtml(_wiz.name)}</b> · ${escHtml(_wiz.myRole)}.
+        ${_wiz.team.length?`<br>Your team of <b style="color:var(--accent2)">${_wiz.team.length} member${_wiz.team.length>1?'s':''}</b> will receive invite emails shortly.`:''}
+      </div>
+      ${_wiz.team.length?`<div style="text-align:left;margin-bottom:16px">${_wiz.team.map((m,i)=>`
+        <div class="team-card">
+          <div class="team-av" style="background:${TEAM_COLORS[i%TEAM_COLORS.length]}">${initials(m.name)}</div>
+          <div class="team-info"><div class="team-nm">${escHtml(m.name)}</div><div class="team-rl">${escHtml(m.role)}</div></div>
+          <span class="team-status-chip invited">Invite pending</span>
+        </div>`).join('')}</div>`:''}
+      <div class="wiz-nav">
+        <button class="btn btn-g" onclick="_wiz.step=2;drawWizard()">← Back</button>
+        <button class="btn btn-p" style="font-size:1rem;padding:12px" onclick="wizComplete()">Enter EventOps ERP →</button>
+      </div>
+    </div>`;
+  }
+}
+
+function wizNext1(){
+  const company=document.getElementById('wiz-company').value.trim();
+  const tagline=document.getElementById('wiz-tagline').value.trim();
+  const name=document.getElementById('wiz-name').value.trim();
+  if(!company||!name){toast('Please fill in company name and your name.');return;}
+  _wiz.company=company; _wiz.tagline=tagline; _wiz.name=name;
+  _wiz.step=2; drawWizard();
+}
+
+function wizNext2(){
+  _wiz.step=3; drawWizard();
+}
+
+function wizAddMember(){
+  const name=document.getElementById('wm-name').value.trim();
+  const email=document.getElementById('wm-email').value.trim();
+  const role=document.getElementById('wm-role').value;
+  if(!name){toast('Member name is required.');return;}
+  const resp=[...document.querySelectorAll('#wm-resp .respon-tag.sel')].map(el=>el.textContent);
+  _wiz.team.push({id:uid(),name,email,role,responsibilities:resp,status:email?'invited':'active'});
+  _wiz.showAddForm=false; drawWizard();
+}
+
+async function wizComplete(){
+  // Save company setup
+  DB.org.name=_wiz.company;
+  DB.org.tagline=_wiz.tagline;
+  DB.org.ownerName=_wiz.name;
+  DB.role=_wiz.myRole;
+  DB.team=_wiz.team.map(m=>({...m}));
+  DB.onboardingDone=true;
+  save();
+
+  // Send invites to team members with emails
+  const invitees=_wiz.team.filter(m=>m.email&&m.status==='invited');
+  for(const m of invitees){
+    try{
+      await sb.auth.signInWithOtp({email:m.email,options:{emailRedirectTo:window.location.origin+window.location.pathname,data:{invitedBy:_wiz.company,role:m.role}}});
+    }catch(e){ /* non-fatal */ }
+  }
+  if(invitees.length) toast(`✉ Invite emails sent to ${invitees.length} team member${invitees.length>1?'s':''}!`);
+
+  session={type:'admin',name:_wiz.name,role:_wiz.myRole};
+  page='dashboard'; render();
+}
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 async function signOut(){
   await sb.auth.signOut();
@@ -789,7 +1022,88 @@ function vSettings(){
         </div>`).join('')}
     </div>
   </div>
+  </div>
+
+  <!-- TEAM MANAGEMENT -->
+  <div class="card" id="team-section" style="margin-top:0">
+    <div class="sec-h">
+      <h3>👥 Team management</h3>
+      <button class="btn btn-p btn-sm" onclick="openAddTeamMember()">+ Add member</button>
+    </div>
+    <div style="color:var(--muted);font-size:.82rem;margin-bottom:16px">Manage your team, roles and responsibilities. Members with email addresses can be invited to log in to EventOps.</div>
+    <div id="team-list">
+      ${DB.team.length===0?`<div style="text-align:center;padding:28px;color:var(--muted);font-size:.85rem">No team members yet. Click <b>+ Add member</b> to build your team.</div>`
+        :DB.team.map((m,i)=>`
+          <div class="team-card">
+            <div class="team-av" style="background:${TEAM_COLORS[i%TEAM_COLORS.length]}">${initials(m.name)}</div>
+            <div class="team-info">
+              <div class="team-nm">${escHtml(m.name)}</div>
+              <div class="team-rl">${escHtml(m.email||'No email set')}</div>
+              <div class="team-badge">${escHtml(m.role)}</div>
+              ${m.responsibilities&&m.responsibilities.length?`<div style="font-size:.72rem;color:var(--muted);margin-top:3px">${m.responsibilities.join(' · ')}</div>`:''}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0">
+              <span class="team-status-chip ${m.status}">${m.status==='active'?'Active':'Invited'}</span>
+              ${m.email&&m.status==='invited'?`<button class="btn btn-g btn-sm" onclick="resendInvite(${i})" style="font-size:.7rem">✉ Resend</button>`:''}
+              <button class="btn btn-g btn-sm" onclick="removeTeamMember(${i})" style="font-size:.7rem;color:var(--bad)">✕ Remove</button>
+            </div>
+          </div>`).join('')}
+    </div>
+    <!-- Add member inline form -->
+    <div id="add-member-form" style="display:none">
+      <div class="wiz-add-form" style="margin-top:14px">
+        <div style="font-size:.82rem;font-weight:700;color:var(--accent2);margin-bottom:12px">New team member</div>
+        <div class="form-row"><label class="fl">Name <span style="color:var(--bad)">*</span></label><input class="ipt" id="tm-name" placeholder="Full name"></div>
+        <div class="form-row"><label class="fl">Email</label><input class="ipt" id="tm-email" type="email" placeholder="name@company.co.za"></div>
+        <div class="form-row"><label class="fl">Role</label><select class="ipt" id="tm-role">${ROLES.map(r=>`<option>${r}</option>`).join('')}</select></div>
+        <div class="form-row"><label class="fl">Responsibilities</label>
+          <div class="respon-tags" id="tm-resp">${RESP_OPTIONS.map(r=>`<span class="respon-tag" onclick="this.classList.toggle('sel')">${r}</span>`).join('')}</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button class="btn btn-g btn-sm" onclick="document.getElementById('add-member-form').style.display='none'">Cancel</button>
+          <button class="btn btn-p btn-sm" onclick="saveNewTeamMember()">Add & invite</button>
+        </div>
+      </div>
+    </div>
   </div>`;
+}
+
+function openAddTeamMember(){
+  const f=document.getElementById('add-member-form');
+  if(f){f.style.display='block';document.getElementById('tm-name').focus();}
+}
+
+async function saveNewTeamMember(){
+  const name=document.getElementById('tm-name').value.trim();
+  const email=document.getElementById('tm-email').value.trim();
+  const role=document.getElementById('tm-role').value;
+  if(!name){toast('Name is required.');return;}
+  const resp=[...document.querySelectorAll('#tm-resp .respon-tag.sel')].map(el=>el.textContent);
+  const member={id:uid(),name,email,role,responsibilities:resp,status:email?'invited':'active'};
+  DB.team.push(member);
+  save();
+  if(email){
+    try{
+      await sb.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin+window.location.pathname}});
+      toast(`✉ Invite sent to ${email}`);
+    }catch(e){toast('Member added — invite email failed.');}
+  } else {toast('Team member added.');}
+  vSettings();
+}
+
+async function resendInvite(idx){
+  const m=DB.team[idx];
+  if(!m||!m.email){toast('No email address set.');return;}
+  try{
+    await sb.auth.signInWithOtp({email:m.email,options:{emailRedirectTo:window.location.origin+window.location.pathname}});
+    toast(`✉ Invite resent to ${m.email}`);
+  }catch(e){toast('Could not send invite: '+e.message);}
+}
+
+function removeTeamMember(idx){
+  const m=DB.team[idx];
+  if(!confirm(`Remove ${m.name} from the team?`)) return;
+  DB.team.splice(idx,1); save(); vSettings();
 }
 
 function markSettingsDirty(){const el=document.getElementById('settings-status');if(el){el.style.opacity='1';el.textContent='● unsaved changes';}}

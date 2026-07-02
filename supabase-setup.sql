@@ -43,6 +43,52 @@ create table if not exists admin_activity (
   created_at  timestamptz default now()
 );
 
+-- Team members (org owner invites their team)
+create table if not exists team_members (
+  id              uuid primary key default gen_random_uuid(),
+  org_user_id     uuid references auth.users(id) on delete cascade,
+  member_email    text not null,
+  member_user_id  uuid references auth.users(id) on delete set null,
+  name            text,
+  role            text not null,
+  responsibilities text[] default '{}',
+  status          text default 'invited',
+  invited_at      timestamptz default now(),
+  joined_at       timestamptz,
+  created_at      timestamptz default now()
+);
+
+alter table team_members enable row level security;
+
+create policy "Org owner manages team"
+  on team_members for all
+  to authenticated
+  using (auth.uid() = org_user_id)
+  with check (auth.uid() = org_user_id);
+
+create policy "Member reads own entry"
+  on team_members for select
+  to authenticated
+  using (auth.jwt() ->> 'email' = member_email or auth.uid() = member_user_id);
+
+create policy "Member updates own entry"
+  on team_members for update
+  to authenticated
+  using (auth.jwt() ->> 'email' = member_email or auth.uid() = member_user_id);
+
+-- Allow team members to read their org's user_data
+create policy "Team member reads org data"
+  on user_data for select
+  to authenticated
+  using (
+    exists (
+      select 1 from team_members
+      where team_members.org_user_id = user_data.user_id
+        and (team_members.member_email = auth.jwt() ->> 'email'
+          or team_members.member_user_id = auth.uid())
+    )
+  );
+
 -- RLS policies
 
 -- user_feedback: authenticated users can insert their own rows; admin reads all
