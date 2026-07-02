@@ -1,0 +1,11 @@
+<svg width="1080" height="1080" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="EventOps profile avatar">
+  <defs>
+    <linearGradient id="eo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5462F0"/>
+      <stop offset="0.52" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#0BB5CC"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1080" height="1080" fill="url(#eo)"/>
+  <path d="M624 300 L392 690 L536 690 L472 918 L688 528 L544 528 Z" fill="#FFFFFF"/>
+</svg>

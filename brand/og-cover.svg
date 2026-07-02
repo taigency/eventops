@@ -1,0 +1,32 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="EventOps cover">
+  <defs>
+    <linearGradient id="eo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5462F0"/>
+      <stop offset="0.52" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#0BB5CC"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#080B14"/>
+      <stop offset="1" stop-color="#0F1323"/>
+    </linearGradient>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&amp;display=swap');text{font-family:'Plus Jakarta Sans',sans-serif}</style>
+  </defs>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1050" cy="120" r="360" fill="url(#eo)" opacity="0.10"/>
+  <rect x="80" y="80" width="96" height="96" rx="24" fill="url(#eo)"/>
+  <path d="M132 100 L108 140 L123 140 L116 164 L141 124 L126 124 Z" fill="#FFFFFF"/>
+  <text x="196" y="148" font-weight="800" font-size="52" letter-spacing="-1.5" fill="#FFFFFF">Event<tspan fill="#8B5CF6">Ops</tspan></text>
+  <text x="80" y="320" font-weight="800" font-size="76" letter-spacing="-2.5" fill="#FFFFFF">Run your events</text>
+  <text x="80" y="404" font-weight="800" font-size="76" letter-spacing="-2.5" fill="#FFFFFF">like <tspan fill="url(#eo)">clockwork.</tspan></text>
+  <text x="80" y="472" font-weight="500" font-size="30" fill="#9AA6C2">Quotes, crew, run sheets and live comms — one system for</text>
+  <text x="80" y="512" font-weight="500" font-size="30" fill="#9AA6C2">event &amp; production companies.</text>
+  <g font-weight="700" font-size="24">
+    <rect x="80" y="548" width="150" height="46" rx="23" fill="rgba(84,98,240,0.15)"/>
+    <text x="104" y="578" fill="#818CF8">Quoting</text>
+    <rect x="246" y="548" width="146" height="46" rx="23" fill="rgba(139,92,246,0.15)"/>
+    <text x="270" y="578" fill="#A78BFA">Crew &amp; HR</text>
+    <rect x="408" y="548" width="180" height="46" rx="23" fill="rgba(11,181,204,0.15)"/>
+    <text x="432" y="578" fill="#22D3EE">Run sheets</text>
+  </g>
+  <text x="1120" y="588" text-anchor="end" font-weight="700" font-size="28" fill="#FFFFFF">eventops.africa</text>
+</svg>

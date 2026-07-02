@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EventOps — Promo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --grad:linear-gradient(135deg,#5462F0 0%,#8B5CF6 52%,#0BB5CC 100%);
+  --bg:#06080F;--panel:#0F1323;--line:rgba(148,163,184,.12);--txt:#DDE3F0;--muted:#7B8BAD;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:#000;color:var(--txt);font-family:'Plus Jakarta Sans',sans-serif;overflow:hidden;display:grid;place-items:center}
+.stage{position:relative;width:100vw;height:100vh;max-width:177.78vh;max-height:100vh;aspect-ratio:16/9;background:radial-gradient(1200px 700px at 75% 10%,rgba(84,98,240,.14),transparent 60%),var(--bg);overflow:hidden}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease;padding:6%}
+.scene.on{opacity:1;transform:translateY(0)}
+.eyebrow{font-size:1.1vw;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:1.4vh}
+h1{font-size:5.2vw;font-weight:800;letter-spacing:-.03em;line-height:1.02;text-align:center}
+h2{font-size:3.6vw;font-weight:800;letter-spacing:-.02em;line-height:1.05;text-align:center}
+.sub{font-size:1.7vw;color:var(--muted);font-weight:500;margin-top:2.2vh;text-align:center;max-width:70%}
+.mark{width:9vw;height:9vw;border-radius:2vw;background:var(--grad);display:grid;place-items:center;box-shadow:0 1vw 4vw rgba(84,98,240,.4)}
+.mark svg{width:55%;height:55%}
+.chaos{position:absolute;font-weight:700;color:#2A3350;font-size:2.4vw;white-space:nowrap;opacity:0;animation:float 4s ease forwards}
+@keyframes float{15%{opacity:1}70%{opacity:1}100%{opacity:.25}}
+.chip{display:inline-flex;align-items:center;gap:.6vw;padding:.9vh 1.6vw;border-radius:100px;font-size:1.3vw;font-weight:600;margin:.5vw}
+.dot{width:1vw;height:1vw;border-radius:50%}
+/* mock ui */
+.mock{width:74%;background:var(--panel);border:1px solid var(--line);border-radius:1.2vw;overflow:hidden;box-shadow:0 2vw 6vw rgba(0,0,0,.5);transform:scale(.96);transition:transform .7s ease}
+.scene.on .mock{transform:scale(1)}
+.mock-top{display:flex;align-items:center;gap:.7vw;padding:1.2vh 1.4vw;border-bottom:1px solid var(--line)}
+.tl{width:.9vw;height:.9vw;border-radius:50%;background:#2A3350}
+.mock-title{margin-left:.8vw;font-size:1.1vw;font-weight:600;color:var(--muted)}
+.mock-body{padding:2.2vh 1.8vw}
+.row{display:flex;align-items:center;justify-content:space-between;padding:1.3vh 0;border-bottom:1px solid var(--line);font-size:1.25vw}
+.row:last-child{border:none}
+.rl{color:var(--txt);font-weight:500}
+.rv{color:var(--muted);font-weight:600}
+.rv.accent{color:#22D3EE}
+.bar{height:1.1vw;border-radius:100px;background:var(--grad)}
+.big{font-size:2.6vw;font-weight:800;letter-spacing:-.02em}
+.feat-ic{width:5vw;height:5vw;border-radius:1.3vw;display:grid;place-items:center;font-size:2.4vw;margin-bottom:2.2vh}
+.progress{position:absolute;left:0;bottom:0;height:.5vh;background:var(--grad);width:0%;transition:width .2s linear;z-index:5}
+.controls{position:absolute;bottom:2.5vh;right:2.5vw;display:flex;gap:.8vw;z-index:6;opacity:.5;transition:.2s}
+.controls:hover{opacity:1}
+.btn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--txt);border-radius:.7vw;padding:1vh 1.4vw;font-size:1.1vw;font-weight:600;cursor:pointer;font-family:inherit}
+.btn:hover{background:rgba(255,255,255,.12)}
+.cta-btn{margin-top:3.5vh;background:var(--grad);color:#fff;border:none;border-radius:100px;padding:2vh 3.4vw;font-size:1.7vw;font-weight:700;box-shadow:0 1vw 3vw rgba(84,98,240,.4)}
+.url{margin-top:2.6vh;font-size:2vw;font-weight:700}
+.logo-row{display:flex;align-items:center;gap:2vw}
+.wordmark{font-size:6vw;font-weight:800;letter-spacing:-.03em}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+  <!-- 0: hook -->
+  <div class="scene" data-i="0">
+    <div class="eyebrow">for event &amp; production teams</div>
+    <h1>Running events<br>is <span style="color:#F43F5E">chaos.</span></h1>
+    <div id="chaos-layer"></div>
+  </div>
+
+  <!-- 1: logo reveal -->
+  <div class="scene" data-i="1">
+    <div class="logo-row">
+      <div class="mark">
+        <svg viewBox="0 0 512 512"><path d="M300 76 L156 308 L248 308 L212 436 L356 204 L264 204 Z" fill="#fff"/></svg>
+      </div>
+      <div class="wordmark">Event<span class="grad">Ops</span></div>
+    </div>
+    <div class="sub" style="margin-top:4vh">One system for your whole operation.</div>
+  </div>
+
+  <!-- 2: quoting -->
+  <div class="scene" data-i="2">
+    <div class="eyebrow">quotes &amp; budgets</div>
+    <h2>Quote a job in <span class="grad">minutes.</span></h2>
+    <div class="mock" style="margin-top:3.5vh">
+      <div class="mock-top"><span class="tl"></span><span class="tl"></span><span class="tl"></span><span class="mock-title">Quote · Corporate Gala 2026</span></div>
+      <div class="mock-body">
+        <div class="row"><span class="rl">Staging &amp; rigging</span><span class="rv">R 48 500</span></div>
+        <div class="row"><span class="rl">AV &amp; technical</span><span class="rv">R 62 000</span></div>
+        <div class="row"><span class="rl">Crew (14 pax)</span><span class="rv">R 31 200</span></div>
+        <div class="row"><span class="rl big grad">Total</span><span class="rv big" style="color:#fff">R 141 700</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3: crew -->
+  <div class="scene" data-i="3">
+    <div class="eyebrow">crew &amp; scheduling</div>
+    <h2>Every role. <span class="grad">Every shift.</span></h2>
+    <div class="mock" style="margin-top:3.5vh">
+      <div class="mock-top"><span class="tl"></span><span class="tl"></span><span class="tl"></span><span class="mock-title">Crew · load-in day</span></div>
+      <div class="mock-body">
+        <div class="row"><span class="rl">🎛️ Technical Director</span><span class="rv accent">Sipho M.</span></div>
+        <div class="row"><span class="rl">💡 Lighting lead</span><span class="rv accent">Anja V.</span></div>
+        <div class="row"><span class="rl">📹 Camera op ×2</span><span class="rv accent">Assigned</span></div>
+        <div class="row"><span class="rl">🚚 Logistics</span><span class="rv accent">Thabo K.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4: run sheet + comms -->
+  <div class="scene" data-i="4">
+    <div class="eyebrow">run sheets &amp; live comms</div>
+    <h2>Brief the whole team <span class="grad">live.</span></h2>
+    <div class="mock" style="margin-top:3.5vh">
+      <div class="mock-top"><span class="tl"></span><span class="tl"></span><span class="tl"></span><span class="mock-title">Run sheet · show day</span></div>
+      <div class="mock-body">
+        <div class="row"><span class="rl">16:00 · Doors open</span><span class="rv">Front of house</span></div>
+        <div class="row"><span class="rl">18:30 · Keynote</span><span class="rv">AV + Lighting</span></div>
+        <div class="row"><span class="rl">20:00 · Live band</span><span class="rv">Stage + Sound</span></div>
+        <div class="row"><span class="rl" style="color:#22D3EE">📡 "Standby, doors in 5"</span><span class="rv accent">broadcast</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5: cta -->
+  <div class="scene" data-i="5">
+    <div class="mark" style="margin-bottom:3.5vh">
+      <svg viewBox="0 0 512 512"><path d="M300 76 L156 308 L248 308 L212 436 L356 204 L264 204 Z" fill="#fff"/></svg>
+    </div>
+    <h1>Run your events<br>like <span class="grad">clockwork.</span></h1>
+    <div class="url grad">eventops.africa</div>
+    <button class="cta-btn">Start free</button>
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div class="controls">
+    <button class="btn" id="replay">↻ Replay</button>
+    <button class="btn" id="fs">⛶ Fullscreen</button>
+  </div>
+</div>
+
+<script>
+const scenes=[...document.querySelectorAll('.scene')];
+const durations=[4000,4000,5500,5500,6000,5000];
+const total=durations.reduce((a,b)=>a+b,0);
+const progress=document.getElementById('progress');
+let timers=[];
+
+function clearTimers(){timers.forEach(clearTimeout);timers=[];}
+
+function spawnChaos(){
+  const layer=document.getElementById('chaos-layer');
+  layer.innerHTML='';
+  const words=['spreadsheets','WhatsApp groups','paper run sheets','missed cues','double-booked crew','"which version?"'];
+  const zones=[[10,14],[62,16],[8,74],[60,78],[6,40],[70,46]];
+  words.forEach((w,i)=>{
+    const el=document.createElement('div');
+    el.className='chaos';el.textContent=w;
+    const z=zones[i%zones.length];
+    el.style.left=z[0]+'%';
+    el.style.top=z[1]+'%';
+    el.style.animationDelay=(i*0.35)+'s';
+    layer.appendChild(el);
+  });
+}
+
+function play(){
+  clearTimers();
+  let t=0;
+  scenes.forEach((s,i)=>{
+    timers.push(setTimeout(()=>{
+      scenes.forEach(x=>x.classList.remove('on'));
+      s.classList.add('on');
+      if(i===0) spawnChaos();
+    },t));
+    t+=durations[i];
+  });
+  // progress bar
+  progress.style.transition='none';progress.style.width='0%';
+  requestAnimationFrame(()=>{progress.style.transition='width '+total+'ms linear';progress.style.width='100%';});
+  // loop
+  timers.push(setTimeout(play,total+400));
+}
+
+document.getElementById('replay').onclick=play;
+document.getElementById('fs').onclick=()=>{
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+};
+play();
+</script>
+</body>
+</html>
