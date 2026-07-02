@@ -508,6 +508,16 @@ function migrateDB(){
   if(!DB.org.clientContact) DB.org.clientContact='';
   if(!DB.org.clientPhone) DB.org.clientPhone='';
   if(!DB.org.clientEmail) DB.org.clientEmail='';
+  // Migrate client info to per-event (was stored on org)
+  evIds.forEach(id=>{
+    const e=DB.events[id];
+    if(!e.client) e.client=DB.org.client||'';
+    if(!e.clientContact) e.clientContact=DB.org.clientContact||'';
+    if(!e.clientPhone) e.clientPhone=DB.org.clientPhone||'';
+    if(!e.clientEmail) e.clientEmail=DB.org.clientEmail||'';
+    if(!e.clientAddress) e.clientAddress='';
+    if(!e.clientVatNo) e.clientVatNo='';
+  });
 }
 
 const E=()=>DB.events[DB.currentEvent];
@@ -1216,7 +1226,7 @@ function addLabour(){
 }
 function addLog(){modal('Add logistics task',[{k:'task',label:'Task'}],v=>{if(v.task)E().logistics.push({id:uid(),task:v.task,status:'Scheduled'});});}
 function addVendor(){modal('Add vendor',[{k:'name',label:'Vendor name'},{k:'bbbee',label:'B-BBEE level',ph:'Level 1'},{k:'expiry',label:'Affidavit expiry',type:'date'}],v=>{if(v.name)E().vendors.push({id:uid(),name:v.name,csd:true,bbbee:v.bbbee||'—',expiry:v.expiry||'2026-12-31'});});}
-function newEvent(){modal('New event',[{k:'name',label:'Event name'},{k:'venue',label:'Venue'},{k:'dates',label:'Dates'}],v=>{if(!v.name)return;const id=uid();DB.events[id]={id,name:v.name,venue:v.venue||'',dates:v.dates||'',scope:0,status:'Draft',brief:'',venue_address:'',contacts:[],pricing:{marginPct:18,mgmtFeePct:8,discountPct:0,vatPct:15},milestones:[{id:uid(),label:'Deposit on signature',pct:50,status:'Pending'},{id:uid(),label:'Pre-event payment',pct:40,status:'Pending'},{id:uid(),label:'Final on reconciliation',pct:10,status:'Pending'}],ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},quote:[],triple:[],schedule:[],designs:[],labour:[],logistics:[],vendors:[]};DB.currentEvent=id;page='quote';});}
+function newEvent(){modal('New event',[{k:'name',label:'Event name'},{k:'venue',label:'Venue'},{k:'dates',label:'Dates'}],v=>{if(!v.name)return;const id=uid();DB.events[id]={id,name:v.name,venue:v.venue||'',dates:v.dates||'',scope:0,status:'Draft',brief:'',venue_address:'',contacts:[],client:'',clientContact:'',clientPhone:'',clientEmail:'',clientAddress:'',clientVatNo:'',pricing:{marginPct:18,mgmtFeePct:8,discountPct:0,vatPct:15},milestones:[{id:uid(),label:'Deposit on signature',pct:50,status:'Pending'},{id:uid(),label:'Pre-event payment',pct:40,status:'Pending'},{id:uid(),label:'Final on reconciliation',pct:10,status:'Pending'}],ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},quote:[],triple:[],schedule:[],designs:[],labour:[],logistics:[],vendors:[]};DB.currentEvent=id;page='quote';});}
 
 /* ═══ EVENT INFO & BRIEF ════════════════════════════════════ */
 const WMO_DESC={0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',80:'Showers',81:'Heavy showers',82:'Violent showers',95:'Thunderstorm',96:'Thunderstorm+hail'};
@@ -1257,11 +1267,15 @@ function vEventInfo(){
     </div>
     <!-- CLIENT -->
     <div class="card">
-      <div class="sec-h"><h3>Client details</h3></div>
-      <div class="form-row"><label class="fl">Client / company</label><input class="ipt" value="${o.client||''}" oninput="DB.org.client=this.value;save()"></div>
-      <div class="form-row"><label class="fl">Client contact name</label><input class="ipt" value="${o.clientContact||''}" oninput="DB.org.clientContact=this.value;save()"></div>
-      <div class="form-row"><label class="fl">Client phone</label><input class="ipt" value="${o.clientPhone||''}" oninput="DB.org.clientPhone=this.value;save()"></div>
-      <div class="form-row"><label class="fl">Client email</label><input class="ipt" value="${o.clientEmail||''}" oninput="DB.org.clientEmail=this.value;save()"></div>
+      <div class="sec-h"><h3>Client details</h3><span style="font-size:.75rem;color:var(--muted)">Per-event — appears on all documents</span></div>
+      <div class="grid g2" style="gap:12px">
+        <div class="form-row"><label class="fl">Client company / name</label><input class="ipt" value="${e.client||''}" oninput="E().client=this.value;save()"></div>
+        <div class="form-row"><label class="fl">Contact person</label><input class="ipt" value="${e.clientContact||''}" oninput="E().clientContact=this.value;save()"></div>
+        <div class="form-row"><label class="fl">Phone</label><input class="ipt" type="tel" value="${e.clientPhone||''}" oninput="E().clientPhone=this.value;save()"></div>
+        <div class="form-row"><label class="fl">Email</label><input class="ipt" type="email" value="${e.clientEmail||''}" oninput="E().clientEmail=this.value;save()"></div>
+        <div class="form-row"><label class="fl">Billing address</label><textarea class="ipt" rows="2" oninput="E().clientAddress=this.value;save()">${e.clientAddress||''}</textarea></div>
+        <div class="form-row"><label class="fl">VAT / Tax number</label><input class="ipt" value="${e.clientVatNo||''}" oninput="E().clientVatNo=this.value;save()"></div>
+      </div>
     </div>
     <!-- WEATHER -->
     <div class="card">
@@ -1354,8 +1368,8 @@ function printEventBrief(){
     <p><b>Dates:</b> ${e.dates}</p>
     ${e.brief?`<p style="margin-top:8px;color:#444">${e.brief}</p>`:''}
     <h2>Client</h2>
-    <p><b>${o.client||'—'}</b>${o.clientContact?' · '+o.clientContact:''}</p>
-    ${o.clientPhone?`<p class="ph">${o.clientPhone}${o.clientEmail?' · '+o.clientEmail:''}</p>`:''}
+    <p><b>${e.client||o.client||'—'}</b>${(e.clientContact||o.clientContact)?' · '+(e.clientContact||o.clientContact):''}</p>
+    ${(e.clientPhone||o.clientPhone)?`<p class="ph">${e.clientPhone||o.clientPhone}${(e.clientEmail||o.clientEmail)?' · '+(e.clientEmail||o.clientEmail):''}</p>`:''}
     <h2>Section Contacts</h2>
     <table><tr><th>Section</th><th>Name</th><th>Role</th><th>Phone</th><th>Email</th></tr>
     ${e.contacts.map(c=>`<tr><td>${c.section}</td><td><b>${c.name}</b></td><td>${c.role}</td><td>${c.phone||'—'}</td><td>${c.email||'—'}</td></tr>`).join('')}
@@ -1758,7 +1772,7 @@ function genQuote(){
   e.status='Quoted';save();
   showDoc(`<div class="paper">
     ${docHeader('QUOTATION',ref)}
-    <h2>Prepared for: ${DB.org.client||'Client'}</h2>
+    <h2>Prepared for: ${E().client||DB.org.client||'Client'}</h2>
     <p><b>${e.name}</b> &nbsp;·&nbsp; ${e.venue} &nbsp;·&nbsp; ${e.dates}</p>
     ${Object.keys(byCat).map(cat=>`<h2>${cat}</h2><table><tr><th>Description</th><th>Vendor</th><th>Qty</th><th style="text-align:right">Amount</th></tr>${byCat[cat].map(i=>`<tr><td>${i.desc}</td><td class="ph">${i.vendor}</td><td>${i.qty}</td><td style="text-align:right">${fmt(i.cost*i.qty)}</td></tr>`).join('')}</table>`).join('')}
     ${e.labour.length?`<h2>Labour & Crew</h2><table><tr><th>Role</th><th>Rate / hr</th><th>Hours</th><th style="text-align:right">Cost</th></tr>${e.labour.map(l=>`<tr><td>${l.name}</td><td>${fmt(l.rate)}</td><td>${l.hours}</td><td style="text-align:right">${fmt(l.rate*l.hours)}</td></tr>`).join('')}</table>`:''}
@@ -1787,7 +1801,7 @@ function acceptQuote(){
     <h2>Parties</h2>
     <p><b>Service Provider:</b> ${DB.org.name||'Your Company'}</p>
     ${DB.org.address?`<p style="color:#555;font-size:12px;margin-top:-8px">${DB.org.address.replace(/\n/g,', ')}</p>`:''}
-    <p><b>Client:</b> ${DB.org.client||'Client'}</p>
+    <p><b>Client:</b> ${E().client||DB.org.client||'Client'}</p>
     <h2>Scope of Work</h2>
     <p>Delivery of <b>${e.name}</b> at ${e.venue} on ${e.dates}, per accepted quotation, including venue, production, staging, decor, catering, transport and crew as specified.</p>
     <h2>Contract Value</h2>
@@ -1799,7 +1813,7 @@ function acceptQuote(){
     ${e.milestones.map(m=>`<tr><td>${m.label}</td><td>${m.pct}%</td><td style="text-align:right">${fmt(q.total*m.pct/100)}</td></tr>`).join('')}</table>
     <h2>Financial Workflow & Audit Trail</h2>
     <p>All vendor purchase orders are issued against this contract value. Each PO and invoice is reconciled via Triple-Match accounting; variances exceeding 5% require Event Director approval and are logged to an immutable audit trail.</p>
-    <div class="sig"><div>${DB.org.name||'Service Provider'} · Date</div><div>${DB.org.client||'Client'} · Date</div></div>
+    <div class="sig"><div>${DB.org.name||'Service Provider'} · Date</div><div>${E().client||DB.org.client||'Client'} · Date</div></div>
     ${docTerms('contractTerms')}
   </div>`);
   setTimeout(()=>renderAdmin(),50);
@@ -1813,7 +1827,8 @@ function genInvoice(id){
   showDoc(`<div class="paper">
     ${docHeader('TAX INVOICE',ref)}
     <h2>Bill To</h2>
-    <p><b>${DB.org.client||'Client'}</b></p>
+    <p><b>${E().client||DB.org.client||'Client'}</b>${E().clientContact?`<br>${E().clientContact}`:''}</p>
+    ${(E().clientAddress||E().clientPhone||E().clientEmail)?`<p style="color:#555;font-size:12px;margin-top:-4px">${[E().clientAddress?E().clientAddress.replace(/\n/g,', '):'',E().clientPhone,E().clientEmail].filter(Boolean).join(' · ')}</p>`:''}
     <h2>${m.label} — ${e.name}</h2>
     <table><tr><th>Description</th><th style="text-align:right">Amount (excl. VAT)</th></tr>
     <tr><td>${m.label} — ${m.pct}% of contract value<br><span class="ph">${e.venue} · ${e.dates}</span></td><td style="text-align:right">${fmt(net)}</td></tr></table>
