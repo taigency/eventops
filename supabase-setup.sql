@@ -89,6 +89,41 @@ create policy "Team member reads org data"
     )
   );
 
+-- Company accounts — one row per registered company/user (managed by admin)
+create table if not exists company_accounts (
+  id              uuid primary key default gen_random_uuid(),
+  user_id         uuid references auth.users(id) on delete cascade unique,
+  email           text not null,
+  company_name    text,
+  owner_name      text,
+  plan            text default 'beta',       -- beta, starter, growth, pro, agency
+  monthly_fee     numeric default 0,
+  status          text default 'active',     -- active, blocked, suspended
+  blocked_reason  text,
+  blocked_at      timestamptz,
+  notes           text,                      -- admin private notes
+  event_count     int default 0,
+  team_size       int default 0,
+  registered_at   timestamptz default now(),
+  last_active     timestamptz
+);
+
+alter table company_accounts enable row level security;
+
+-- Users can read/upsert their own row
+create policy "User manages own account row"
+  on company_accounts for all
+  to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+-- Admin reads and updates all
+create policy "Admin full access to accounts"
+  on company_accounts for all
+  to authenticated
+  using (auth.jwt() ->> 'email' = 'tiaanj@gmail.com')
+  with check (auth.jwt() ->> 'email' = 'tiaanj@gmail.com');
+
 -- RLS policies
 
 -- user_feedback: authenticated users can insert their own rows; admin reads all

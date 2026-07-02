@@ -2153,12 +2153,52 @@ function toggleNotifPanel(){
 /* ═══ INIT ══════════════════════════════════════════════════ */
 function isCrewBoard(){ return window.location.hash==='#crewboard'; }
 
+async function syncAccountRecord(){
+  if(!supabaseUser) return;
+  try{
+    await sb.from('company_accounts').upsert({
+      user_id: supabaseUser.id,
+      email: supabaseUser.email,
+      company_name: DB.org?.name||'',
+      owner_name: DB.org?.ownerName||'',
+      last_active: new Date().toISOString(),
+      event_count: Object.keys(DB.events||{}).length,
+      team_size: (DB.team||[]).length,
+    },{onConflict:'user_id'});
+  }catch(e){/* silent */}
+}
+
+async function checkAccountStatus(){
+  if(!supabaseUser) return true;
+  try{
+    const {data} = await sb.from('company_accounts').select('status,blocked_reason').eq('user_id',supabaseUser.id).maybeSingle();
+    if(data?.status==='blocked'){
+      document.getElementById('app').innerHTML=`
+        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)">
+          <div style="background:var(--panel);border:1px solid rgba(244,63,94,.3);border-radius:18px;padding:40px;max-width:440px;text-align:center">
+            <div style="font-size:2.5rem;margin-bottom:16px">🚫</div>
+            <div style="font-size:1.1rem;font-weight:700;margin-bottom:8px;color:var(--bad)">Account suspended</div>
+            <div style="color:var(--muted);font-size:.88rem;margin-bottom:20px">${data.blocked_reason||'Your account has been suspended. Please contact support.'}</div>
+            <div style="font-size:.8rem;color:var(--muted);margin-bottom:20px">Email: <a href="mailto:support@eventops.app" style="color:var(--accent2)">support@eventops.app</a></div>
+            <button class="btn btn-g" onclick="signOut()">Sign out</button>
+          </div>
+        </div>`;
+      document.getElementById('app').style.cssText='display:block';
+      return false;
+    }
+  }catch(e){/* if table missing, allow through */}
+  return true;
+}
+
 async function init(){
   if(isCrewBoard()){ renderCrewBoard(); return; }
   const {data:{session:s}} = await sb.auth.getSession();
   if(s){
     supabaseUser = s.user;
     await loadFromCloud();
+    const allowed = await checkAccountStatus();
+    if(!allowed) return;
+    await syncAccountRecord();
     await refreshAppCounts();
     await loadAdminMessages();
   }
@@ -2168,6 +2208,9 @@ async function init(){
     supabaseUser = s?.user || null;
     if(supabaseUser && !wasLoggedIn){
       await loadFromCloud();
+      const allowed = await checkAccountStatus();
+      if(!allowed) return;
+      await syncAccountRecord();
       await refreshAppCounts();
       await loadAdminMessages();
       render();
