@@ -538,7 +538,7 @@ const RESP_OPTIONS=['Budgeting','Vendor management','Scheduling','On-site ops','
 const TEAM_COLORS=['#5462F0','#0BB5CC','#8B5CF6','#F59E0B','#22C55E','#F43F5E','#EC4899','#14B8A6'];
 let _wiz = {step:1, name:'', myRole:'Event Director', company:'', tagline:'', team:[], showAddForm:false, editIdx:-1};
 
-const PAGES=[{id:'dashboard',ic:'🎯',label:'Director'},{id:'quote',ic:'🧾',label:'Quotation'},{id:'finance',ic:'💰',label:'Finance'},{id:'designs',ic:'🎨',label:'Designs'},{id:'schedule',ic:'🗓️',label:'Schedule'},{id:'ripple',ic:'⚡',label:'Ripple Engine'},{id:'workforce',ic:'👷',label:'Workforce'},{id:'logistics',ic:'🚚',label:'Logistics'},{id:'compliance',ic:'🛡️',label:'Compliance'},{id:'eventinfo',ic:'📋',label:'Event Info & Brief'},{id:'comms',ic:'💬',label:'Comms & Groups'},{id:'settings',ic:'⚙️',label:'Settings & Branding'}];
+const PAGES=[{id:'dashboard',ic:'🎯',label:'Director'},{id:'quote',ic:'🧾',label:'Quotation'},{id:'finance',ic:'💰',label:'Finance'},{id:'designs',ic:'🎨',label:'Designs'},{id:'schedule',ic:'🗓️',label:'Schedule'},{id:'ripple',ic:'⚡',label:'Ripple Engine'},{id:'workforce',ic:'👷',label:'Workforce'},{id:'logistics',ic:'🚚',label:'Logistics'},{id:'compliance',ic:'🛡️',label:'Compliance'},{id:'eventinfo',ic:'📋',label:'Event Info & Brief'},{id:'comms',ic:'💬',label:'Comms & Groups'},{id:'settings',ic:'⚙️',label:'Settings & Branding'},{id:'account',ic:'👤',label:'My Account'}];
 let page='dashboard', fieldTab='duties';
 
 /* ═══ ROUTER ════════════════════════════════════════════════ */
@@ -908,7 +908,7 @@ function renderAdmin(){
       </div>
       <div class="content" id="content"></div>
     </div>`;
-  ({dashboard:vDash,quote:vQuote,finance:vFin,designs:vDesigns,schedule:vSched,ripple:vRipple,workforce:vWork,logistics:vLog,compliance:vComp,eventinfo:vEventInfo,comms:vComms,settings:vSettings}[page])();
+  ({dashboard:vDash,quote:vQuote,finance:vFin,designs:vDesigns,schedule:vSched,ripple:vRipple,workforce:vWork,logistics:vLog,compliance:vComp,eventinfo:vEventInfo,comms:vComms,settings:vSettings,account:vAccount}[page])();
 }
 
 function go(p){stopCommsPoll();page=p;renderAdmin();}
@@ -965,6 +965,148 @@ function vLog(){const e=E();document.getElementById('content').innerHTML=`<div c
 function vComp(){const e=E(),today=new Date();document.getElementById('content').innerHTML=`<div class="pg-title">Supplier Compliance</div><div class="pg-sub">CSD registration, tax status, and B-BBEE affidavit tracking.</div><div class="card"><div class="sec-h"><h3>Vendors</h3><button class="btn btn-p btn-sm" onclick="addVendor()">+ Add vendor</button></div><table><tr><th>Vendor</th><th>CSD</th><th>B-BBEE</th><th>Affidavit expiry</th><th>Status</th><th></th></tr>${e.vendors.map(v=>{const exp=new Date(v.expiry),days=Math.round((exp-today)/86400000);let cls,txt;if(!v.csd){cls='b-red';txt='CSD / tax issue';}else if(days<0){cls='b-red';txt='Affidavit expired';}else if(days<30){cls='b-amber';txt='Expiring ('+days+'d)';}else{cls='b-green';txt='Compliant';}return`<tr><td>${v.name}</td><td><span class="badge ${v.csd?'b-green':'b-red'}">${v.csd?'Verified':'Not found'}</span></td><td>${v.bbbee}</td><td>${v.expiry}</td><td><span class="badge ${cls}">${txt}</span></td><td><button class="x" onclick="del('vendors','${v.id}')">✕</button></td></tr>`;}).join('')}</table></div>`;}
 
 /* ═══ SETTINGS & BRANDING ══════════════════════════════════ */
+/* ═══ ACCOUNT & PROFILE ═════════════════════════════════════ */
+function vAccount(){
+  const o=DB.org;
+  const av=initials(o.ownerName||supabaseUser?.email||'?');
+  const color=TEAM_COLORS[0];
+  document.getElementById('content').innerHTML=`
+  <div class="pg-title" style="margin-bottom:4px">👤 My Account</div>
+  <div class="pg-sub" style="margin-bottom:20px">Manage your profile, company details and security settings.</div>
+
+  <div class="grid g2">
+  <div>
+    <!-- PROFILE -->
+    <div class="card">
+      <div class="sec-h"><h3>Profile</h3>
+        <button class="btn btn-p btn-sm" onclick="saveAccount()">💾 Save changes</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        <div style="width:64px;height:64px;border-radius:18px;background:${color};display:grid;place-items:center;font-size:1.4rem;font-weight:700;color:#fff;flex-shrink:0">${av}</div>
+        <div>
+          <div style="font-weight:700;font-size:1rem">${o.ownerName||'—'}</div>
+          <div style="color:var(--muted);font-size:.82rem">${supabaseUser?.email||''}</div>
+          <div style="margin-top:4px"><span class="role-badge" style="display:inline-block;padding:2px 10px;border-radius:20px;background:rgba(84,98,240,.15);color:var(--accent);font-size:.75rem;font-weight:600">${DB.role||'Event Director'}</span></div>
+        </div>
+      </div>
+      <div class="form-row"><label class="fl">Your name</label>
+        <input class="ipt" id="acc-name" value="${escHtml(o.ownerName||'')}" placeholder="Full name">
+      </div>
+      <div class="form-row"><label class="fl">Your role / title</label>
+        <select class="ipt" id="acc-role">${ROLES.map(r=>`<option ${r===(DB.role||'Event Director')?'selected':''}>${r}</option>`).join('')}</select>
+      </div>
+      <div class="form-row"><label class="fl">Email address</label>
+        <input class="ipt" value="${escHtml(supabaseUser?.email||'')}" disabled style="opacity:.55;cursor:not-allowed">
+        <div style="font-size:.73rem;color:var(--muted);margin-top:4px">Email is managed by your sign-in provider.</div>
+      </div>
+    </div>
+
+    <!-- SECURITY -->
+    <div class="card">
+      <div class="sec-h"><h3>Security</h3></div>
+      <div style="font-size:.85rem;color:var(--muted);margin-bottom:14px">Change your password or sign out of all sessions.</div>
+      <div class="form-row"><label class="fl">New password</label>
+        <input class="ipt" id="acc-pw1" type="password" placeholder="New password (min 8 chars)">
+      </div>
+      <div class="form-row"><label class="fl">Confirm new password</label>
+        <input class="ipt" id="acc-pw2" type="password" placeholder="Repeat new password">
+      </div>
+      <div id="acc-pw-err" style="font-size:.8rem;color:var(--bad);margin-bottom:8px;min-height:16px"></div>
+      <button class="btn btn-g" style="width:100%" onclick="changePassword()">🔒 Update password</button>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+        <button class="btn btn-g" style="width:100%;color:var(--bad);border-color:rgba(244,63,94,.3)" onclick="signOut()">⏻ Sign out of all sessions</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <!-- COMPANY -->
+    <div class="card">
+      <div class="sec-h"><h3>Company details</h3>
+        <button class="btn btn-p btn-sm" onclick="saveAccount()">💾 Save</button>
+      </div>
+      <div class="form-row"><label class="fl">Company / trading name</label>
+        <input class="ipt" id="acc-company" value="${escHtml(o.name||'')}" placeholder="Your Event Company (Pty) Ltd">
+      </div>
+      <div class="form-row"><label class="fl">Tagline</label>
+        <input class="ipt" id="acc-tagline" value="${escHtml(o.tagline||'')}" placeholder="Professional Event Management">
+      </div>
+      <div class="form-row"><label class="fl">Phone</label>
+        <input class="ipt" id="acc-phone" type="tel" value="${escHtml(o.phone||'')}" placeholder="+27 11 000 0000">
+      </div>
+      <div class="form-row"><label class="fl">Email</label>
+        <input class="ipt" id="acc-email" type="email" value="${escHtml(o.email||'')}" placeholder="info@yourcompany.co.za">
+      </div>
+      <div class="form-row"><label class="fl">Address</label>
+        <textarea class="ipt" id="acc-address" rows="3" placeholder="Street address&#10;City, Province&#10;Postal code">${escHtml(o.address||'')}</textarea>
+      </div>
+      <div class="form-row"><label class="fl">VAT registration number</label>
+        <input class="ipt" id="acc-vat" value="${escHtml(o.vatNo||'')}" placeholder="e.g. 4123456789">
+      </div>
+      <div class="form-row"><label class="fl">Company registration number</label>
+        <input class="ipt" id="acc-reg" value="${escHtml(o.regNo||'')}" placeholder="e.g. 2019/123456/07">
+      </div>
+      <div class="form-row"><label class="fl">Banking details <span style="color:var(--muted);font-size:.75rem">(shown on invoices)</span></label>
+        <textarea class="ipt" id="acc-banking" rows="3" placeholder="Bank name&#10;Account number&#10;Branch code">${escHtml(o.banking||'')}</textarea>
+      </div>
+    </div>
+
+    <!-- LOGO -->
+    <div class="card">
+      <div class="sec-h"><h3>Company logo</h3>
+        <div style="display:flex;gap:8px">
+          ${o.logo?`<button class="btn btn-g btn-sm" onclick="DB.org.logo=null;save();vAccount()">✕ Remove</button>`:''}
+          <button class="btn btn-p btn-sm" onclick="document.getElementById('acc-logo-upl').click()">⬆ Upload</button>
+        </div>
+      </div>
+      <input type="file" id="acc-logo-upl" accept="image/*" style="display:none" onchange="uploadLogoFromAccount(this)">
+      ${o.logo
+        ? `<img src="${o.logo}" style="max-height:80px;max-width:220px;object-fit:contain;border-radius:8px;background:var(--bg2);padding:10px">`
+        : `<div style="width:160px;height:72px;background:var(--bg2);border:1.5px dashed var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.8rem">No logo uploaded</div>`}
+      <div style="font-size:.75rem;color:var(--muted);margin-top:10px">Logo appears on all printed documents — quotes, invoices, contracts.</div>
+    </div>
+  </div>
+  </div>`;
+}
+
+function saveAccount(){
+  DB.org.ownerName = document.getElementById('acc-name')?.value.trim() || DB.org.ownerName;
+  DB.role          = document.getElementById('acc-role')?.value || DB.role;
+  DB.org.name      = document.getElementById('acc-company')?.value.trim() || DB.org.name;
+  DB.org.tagline   = document.getElementById('acc-tagline')?.value.trim() ?? DB.org.tagline;
+  DB.org.phone     = document.getElementById('acc-phone')?.value.trim() ?? DB.org.phone;
+  DB.org.email     = document.getElementById('acc-email')?.value.trim() ?? DB.org.email;
+  DB.org.address   = document.getElementById('acc-address')?.value.trim() ?? DB.org.address;
+  DB.org.vatNo     = document.getElementById('acc-vat')?.value.trim() ?? DB.org.vatNo;
+  DB.org.regNo     = document.getElementById('acc-reg')?.value.trim() ?? DB.org.regNo;
+  DB.org.banking   = document.getElementById('acc-banking')?.value.trim() ?? DB.org.banking;
+  save();
+  toast('Account saved ✓');
+  vAccount();
+}
+
+async function changePassword(){
+  const p1=document.getElementById('acc-pw1').value;
+  const p2=document.getElementById('acc-pw2').value;
+  const err=document.getElementById('acc-pw-err');
+  if(!p1){err.textContent='Enter a new password.';return;}
+  if(p1.length<8){err.textContent='Password must be at least 8 characters.';return;}
+  if(p1!==p2){err.textContent='Passwords do not match.';return;}
+  err.textContent='';
+  const {error}=await sb.auth.updateUser({password:p1});
+  if(error){err.textContent=error.message;return;}
+  document.getElementById('acc-pw1').value='';
+  document.getElementById('acc-pw2').value='';
+  toast('Password updated ✓');
+}
+
+function uploadLogoFromAccount(inp){
+  const file=inp.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=e=>{DB.org.logo=e.target.result;save();vAccount();};
+  r.readAsDataURL(file);
+}
+
 function vSettings(){
   const o=DB.org;
   const logoHtml=o.logo?`<img src="${o.logo}" style="max-height:70px;max-width:200px;object-fit:contain;border-radius:6px">`:
