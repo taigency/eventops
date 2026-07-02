@@ -1216,7 +1216,7 @@ function addLabour(){
 }
 function addLog(){modal('Add logistics task',[{k:'task',label:'Task'}],v=>{if(v.task)E().logistics.push({id:uid(),task:v.task,status:'Scheduled'});});}
 function addVendor(){modal('Add vendor',[{k:'name',label:'Vendor name'},{k:'bbbee',label:'B-BBEE level',ph:'Level 1'},{k:'expiry',label:'Affidavit expiry',type:'date'}],v=>{if(v.name)E().vendors.push({id:uid(),name:v.name,csd:true,bbbee:v.bbbee||'—',expiry:v.expiry||'2026-12-31'});});}
-function newEvent(){modal('New event',[{k:'name',label:'Event name'},{k:'venue',label:'Venue'},{k:'dates',label:'Dates'}],v=>{if(!v.name)return;const id=uid();DB.events[id]={id,name:v.name,venue:v.venue||'',dates:v.dates||'',scope:0,status:'Draft',pricing:{marginPct:18,mgmtFeePct:8,discountPct:0,vatPct:15},milestones:[{id:uid(),label:'Deposit on signature',pct:50,status:'Pending'},{id:uid(),label:'Pre-event payment',pct:40,status:'Pending'},{id:uid(),label:'Final on reconciliation',pct:10,status:'Pending'}],ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},quote:[],triple:[],schedule:[],designs:[],labour:[],logistics:[],vendors:[]};DB.currentEvent=id;page='quote';});}
+function newEvent(){modal('New event',[{k:'name',label:'Event name'},{k:'venue',label:'Venue'},{k:'dates',label:'Dates'}],v=>{if(!v.name)return;const id=uid();DB.events[id]={id,name:v.name,venue:v.venue||'',dates:v.dates||'',scope:0,status:'Draft',brief:'',venue_address:'',contacts:[],pricing:{marginPct:18,mgmtFeePct:8,discountPct:0,vatPct:15},milestones:[{id:uid(),label:'Deposit on signature',pct:50,status:'Pending'},{id:uid(),label:'Pre-event payment',pct:40,status:'Pending'},{id:uid(),label:'Final on reconciliation',pct:10,status:'Pending'}],ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},quote:[],triple:[],schedule:[],designs:[],labour:[],logistics:[],vendors:[]};DB.currentEvent=id;page='quote';});}
 
 /* ═══ EVENT INFO & BRIEF ════════════════════════════════════ */
 const WMO_DESC={0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',80:'Showers',81:'Heavy showers',82:'Violent showers',95:'Thunderstorm',96:'Thunderstorm+hail'};
@@ -1377,10 +1377,11 @@ function groupIcon(g){return{'All Hands':'📢','Production':'🎬','Operations'
 
 function getGroups(){
   const e=E();
-  const depts=[...new Set(e.schedule.map(s=>s.owner))];
+  const DEFAULT_DEPTS=['Production','Operations','AV & Technical','Staging','Catering','Logistics'];
+  const schedDepts=[...new Set(e.schedule.map(s=>s.owner))];
+  const depts=[...new Set([...DEFAULT_DEPTS,...schedDepts])];
   const base=['All Hands',...depts];
-  // add DM groups for contacts
-  const dms=e.contacts.map(c=>({type:'dm',name:c.name,contact:c}));
+  const dms=(e.contacts||[]).map(c=>({type:'dm',name:c.name,contact:c}));
   return{groups:base,dms};
 }
 
