@@ -114,26 +114,26 @@ input.ipt:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgb
   <div class="nav-brand"><div class="m">⚡</div>EventOps</div>
   <div class="nav-links">
     <a href="#features">Features</a>
-    <a href="#pricing">Pricing</a>
+    <a href="#beta">Beta</a>
     <a href="#how">How it works</a>
   </div>
   <div class="nav-cta">
     <a href="index.html" class="btn btn-g">Sign in</a>
-    <button class="btn btn-p" onclick="openPayModal('pro')">Start free trial</button>
+    <button class="btn btn-p" onclick="document.getElementById('reg-section').scrollIntoView({behavior:'smooth'})">Register free →</button>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
   <div class="glow"></div>
-  <div class="hero-badge">⚡ Now in Beta — 14-day free trial</div>
+  <div class="hero-badge">🎉 Free Beta — Register your company today</div>
   <h1>The ERP built for<br><span class="grad">event professionals</span></h1>
   <p>Quotations, finance, crew management, logistics, compliance and real-time comms — one platform replacing five tools and every WhatsApp group.</p>
   <div class="hero-ctas">
-    <button class="btn btn-p btn-lg" onclick="openPayModal('pro')">Start free trial — no card required</button>
-    <a href="index.html" class="btn btn-g btn-lg">View demo</a>
+    <button class="btn btn-p btn-lg" onclick="document.getElementById('reg-section').scrollIntoView({behavior:'smooth'})">Register your company — it's free</button>
+    <a href="index.html" class="btn btn-g btn-lg">Explore demo</a>
   </div>
-  <div class="hero-note">14-day free trial · Cancel anytime · South African & international payments</div>
+  <div class="hero-note">Free during beta · All features unlocked · Help shape the product with your feedback</div>
 </section>
 
 <!-- LOGOS -->
@@ -162,68 +162,52 @@ input.ipt:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgb
   </div>
 </section>
 
-<!-- PRICING -->
-<section class="pricing" id="pricing">
+<!-- BETA REGISTRATION -->
+<section class="pricing" id="beta">
   <div class="pricing-inner">
-    <div class="section-label">Simple pricing</div>
-    <h2 class="section-h">Start free. Scale as you grow.</h2>
-    <p style="color:var(--muted)">14-day free trial on the Pro plan. No card required to start. Pay with card (Stripe) or instant EFT (Ozow).</p>
-    <div class="pricing-grid">
-
-      <!-- STARTER -->
-      <div class="plan-card">
-        <div class="plan-name">Starter</div>
-        <div class="plan-price"><sup>$</sup>5<span>/month</span></div>
-        <div class="plan-zar">≈ R90/month · billed monthly</div>
-        <div class="plan-desc">Perfect for independent event coordinators managing a single event at a time.</div>
-        <ul class="feat-list">
-          <li class="on"><span class="ck">✓</span> 1 active event</li>
-          <li class="on"><span class="ck">✓</span> Quotation builder</li>
-          <li class="on"><span class="ck">✓</span> Finance & milestone invoicing</li>
-          <li class="on"><span class="ck">✓</span> Production schedule</li>
-          <li class="on"><span class="ck">✓</span> Designs & renders upload</li>
-          <li class="on"><span class="ck">✓</span> White-label documents</li>
-          <li class="on"><span class="ck">✓</span> Field app (3 crew max)</li>
-          <li><span class="ck" style="opacity:.3">✗</span> Comms Hub & group chat</li>
-          <li><span class="ck" style="opacity:.3">✗</span> Workforce marketplace</li>
-          <li><span class="ck" style="opacity:.3">✗</span> Ripple Engine</li>
-          <li><span class="ck" style="opacity:.3">✗</span> Supplier compliance</li>
-        </ul>
-        <div class="pay-opts">
-          <div class="pay-opt-label">Pay with</div>
-          <button class="btn btn-g" onclick="openPayModal('starter','stripe')" style="width:100%">💳 Card via Stripe</button>
-          <button class="btn btn-g" onclick="openPayModal('starter','ozow')" style="width:100%">🏦 Instant EFT via Ozow</button>
-        </div>
-      </div>
-
-      <!-- PRO -->
-      <div class="plan-card featured">
-        <div class="plan-badge">Most popular</div>
-        <div class="plan-name">Pro</div>
-        <div class="plan-price"><sup>$</sup>25<span>/month</span></div>
-        <div class="plan-zar">≈ R450/month · billed monthly</div>
-        <div class="plan-desc">For professional event companies running multiple events with a full crew.</div>
-        <ul class="feat-list">
-          <li class="on"><span class="ck">✓</span> <b>Unlimited</b> events</li>
-          <li class="on"><span class="ck">✓</span> All Starter features</li>
-          <li class="on"><span class="ck">✓</span> Comms Hub — group & direct chat</li>
-          <li class="on"><span class="ck">✓</span> Workforce marketplace & crew board</li>
-          <li class="on"><span class="ck">✓</span> ⚡ Ripple Engine</li>
-          <li class="on"><span class="ck">✓</span> Supplier compliance tracking</li>
-          <li class="on"><span class="ck">✓</span> Event Info & production brief PDF</li>
-          <li class="on"><span class="ck">✓</span> Weather forecast integration</li>
-          <li class="on"><span class="ck">✓</span> Unlimited crew on field app</li>
-          <li class="on"><span class="ck">✓</span> Priority support</li>
-        </ul>
-        <div class="pay-opts">
-          <div class="pay-opt-label">Start 14-day free trial</div>
-          <button class="btn btn-p" onclick="openPayModal('pro','stripe')" style="width:100%">💳 Card via Stripe</button>
-          <button class="btn btn-g" onclick="openPayModal('pro','ozow')" style="width:100%;margin-top:0">🏦 Instant EFT via Ozow</button>
-        </div>
-      </div>
-
+    <div class="section-label">Free beta access</div>
+    <h2 class="section-h">Everything unlocked.<br>Completely free.</h2>
+    <p style="color:var(--muted);max-width:560px;margin:0 auto 16px">We're giving EventOps to event companies to use, test, and help us build the right product. Every feature is open — no limits, no credit card, no trial period. Just give us your feedback.</p>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:50px">
+      <span style="background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2);border-radius:100px;padding:5px 14px;font-size:.8rem;font-weight:600">✓ All modules unlocked</span>
+      <span style="background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2);border-radius:100px;padding:5px 14px;font-size:.8rem;font-weight:600">✓ Unlimited events</span>
+      <span style="background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2);border-radius:100px;padding:5px 14px;font-size:.8rem;font-weight:600">✓ No credit card</span>
+      <span style="background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2);border-radius:100px;padding:5px 14px;font-size:.8rem;font-weight:600">✓ Full Comms Hub</span>
+      <span style="background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2);border-radius:100px;padding:5px 14px;font-size:.8rem;font-weight:600">✓ Crew Board</span>
     </div>
-    <p style="color:var(--muted);font-size:.82rem;margin-top:24px">All prices in USD. Ozow payments billed in ZAR at prevailing exchange rate. Cancel anytime — no lock-in.</p>
+    <div id="reg-section" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:800px;margin:0 auto;text-align:left">
+      <!-- REGISTER -->
+      <div style="background:var(--bg);border:1px solid rgba(84,98,240,.4);border-radius:22px;padding:32px;box-shadow:0 0 60px rgba(84,98,240,.1)">
+        <div style="font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent2);margin-bottom:8px;font-weight:600">Register your company</div>
+        <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;letter-spacing:-.01em">Get started in 30 seconds</h3>
+        <p style="color:var(--muted);font-size:.85rem;margin-bottom:22px;line-height:1.6">Create your account, set up your company and start managing events — completely free while we're in beta.</p>
+        <div class="err" id="reg-err"></div>
+        <input class="ipt" id="reg-email" type="email" placeholder="Work email address">
+        <input class="ipt" id="reg-pass" type="password" placeholder="Create a password (min 8 chars)">
+        <button class="btn btn-p" style="width:100%;padding:13px;font-size:.95rem" onclick="doRegister()">Register free →</button>
+        <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:12px">Already have an account? <a href="index.html" style="color:var(--accent)">Sign in →</a></p>
+        <div id="reg-success" style="display:none;text-align:center;padding:16px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:12px;margin-top:12px">
+          <div style="font-size:1.5rem;margin-bottom:6px">🎉</div>
+          <div style="font-weight:700;color:#4ade80;margin-bottom:4px">Welcome to EventOps!</div>
+          <div style="font-size:.83rem;color:var(--muted)">Redirecting to the app…</div>
+        </div>
+      </div>
+      <!-- WHAT YOU GET -->
+      <div style="display:flex;flex-direction:column;gap:14px;justify-content:center">
+        ${[
+          ['🧾','Smart Quotation Builder','Vendor quotes by category with margin, VAT and PDF generation'],
+          ['💰','Finance & Milestone Invoicing','Triple-Match accounting and tax invoice generation'],
+          ['👷','Workforce Crew Board','Post positions, receive crew quotes, manage contracts'],
+          ['💬','Comms Hub','Replace WhatsApp — section groups, direct messages, broadcasts'],
+          ['⚡','Ripple Engine','Real-time cost cascade simulation for delays'],
+          ['🛡️','Supplier Compliance','CSD, B-BBEE and affidavit tracking with expiry alerts'],
+        ].map(([ic,title,desc]) => `<div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="font-size:1.2rem;flex-shrink:0;margin-top:2px">${ic}</div>
+          <div><div style="font-weight:600;font-size:.9rem;margin-bottom:2px">${title}</div><div style="font-size:.8rem;color:var(--muted);line-height:1.5">${desc}</div></div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:.82rem;margin-top:32px">Beta is free indefinitely while we gather feedback. When we introduce pricing, existing beta users get an early-adopter rate.</p>
   </div>
 </section>
 
@@ -236,8 +220,8 @@ input.ipt:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgb
   <div class="steps">
     <div class="step">
       <div class="step-num">1</div>
-      <h3>Create your account</h3>
-      <p>Sign up with your email. 14-day free Pro trial starts immediately — no card needed.</p>
+      <h3>Register free</h3>
+      <p>Create your account with your email. No credit card, no trial — just instant full access.</p>
     </div>
     <div class="step">
       <div class="step-num">2</div>
@@ -246,7 +230,7 @@ input.ipt:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgb
     </div>
     <div class="step">
       <div class="step-num">3</div>
-      <h3>Create your first event</h3>
+      <h3>Run your first event</h3>
       <p>Add vendors, build your quote, roster crew, and generate a branded quotation in minutes.</p>
     </div>
   </div>
@@ -255,149 +239,40 @@ input.ipt:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgb
 <!-- CTA BANNER -->
 <div class="cta-banner">
   <h2>Ready to run professional events?</h2>
-  <p>Join event companies across South Africa already using EventOps to deliver exceptional events.</p>
-  <button class="btn btn-p btn-lg" onclick="openPayModal('pro')">Start your free 14-day trial</button>
+  <p>Join event companies across South Africa already using EventOps. It's completely free while we're in beta — and your feedback shapes the product.</p>
+  <button class="btn btn-p btn-lg" onclick="document.getElementById('reg-section').scrollIntoView({behavior:'smooth'})">Register your company free →</button>
 </div>
 
 <!-- FOOTER -->
 <footer>
   <div style="display:flex;align-items:center;gap:10px;font-weight:700"><span style="width:28px;height:28px;border-radius:8px;background:var(--grad);display:inline-grid;place-items:center;font-size:13px">⚡</span>EventOps</div>
   <div style="display:flex;gap:24px"><a href="index.html" style="color:var(--muted)">App</a><a href="mailto:support@eventops.io" style="color:var(--muted)">Support</a></div>
-  <div>© 2026 EventOps · Built for the industry</div>
+  <div>© 2026 EventOps · Free beta · Built for the industry</div>
 </footer>
 
-<!-- PAYMENT MODAL -->
-<div class="pay-modal-bg" id="payModalBg">
-  <div class="pay-modal">
-    <h2 id="pm-title">Start your trial</h2>
-    <p id="pm-sub">14 days free, then billed monthly. Cancel anytime.</p>
-    <div class="err" id="pm-err"></div>
-    <input class="ipt" id="pm-email" type="email" placeholder="Your email address">
-    <input class="ipt" id="pm-pass" type="password" placeholder="Create a password (min 8 chars)">
-    <div class="pay-method-grid" id="pm-methods">
-      <div class="pay-method sel" id="pm-stripe" onclick="selectPayMethod('stripe')">
-        <div class="pm-icon">💳</div>
-        <div class="pm-name">Card</div>
-        <div class="pm-sub">Visa · Mastercard<br>via Stripe</div>
-      </div>
-      <div class="pay-method" id="pm-ozow" onclick="selectPayMethod('ozow')">
-        <div class="pm-icon">🏦</div>
-        <div class="pm-name">Instant EFT</div>
-        <div class="pm-sub">South African banks<br>via Ozow</div>
-      </div>
-    </div>
-    <button class="btn btn-p" id="pm-btn" style="width:100%;padding:13px;font-size:.95rem" onclick="submitPayment()">Continue →</button>
-    <button class="btn btn-g" style="width:100%;padding:11px;margin-top:8px" onclick="closePayModal()">Cancel</button>
-    <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:14px">Your data is stored securely. No spam, ever.</p>
-  </div>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// CONFIG — replace with your actual keys
 const SUPABASE_URL = 'https://awbtpgugmzitjqovlewr.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3YnRwZ3VnbXppdGpxb3ZsZXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTkzMDYsImV4cCI6MjA5NzQzNTMwNn0.0SJMcy-B8tfoJHFDVwz4wQPuA03IU5NFWMBKe1_XNn0';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3YnRwZ3VnbXppdGpxb3ZsZXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MTY4MDMsImV4cCI6MjA2NTQ5MjgwM30.HJxVwNS5PLf8lT-LPjTbVYrmSFSwStQ7_y7uf5iULYg';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Stripe Price IDs — create these in your Stripe Dashboard → Products
-const STRIPE_PRICE_STARTER = 'price_STARTER_ID_HERE';
-const STRIPE_PRICE_PRO     = 'price_PRO_ID_HERE';
-
-let selectedPlan = 'pro';
-let selectedMethod = 'stripe';
-
-function openPayModal(plan, method = 'stripe') {
-  selectedPlan = plan;
-  selectedMethod = method;
-  selectPayMethod(method);
-  document.getElementById('pm-title').textContent = plan === 'pro' ? 'Start Pro free trial' : 'Start Starter plan';
-  document.getElementById('pm-sub').textContent = plan === 'pro'
-    ? '14 days free on Pro, then $25/month. No card charged until trial ends.'
-    : '$5/month — billed immediately after sign-up.';
-  document.getElementById('pm-err').textContent = '';
-  document.getElementById('payModalBg').classList.add('show');
-}
-
-function closePayModal() { document.getElementById('payModalBg').classList.remove('show'); }
-document.getElementById('payModalBg').onclick = e => { if (e.target.id === 'payModalBg') closePayModal(); };
-
-function selectPayMethod(m) {
-  selectedMethod = m;
-  document.getElementById('pm-stripe').classList.toggle('sel', m === 'stripe');
-  document.getElementById('pm-ozow').classList.toggle('sel', m === 'ozow');
-  document.getElementById('pm-btn').textContent = m === 'stripe' ? 'Pay with card →' : 'Pay with Instant EFT →';
-}
-
-async function submitPayment() {
-  const email = document.getElementById('pm-email').value.trim();
-  const pass = document.getElementById('pm-pass').value;
-  const err = document.getElementById('pm-err');
+async function doRegister() {
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  const err   = document.getElementById('reg-err');
   err.textContent = '';
   if (!email || pass.length < 8) { err.textContent = 'Enter a valid email and password (min 8 chars).'; return; }
-
-  document.getElementById('pm-btn').textContent = 'Setting up account…';
-  document.getElementById('pm-btn').disabled = true;
-
-  try {
-    // 1. Sign up with Supabase
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const { data, error: signUpErr } = await sb.auth.signUp({ email, password: pass });
-    if (signUpErr) { err.textContent = signUpErr.message; reset(); return; }
-
-    const userId = data.user?.id;
-    const origin = window.location.origin;
-
-    if (selectedMethod === 'stripe') {
-      const priceId = selectedPlan === 'pro' ? STRIPE_PRICE_PRO : STRIPE_PRICE_STARTER;
-      const res = await fetch('/api/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          priceId, userId, email,
-          successUrl: `${origin}/index.html?checkout=success`,
-          cancelUrl: `${origin}/landing.html?checkout=cancel`,
-        }),
-      });
-      const { url, error: checkoutErr } = await res.json();
-      if (checkoutErr) { err.textContent = checkoutErr; reset(); return; }
-      window.location.href = url;
-    } else {
-      // Ozow EFT
-      const amountUSD = selectedPlan === 'pro' ? 25 : 5;
-      // Convert to ZAR — in production fetch live rate; here use a fixed estimate
-      const amountZAR = (amountUSD * 18.5).toFixed(2);
-      const res = await fetch('/api/ozow-init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan: selectedPlan, userId, email, amount: amountZAR,
-          successUrl: `${origin}/index.html?checkout=success`,
-          cancelUrl: `${origin}/landing.html?checkout=cancel`,
-          notifyUrl: `${origin}/api/ozow-notify`,
-        }),
-      });
-      const { url, error: ozowErr } = await res.json();
-      if (ozowErr) { err.textContent = ozowErr; reset(); return; }
-      window.location.href = url;
-    }
-  } catch (e) {
-    err.textContent = 'Something went wrong. Please try again.';
-    reset();
-  }
+  const btn = event.target;
+  btn.textContent = 'Creating account…'; btn.disabled = true;
+  const { data, error } = await sb.auth.signUp({ email, password: pass });
+  if (error) { err.textContent = error.message; btn.textContent = 'Register free →'; btn.disabled = false; return; }
+  document.getElementById('reg-success').style.display = 'block';
+  btn.style.display = 'none';
+  setTimeout(() => window.location.href = 'index.html', 1800);
 }
 
-function reset() {
-  document.getElementById('pm-btn').textContent = selectedMethod === 'stripe' ? 'Pay with card →' : 'Pay with Instant EFT →';
-  document.getElementById('pm-btn').disabled = false;
-}
-
-// Show success/cancel toast from redirect
-const params = new URLSearchParams(window.location.search);
-if (params.get('checkout') === 'success') {
-  setTimeout(() => {
-    document.body.insertAdjacentHTML('beforeend', '<div style="position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#10142a;border:1px solid rgba(52,211,153,.4);color:#34d399;padding:14px 24px;border-radius:12px;font-weight:600;z-index:999">✓ Payment successful — redirecting to your account…</div>');
-    setTimeout(() => window.location.href = 'index.html', 2000);
-  }, 100);
-}
+// Allow Enter key in password field
+document.getElementById('reg-pass')?.addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>

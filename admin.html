@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EventOps — Master Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#06080F;--bg2:#090C18;--panel:#0F1323;--panel2:#141929;
+  --line:rgba(148,163,184,.1);--txt:#DDE3F0;--muted:#7B8BAD;
+  --accent:#5462F0;--accent2:#0BB5CC;--good:#22C55E;--warn:#F59E0B;--bad:#F43F5E;
+  --grad:linear-gradient(135deg,#5462F0 0%,#8B5CF6 52%,#0BB5CC 100%);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--txt);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:14px;line-height:1.6}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
+
+/* AUTH */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.auth-box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:36px;width:100%;max-width:380px}
+.auth-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.1rem;margin-bottom:6px}
+.auth-logo .m{width:34px;height:34px;border-radius:10px;background:var(--grad);display:grid;place-items:center;font-size:16px}
+.auth-sub{color:var(--muted);font-size:.83rem;margin-bottom:24px}
+.auth-err{color:var(--bad);font-size:.82rem;min-height:18px;margin-bottom:6px}
+.fl{display:block;font-size:.78rem;color:var(--muted);margin-bottom:4px;font-weight:500}
+.ipt{background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:10px 13px;width:100%;font-size:.88rem;font-family:inherit;transition:.15s;margin-bottom:12px}
+.ipt:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(84,98,240,.15)}
+.btn{padding:9px 18px;border-radius:9px;font-weight:600;font-size:.85rem;border:none;cursor:pointer;transition:.18s;font-family:inherit}
+.btn-p{background:var(--grad);color:#fff;box-shadow:0 2px 12px rgba(84,98,240,.3)}.btn-p:hover{filter:brightness(1.08)}
+.btn-g{background:var(--panel);color:var(--txt);border:1px solid var(--line)}.btn-g:hover{border-color:rgba(148,163,184,.3)}
+.btn-sm{padding:6px 12px;font-size:.8rem}
+.btn-xs{padding:4px 10px;font-size:.75rem}
+
+/* LAYOUT */
+#admin{display:flex;min-height:100vh}
+.side{width:220px;background:var(--bg2);border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:.95rem;padding:4px 8px 18px;letter-spacing:-.01em}
+.brand .m{width:28px;height:28px;border-radius:8px;background:var(--grad);display:grid;place-items:center;font-size:13px}
+.nav-i{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:9px;color:var(--muted);font-weight:500;margin-bottom:1px;cursor:pointer;transition:.15s;font-size:.83rem}
+.nav-i:hover{background:var(--panel);color:var(--txt)}
+.nav-i.active{background:var(--panel);color:var(--txt);box-shadow:inset 3px 0 0 var(--accent)}
+.nav-i .ic{width:18px;text-align:center}
+.side-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);font-size:.72rem;color:var(--muted)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;border-bottom:1px solid var(--line);background:rgba(9,12,24,.8);backdrop-filter:blur(14px);position:sticky;top:0;z-index:20}
+.topbar h1{font-size:1rem;font-weight:700;letter-spacing:-.01em}
+.content{padding:24px;overflow:auto}
+
+/* CARDS */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-h h3{font-size:.9rem;font-weight:700}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:1fr 1fr}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr 1fr}}
+.kpi{text-align:center;padding:18px}
+.kpi .lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600}
+.kpi .v{font-size:1.6rem;font-weight:700;letter-spacing:-.02em}
+.kpi .d{font-size:.75rem;color:var(--muted);margin-top:3px}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th{text-align:left;padding:8px 10px;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--line);font-weight:600}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:.7rem;font-weight:600;white-space:nowrap}
+.b-green{background:rgba(34,197,94,.12);color:#4ade80}
+.b-blue{background:rgba(84,98,240,.15);color:#818cf8}
+.b-amber{background:rgba(245,158,11,.12);color:#fbbf24}
+.b-red{background:rgba(244,63,94,.12);color:#fb7185}
+.b-gray{background:rgba(148,163,184,.1);color:var(--muted)}
+.b-cyan{background:rgba(11,181,204,.12);color:var(--accent2)}
+
+/* FEEDBACK INBOX */
+.fb-item{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--panel2);transition:.15s}
+.fb-item.unread{border-color:rgba(84,98,240,.3);background:rgba(84,98,240,.04)}
+.fb-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.fb-msg{font-size:.85rem;line-height:1.6;color:var(--txt);margin-bottom:8px}
+.fb-ai{background:rgba(11,181,204,.08);border:1px solid rgba(11,181,204,.2);border-radius:8px;padding:8px 12px;font-size:.8rem;color:var(--accent2);margin-bottom:8px}
+.fb-ai .ai-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;opacity:.7;margin-bottom:2px;font-weight:600}
+.fb-reply-box{display:none;margin-top:10px}
+.fb-reply-box.open{display:block}
+.reply-sent{font-size:.78rem;color:var(--good);margin-top:4px}
+
+/* MSG composer */
+.msg-compose{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+
+/* USERS */
+.user-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.user-row:last-child{border:none}
+.av{width:34px;height:34px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-size:.75rem;font-weight:700;flex-shrink:0;color:#fff}
+.user-info{flex:1;min-width:0}
+.user-info .em{font-size:.83rem;font-weight:600}
+.user-info .meta{font-size:.72rem;color:var(--muted)}
+
+/* ACTIVITY FEED */
+.act-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.82rem}
+.act-item:last-child{border:none}
+.act-ic{font-size:1rem;flex-shrink:0;margin-top:1px}
+.act-body{flex:1}
+.act-time{font-size:.72rem;color:var(--muted);flex-shrink:0}
+
+/* TOASTER */
+#toast{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--line);color:var(--txt);padding:10px 18px;border-radius:10px;font-size:.85rem;transform:translateY(60px);transition:.25s;opacity:0;z-index:999}
+#toast.show{transform:translateY(0);opacity:1}
+
+/* USAGE CHART */
+.usage-bar-wrap{margin-bottom:12px}
+.usage-bar-label{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px;color:var(--muted)}
+.usage-bar{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.usage-bar-fill{height:100%;border-radius:3px;background:var(--grad);transition:.4s}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:18px}
+.tab{padding:7px 16px;border-radius:7px;font-size:.83rem;font-weight:600;color:var(--muted);cursor:pointer;transition:.15s}
+.tab.on{background:var(--panel);color:var(--txt)}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen" class="auth-wrap">
+  <div class="auth-box">
+    <div class="auth-logo"><div class="m">⚡</div>EventOps <span class="grad">Console</span></div>
+    <div class="auth-sub">System master access only. Sign in with your admin credentials.</div>
+    <div class="auth-err" id="auth-err"></div>
+    <label class="fl">Email</label>
+    <input class="ipt" id="a-email" type="email" placeholder="admin@eventops.app">
+    <label class="fl">Password</label>
+    <input class="ipt" id="a-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminAuth()">
+    <button class="btn btn-p" style="width:100%;padding:11px" onclick="doAdminAuth()">Sign in to Console →</button>
+  </div>
+</div>
+
+<!-- ADMIN CONSOLE -->
+<div id="admin" style="display:none">
+  <div class="side">
+    <div class="brand"><div class="m">⚡</div>Admin <span class="grad">Console</span></div>
+    <div class="nav-i active" id="nav-overview" onclick="showPage('overview')"><span class="ic">📊</span>Overview</div>
+    <div class="nav-i" id="nav-users" onclick="showPage('users')"><span class="ic">👥</span>Users & Companies</div>
+    <div class="nav-i" id="nav-feedback" onclick="showPage('feedback')"><span class="ic">💬</span>Feedback Inbox <span id="fb-badge" style="display:none;background:var(--bad);color:#fff;border-radius:100px;padding:1px 7px;font-size:.65rem;margin-left:auto"></span></div>
+    <div class="nav-i" id="nav-messages" onclick="showPage('messages')"><span class="ic">✉️</span>Message Users</div>
+    <div class="nav-i" id="nav-activity" onclick="showPage('activity')"><span class="ic">📡</span>Activity Log</div>
+    <div class="nav-i" id="nav-usage" onclick="showPage('usage')"><span class="ic">📈</span>Usage & Storage</div>
+    <div class="side-foot">
+      <div id="admin-email" style="margin-bottom:6px"></div>
+      <button class="btn btn-g btn-sm" onclick="doSignOut()" style="width:100%;text-align:left">⏻ Sign out</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <h1 id="page-title">Overview</h1>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:.75rem;color:var(--muted)" id="last-refresh"></span>
+        <button class="btn btn-g btn-sm" onclick="refreshAll()">⟳ Refresh</button>
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://awbtpgugmzitjqovlewr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3YnRwZ3VnbXppdGpxb3ZsZXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MTY4MDMsImV4cCI6MjA2NTQ5MjgwM30.HJxVwNS5PLf8lT-LPjTbVYrmSFSwStQ7_y7uf5iULYg';
+const ADMIN_EMAIL = 'tiaanj@gmail.com';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let adminUser = null;
+let currentPage = 'overview';
+let allUsers = [], allFeedback = [], allActivity = [];
+
+/* ── AUTH ─────────────────────────────────────────── */
+async function doAdminAuth() {
+  const email = document.getElementById('a-email').value.trim();
+  const pass = document.getElementById('a-pass').value;
+  const err = document.getElementById('auth-err');
+  err.textContent = '';
+  if (!email || !pass) { err.textContent = 'Enter email and password.'; return; }
+  if (email !== ADMIN_EMAIL) { err.textContent = 'Access denied — admin only.'; return; }
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { err.textContent = error.message; return; }
+  adminUser = data.user;
+  enterConsole();
+}
+
+async function doSignOut() {
+  await sb.auth.signOut();
+  location.reload();
+}
+
+async function checkSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && session.user.email === ADMIN_EMAIL) {
+    adminUser = session.user;
+    enterConsole();
+  }
+}
+
+function enterConsole() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('admin').style.display = 'flex';
+  document.getElementById('admin-email').textContent = adminUser.email;
+  refreshAll();
+}
+
+/* ── DATA LOAD ────────────────────────────────────── */
+async function refreshAll() {
+  document.getElementById('last-refresh').textContent = 'Loading…';
+  await Promise.all([loadUsers(), loadFeedback(), loadActivity()]);
+  document.getElementById('last-refresh').textContent = 'Updated ' + new Date().toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
+  showPage(currentPage);
+}
+
+async function loadUsers() {
+  try {
+    const { data } = await sb.from('user_data').select('user_id, updated_at, data').order('updated_at', { ascending: false });
+    allUsers = (data || []).map(r => ({
+      userId: r.user_id,
+      updatedAt: r.updated_at,
+      company: r.data?.org?.name || 'Unnamed Company',
+      email: r.data?.org?.email || '',
+      eventCount: Object.keys(r.data?.events || {}).length,
+      role: r.data?.role || 'Event Director',
+    }));
+  } catch (e) { allUsers = []; }
+}
+
+async function loadFeedback() {
+  try {
+    const { data } = await sb.from('user_feedback').select('*').order('created_at', { ascending: false }).limit(100);
+    allFeedback = data || [];
+    const unread = allFeedback.filter(f => !f.read_by_admin).length;
+    const badge = document.getElementById('fb-badge');
+    if (unread > 0) { badge.textContent = unread; badge.style.display = 'inline'; }
+    else badge.style.display = 'none';
+  } catch (e) { allFeedback = []; }
+}
+
+async function loadActivity() {
+  try {
+    const { data } = await sb.from('admin_activity').select('*').order('created_at', { ascending: false }).limit(50);
+    allActivity = data || [];
+  } catch (e) { allActivity = []; }
+}
+
+/* ── NAVIGATION ───────────────────────────────────── */
+const PAGE_TITLES = { overview: 'Overview', users: 'Users & Companies', feedback: 'Feedback Inbox', messages: 'Message Users', activity: 'Activity Log', usage: 'Usage & Storage' };
+
+function showPage(p) {
+  currentPage = p;
+  document.querySelectorAll('.nav-i').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-' + p)?.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_TITLES[p] || p;
+  ({ overview: renderOverview, users: renderUsers, feedback: renderFeedback, messages: renderMessages, activity: renderActivity, usage: renderUsage }[p])();
+}
+
+/* ── OVERVIEW ─────────────────────────────────────── */
+function renderOverview() {
+  const unread = allFeedback.filter(f => !f.read_by_admin).length;
+  const urgent = allFeedback.filter(f => f.priority === 'urgent' && !f.read_by_admin).length;
+  const recentUsers = allUsers.slice(0, 5);
+  const recentFb = allFeedback.slice(0, 5);
+
+  document.getElementById('content').innerHTML = `
+    <div class="grid g4" style="margin-bottom:16px">
+      <div class="card kpi"><div class="lbl">Total Companies</div><div class="v">${allUsers.length}</div><div class="d">beta users</div></div>
+      <div class="card kpi"><div class="lbl">Unread Feedback</div><div class="v ${unread ? 'grad' : ''}">${unread}</div><div class="d">${urgent} urgent</div></div>
+      <div class="card kpi"><div class="lbl">Total Feedback</div><div class="v">${allFeedback.length}</div><div class="d">all time</div></div>
+      <div class="card kpi"><div class="lbl">Feature Requests</div><div class="v">${allFeedback.filter(f => f.category === 'feature_request').length}</div><div class="d">suggestions</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="sec-h"><h3>Recent signups</h3><button class="btn btn-g btn-sm" onclick="showPage('users')">View all</button></div>
+        ${recentUsers.length ? recentUsers.map(u => `
+          <div class="user-row">
+            <div class="av">${(u.company||'?')[0].toUpperCase()}</div>
+            <div class="user-info">
+              <div class="em">${u.company}</div>
+              <div class="meta">${u.eventCount} event${u.eventCount !== 1 ? 's' : ''} · ${timeAgo(u.updatedAt)}</div>
+            </div>
+          </div>`).join('') : '<div style="color:var(--muted);font-size:.83rem">No users yet.</div>'}
+      </div>
+      <div class="card">
+        <div class="sec-h"><h3>Recent feedback</h3><button class="btn btn-g btn-sm" onclick="showPage('feedback')">View all</button></div>
+        ${recentFb.length ? recentFb.map(f => `
+          <div class="act-item">
+            <div class="act-ic">${categoryIcon(f.category)}</div>
+            <div class="act-body">
+              <div style="font-weight:${f.read_by_admin ? '400' : '600'}">${f.ai_summary || f.message?.slice(0, 80) || '…'}</div>
+              <div style="font-size:.72rem;color:var(--muted)">${f.user_email || 'Anonymous'} · ${f.page || 'general'}</div>
+            </div>
+            <div class="act-time">${timeAgo(f.created_at)}</div>
+          </div>`).join('') : '<div style="color:var(--muted);font-size:.83rem">No feedback yet.</div>'}
+      </div>
+    </div>
+    ${urgent ? `<div style="background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.25);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:1.3rem">🚨</span>
+      <div><div style="font-weight:600;color:var(--bad)">${urgent} urgent feedback item${urgent > 1 ? 's' : ''} need your attention</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:2px">Review these first — users may be blocked or experiencing critical issues.</div></div>
+      <button class="btn btn-sm" style="background:var(--bad);color:#fff;margin-left:auto" onclick="showPage('feedback')">Review now →</button>
+    </div>` : ''}`;
+}
+
+/* ── USERS ────────────────────────────────────────── */
+function renderUsers() {
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="sec-h"><h3>${allUsers.length} registered companies</h3>
+        <span style="font-size:.78rem;color:var(--muted)">All data is free beta — no billing active</span>
+      </div>
+      ${allUsers.length ? `<table>
+        <tr><th>Company</th><th>Contact email</th><th>Events</th><th>Role</th><th>Last active</th><th>Actions</th></tr>
+        ${allUsers.map(u => `<tr>
+          <td><div style="font-weight:600">${u.company}</div><div style="font-size:.72rem;color:var(--muted)">${u.userId}</div></td>
+          <td>${u.email || '<span style="color:var(--muted)">—</span>'}</td>
+          <td><span class="badge b-blue">${u.eventCount}</span></td>
+          <td>${u.role}</td>
+          <td style="color:var(--muted)">${timeAgo(u.updatedAt)}</td>
+          <td style="display:flex;gap:6px">
+            <button class="btn btn-g btn-xs" onclick="composeToUser('${u.userId}','${esc(u.company)}','${esc(u.email)}')">✉ Message</button>
+          </td>
+        </tr>`).join('')}
+      </table>` : '<div style="color:var(--muted)">No users have signed up yet.</div>'}
+    </div>`;
+}
+
+/* ── FEEDBACK ─────────────────────────────────────── */
+function renderFeedback() {
+  const filters = ['all', 'unread', 'urgent', 'feature_request', 'bug', 'question'];
+  const activeFilter = window._fbFilter || 'all';
+  const filtered = allFeedback.filter(f => {
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'unread') return !f.read_by_admin;
+    if (activeFilter === 'urgent') return f.priority === 'urgent';
+    return f.category === activeFilter;
+  });
+
+  document.getElementById('content').innerHTML = `
+    <div class="tabs">
+      ${filters.map(f => `<div class="tab ${activeFilter === f ? 'on' : ''}" onclick="window._fbFilter='${f}';renderFeedback()">${f.replace('_', ' ')}</div>`).join('')}
+    </div>
+    <div id="fb-list">
+      ${filtered.length ? filtered.map(f => renderFeedbackItem(f)).join('') : '<div class="card" style="color:var(--muted);text-align:center;padding:40px">No feedback in this category.</div>'}
+    </div>`;
+}
+
+function renderFeedbackItem(f) {
+  return `<div class="fb-item ${f.read_by_admin ? '' : 'unread'}" id="fb-${f.id}">
+    <div class="fb-meta">
+      <span class="badge ${priorityClass(f.priority)}">${f.priority || 'normal'}</span>
+      <span class="badge b-gray">${categoryIcon(f.category)} ${(f.category || 'feedback').replace('_', ' ')}</span>
+      <span style="font-size:.75rem;color:var(--muted)">${f.user_email || 'Anonymous'}</span>
+      ${f.company_name ? `<span style="font-size:.75rem;color:var(--muted)">· ${f.company_name}</span>` : ''}
+      ${f.page ? `<span class="badge b-cyan">${f.page}</span>` : ''}
+      <span style="font-size:.72rem;color:var(--muted);margin-left:auto">${timeAgo(f.created_at)}</span>
+    </div>
+    <div class="fb-msg">"${esc(f.message || '')}"</div>
+    ${f.ai_summary ? `<div class="fb-ai"><div class="ai-lbl">AI summary</div>${esc(f.ai_summary)}</div>` : ''}
+    ${f.suggested_reply ? `<div class="fb-ai" style="border-color:rgba(84,98,240,.2);color:var(--accent)"><div class="ai-lbl">Suggested reply</div>${esc(f.suggested_reply)}</div>` : ''}
+    ${f.tags?.length ? `<div style="display:flex;gap:6px;margin-bottom:8px">${f.tags.map(t => `<span class="badge b-gray" style="font-size:.68rem">#${t}</span>`).join('')}</div>` : ''}
+    ${f.admin_reply ? `<div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:8px 12px;font-size:.8rem;margin-bottom:8px"><span style="color:var(--good);font-weight:600">✓ Your reply:</span> ${esc(f.admin_reply)}</div>` : ''}
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${!f.read_by_admin ? `<button class="btn btn-g btn-xs" onclick="markRead('${f.id}')">✓ Mark read</button>` : ''}
+      <button class="btn btn-g btn-xs" onclick="toggleReplyBox('${f.id}')">↩ Reply</button>
+      ${f.user_email ? `<button class="btn btn-g btn-xs" onclick="composeToUser('','','${esc(f.user_email)}')">✉ Message</button>` : ''}
+    </div>
+    <div class="fb-reply-box" id="reply-${f.id}">
+      <textarea class="ipt" id="reply-txt-${f.id}" rows="3" placeholder="Type your reply to ${f.user_email || 'user'}…" style="margin-top:10px;margin-bottom:6px">${esc(f.suggested_reply || '')}</textarea>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-p btn-xs" onclick="sendReply('${f.id}','${esc(f.user_email || '')}','${esc(f.user_id || '')}')">Send reply</button>
+        <button class="btn btn-g btn-xs" onclick="toggleReplyBox('${f.id}')">Cancel</button>
+      </div>
+      <div class="reply-sent" id="reply-sent-${f.id}"></div>
+    </div>
+  </div>`;
+}
+
+async function markRead(id) {
+  await sb.from('user_feedback').update({ read_by_admin: true }).eq('id', id);
+  const item = allFeedback.find(f => f.id === id);
+  if (item) item.read_by_admin = true;
+  document.getElementById('fb-' + id)?.classList.remove('unread');
+  const unread = allFeedback.filter(f => !f.read_by_admin).length;
+  const badge = document.getElementById('fb-badge');
+  if (unread > 0) { badge.textContent = unread; badge.style.display = 'inline'; } else badge.style.display = 'none';
+}
+
+function toggleReplyBox(id) {
+  const box = document.getElementById('reply-' + id);
+  box.classList.toggle('open');
+}
+
+async function sendReply(fbId, toEmail, toUserId) {
+  const txt = document.getElementById('reply-txt-' + fbId)?.value?.trim();
+  if (!txt) return;
+  const sent = document.getElementById('reply-sent-' + fbId);
+  sent.textContent = 'Sending…';
+  try {
+    await sb.from('user_feedback').update({ admin_reply: txt, admin_replied_at: new Date().toISOString(), read_by_admin: true }).eq('id', fbId);
+    if (toEmail || toUserId) {
+      await sb.from('admin_messages').insert({ to_user_id: toUserId || null, to_email: toEmail, subject: 'Reply to your EventOps feedback', message: txt });
+    }
+    const item = allFeedback.find(f => f.id === fbId);
+    if (item) { item.admin_reply = txt; item.read_by_admin = true; }
+    sent.style.color = 'var(--good)';
+    sent.textContent = '✓ Reply sent and saved';
+    document.getElementById('reply-' + fbId).classList.remove('open');
+    toast('Reply sent!');
+  } catch (e) {
+    sent.style.color = 'var(--bad)';
+    sent.textContent = 'Error: ' + e.message;
+  }
+}
+
+/* ── MESSAGES ─────────────────────────────────────── */
+function renderMessages() {
+  document.getElementById('content').innerHTML = `
+    <div class="card msg-compose">
+      <div class="sec-h"><h3>Compose message to user</h3></div>
+      <div class="grid g2" style="margin-bottom:12px">
+        <div>
+          <label class="fl">To (user email)</label>
+          <input class="ipt" id="msg-to" type="email" placeholder="user@company.co.za" id="msg-to">
+        </div>
+        <div>
+          <label class="fl">Subject</label>
+          <input class="ipt" id="msg-subj" placeholder="Re: your EventOps feedback" value="EventOps — Message from the team">
+        </div>
+      </div>
+      <label class="fl">Message</label>
+      <textarea class="ipt" id="msg-body" rows="5" placeholder="Write a personalised message to this user…"></textarea>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+        <button class="btn btn-p btn-sm" onclick="sendAdminMsg()">Send message →</button>
+        <span id="msg-status" style="font-size:.8rem;color:var(--muted)"></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-h"><h3>Select a user to message</h3></div>
+      ${allUsers.map(u => `
+        <div class="user-row">
+          <div class="av">${(u.company||'?')[0].toUpperCase()}</div>
+          <div class="user-info">
+            <div class="em">${u.company}</div>
+            <div class="meta">${u.email || u.userId} · ${u.eventCount} events · last active ${timeAgo(u.updatedAt)}</div>
+          </div>
+          <button class="btn btn-g btn-xs" onclick="composeToUser('${u.userId}','${esc(u.company)}','${esc(u.email)}')">Select</button>
+        </div>`).join('')}
+    </div>`;
+}
+
+function composeToUser(userId, company, email) {
+  showPage('messages');
+  setTimeout(() => {
+    const el = document.getElementById('msg-to');
+    if (el) el.value = email;
+    const subj = document.getElementById('msg-subj');
+    if (subj) subj.value = `EventOps — Personal message for ${company || 'you'}`;
+    el?.focus();
+  }, 50);
+}
+
+async function sendAdminMsg() {
+  const to = document.getElementById('msg-to')?.value?.trim();
+  const subj = document.getElementById('msg-subj')?.value?.trim();
+  const body = document.getElementById('msg-body')?.value?.trim();
+  const status = document.getElementById('msg-status');
+  if (!to || !body) { status.style.color = 'var(--bad)'; status.textContent = 'Enter recipient and message.'; return; }
+  status.textContent = 'Sending…'; status.style.color = 'var(--muted)';
+  try {
+    const user = allUsers.find(u => u.email === to);
+    await sb.from('admin_messages').insert({
+      to_user_id: user?.userId || null,
+      to_email: to,
+      subject: subj,
+      message: body,
+      sent_at: new Date().toISOString(),
+    });
+    status.style.color = 'var(--good)';
+    status.textContent = '✓ Message delivered to inbox';
+    document.getElementById('msg-body').value = '';
+    toast('Message sent to ' + to);
+    await logActivity('message_sent', `Admin sent message to ${to}`);
+  } catch (e) {
+    status.style.color = 'var(--bad)';
+    status.textContent = 'Error: ' + e.message;
+  }
+}
+
+/* ── ACTIVITY ─────────────────────────────────────── */
+function renderActivity() {
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="sec-h"><h3>Activity log</h3><span style="font-size:.75rem;color:var(--muted)">Last 50 events</span></div>
+      ${allActivity.length ? allActivity.map(a => `
+        <div class="act-item">
+          <div class="act-ic">📡</div>
+          <div class="act-body">
+            <div>${esc(a.description || a.type)}</div>
+            ${a.user_email ? `<div style="font-size:.72rem;color:var(--muted)">${a.user_email}</div>` : ''}
+          </div>
+          <div class="act-time">${timeAgo(a.created_at)}</div>
+        </div>`).join('') : '<div style="color:var(--muted);text-align:center;padding:40px">No activity recorded yet. Activity populates as users use the system.</div>'}
+    </div>`;
+}
+
+/* ── USAGE ────────────────────────────────────────── */
+function renderUsage() {
+  const totalEvents = allUsers.reduce((s, u) => s + u.eventCount, 0);
+  const fbByType = {};
+  allFeedback.forEach(f => { fbByType[f.category || 'other'] = (fbByType[f.category || 'other'] || 0) + 1; });
+  const maxFb = Math.max(...Object.values(fbByType), 1);
+
+  document.getElementById('content').innerHTML = `
+    <div class="grid g3" style="margin-bottom:16px">
+      <div class="card kpi"><div class="lbl">Total Events</div><div class="v">${totalEvents}</div><div class="d">across all companies</div></div>
+      <div class="card kpi"><div class="lbl">Avg Events/Company</div><div class="v">${allUsers.length ? (totalEvents / allUsers.length).toFixed(1) : 0}</div></div>
+      <div class="card kpi"><div class="lbl">Feedback Rate</div><div class="v">${allUsers.length ? (allFeedback.length / allUsers.length).toFixed(1) : 0}</div><div class="d">per company</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="sec-h"><h3>Feedback by category</h3></div>
+        ${Object.entries(fbByType).map(([k, v]) => `
+          <div class="usage-bar-wrap">
+            <div class="usage-bar-label"><span>${categoryIcon(k)} ${k.replace('_', ' ')}</span><span>${v}</span></div>
+            <div class="usage-bar"><div class="usage-bar-fill" style="width:${(v / maxFb * 100).toFixed(0)}%"></div></div>
+          </div>`).join('') || '<div style="color:var(--muted);font-size:.83rem">No feedback yet.</div>'}
+      </div>
+      <div class="card">
+        <div class="sec-h"><h3>Billing model</h3><span class="badge b-green">Free beta</span></div>
+        <div style="color:var(--muted);font-size:.85rem;line-height:1.8">
+          <div>• All features unlocked for all users</div>
+          <div>• No payment required during beta</div>
+          <div>• Usage data collected for future billing model</div>
+          <div>• Billing tiers to be defined based on feedback</div>
+        </div>
+        <div style="margin-top:16px;background:var(--bg2);border-radius:10px;padding:14px">
+          <div style="font-size:.78rem;font-weight:600;margin-bottom:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Planned tiers (not active)</div>
+          ${[['Starter', '$5/mo', '3 events, basic modules'],['Pro', '$25/mo', 'Unlimited events, all modules'],['Agency', 'Custom', 'Multi-team, white-label']].map(([n,p,d]) => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)">
+              <div><div style="font-weight:600;font-size:.85rem">${n}</div><div style="font-size:.72rem;color:var(--muted)">${d}</div></div>
+              <div style="font-weight:700;font-size:.9rem;color:var(--accent)">${p}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── HELPERS ──────────────────────────────────────── */
+async function logActivity(type, description) {
+  try { await sb.from('admin_activity').insert({ type, description, admin_user: adminUser?.email }); } catch {}
+}
+
+function categoryIcon(cat) {
+  return { bug: '🐛', feature_request: '💡', question: '❓', praise: '⭐', complaint: '😤', suggestion: '✨' }[cat] || '💬';
+}
+
+function priorityClass(p) {
+  return { urgent: 'b-red', high: 'b-amber', normal: 'b-blue', low: 'b-gray' }[p] || 'b-blue';
+}
+
+function timeAgo(iso) {
+  if (!iso) return '—';
+  const diff = (Date.now() - new Date(iso)) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  return Math.floor(diff / 86400) + 'd ago';
+}
+
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function toast(t) {
+  const el = document.getElementById('toast');
+  el.textContent = t;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* ── INIT ─────────────────────────────────────────── */
+checkSession();
+</script>
+</body>
+</html>

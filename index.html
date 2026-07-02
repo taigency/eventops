@@ -282,6 +282,29 @@
   /* CHAT */
   .chat-fab{position:fixed;bottom:22px;right:22px;width:52px;height:52px;border-radius:50%;background:var(--grad);border:none;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(109,107,255,.45);z-index:500;display:flex;align-items:center;justify-content:center;transition:.2s}
   .chat-fab:hover{transform:scale(1.08)}
+  .fb-fab{position:fixed;bottom:22px;right:84px;width:52px;height:52px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--txt);font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:500;display:none;align-items:center;justify-content:center;transition:.2s}
+  .fb-fab:hover{border-color:var(--accent);transform:scale(1.08)}
+  .fb-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:600;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+  .fb-modal-bg.show{display:flex}
+  .fb-modal{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px;width:100%;max-width:460px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+  .fb-modal h3{font-size:1rem;font-weight:700;margin-bottom:4px}
+  .fb-modal .sub{font-size:.83rem;color:var(--muted);margin-bottom:20px}
+  .fb-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+  .fb-type{background:var(--bg2);border:2px solid var(--line);border-radius:11px;padding:10px 6px;text-align:center;cursor:pointer;transition:.15s;font-size:.78rem;font-weight:600}
+  .fb-type:hover{border-color:rgba(84,98,240,.4)}
+  .fb-type.sel{border-color:var(--accent);background:rgba(84,98,240,.08)}
+  .fb-type .fi{font-size:1.2rem;display:block;margin-bottom:4px}
+  .notif-bell{position:relative;cursor:pointer;padding:6px;border-radius:8px;transition:.15s;display:none}
+  .notif-bell:hover{background:var(--panel)}
+  .notif-bell .nb-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--bad);border:2px solid var(--bg2)}
+  .notif-panel{position:fixed;top:54px;right:20px;width:340px;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:300;display:none}
+  .notif-panel.show{display:block}
+  .notif-head{padding:12px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:.88rem;display:flex;justify-content:space-between;align-items:center}
+  .notif-item{padding:11px 16px;border-bottom:1px solid var(--line);cursor:pointer;transition:.15s}
+  .notif-item:hover{background:var(--panel2)}
+  .notif-item:last-child{border:none}
+  .notif-item .nt{font-size:.83rem;font-weight:600;margin-bottom:2px}
+  .notif-item .nm{font-size:.78rem;color:var(--muted);line-height:1.5}
   .chat-panel{position:fixed;bottom:84px;right:22px;width:340px;max-width:calc(100vw - 28px);background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.55);z-index:500;display:flex;flex-direction:column;overflow:hidden;transition:.2s;transform-origin:bottom right}
   .chat-panel.hidden{transform:scale(.85);opacity:0;pointer-events:none}
   .chat-head{background:var(--grad);padding:13px 16px;display:flex;justify-content:space-between;align-items:center}
@@ -308,6 +331,40 @@
 <div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
 <div id="doc"><div class="doc-bar"><button class="btn btn-g btn-sm" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn btn-p btn-sm" onclick="closeDoc()">Close</button></div><div id="paper"></div></div>
 <div id="toast"></div>
+
+<!-- FEEDBACK FAB -->
+<button class="fb-fab" id="fb-fab" onclick="openFeedback()" title="Send feedback">💡</button>
+
+<!-- FEEDBACK MODAL -->
+<div class="fb-modal-bg" id="fb-modal-bg" onclick="if(event.target===this)closeFeedback()">
+  <div class="fb-modal">
+    <h3>Share feedback with the team</h3>
+    <div class="sub">Help us build the right product — questions, suggestions, bugs, anything.</div>
+    <div class="fb-type-grid" id="fb-types">
+      <div class="fb-type sel" onclick="selectFbType('suggestion',this)"><span class="fi">✨</span>Suggestion</div>
+      <div class="fb-type" onclick="selectFbType('question',this)"><span class="fi">❓</span>Question</div>
+      <div class="fb-type" onclick="selectFbType('bug',this)"><span class="fi">🐛</span>Bug</div>
+      <div class="fb-type" onclick="selectFbType('feature_request',this)"><span class="fi">💡</span>Feature idea</div>
+      <div class="fb-type" onclick="selectFbType('praise',this)"><span class="fi">⭐</span>Praise</div>
+      <div class="fb-type" onclick="selectFbType('complaint',this)"><span class="fi">😤</span>Complaint</div>
+    </div>
+    <textarea class="ipt" id="fb-msg" rows="4" placeholder="Tell us what's on your mind… the more detail the better." style="width:100%;resize:vertical;margin-bottom:12px"></textarea>
+    <div id="fb-err" style="color:var(--bad);font-size:.8rem;min-height:16px;margin-bottom:8px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-p" style="flex:1;padding:10px" onclick="submitFeedback()">Send feedback →</button>
+      <button class="btn btn-g" onclick="closeFeedback()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION BELL + PANEL -->
+<div class="notif-bell" id="notif-bell" onclick="toggleNotifPanel()" title="Messages from the EventOps team">
+  🔔<div class="nb-dot" id="notif-dot" style="display:none"></div>
+</div>
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-head"><span>Messages from EventOps</span><button class="btn btn-g btn-sm" onclick="document.getElementById('notif-panel').classList.remove('show')">✕</button></div>
+  <div id="notif-list"><div style="padding:16px;color:var(--muted);font-size:.83rem">No messages yet.</div></div>
+</div>
 
 <!-- CHAT -->
 <button class="chat-fab" id="chat-fab" onclick="toggleChat()" style="display:none">💬</button>
@@ -423,12 +480,14 @@ function render(){
   if(session.type==='field'){ return renderField(); }
   renderAdmin();
   document.getElementById('chat-fab').style.display='flex';
+  document.getElementById('fb-fab').style.display='flex';
 }
 
 /* ═══ SUPABASE AUTH SCREEN ══════════════════════════════════ */
 let authTab='in';
 function renderAuth(){
   document.getElementById('chat-fab').style.display='none';
+  document.getElementById('fb-fab').style.display='none';
   document.getElementById('app').style.cssText='display:block';
   document.getElementById('app').innerHTML=`
     <div class="auth-screen"><div class="auth-box">
@@ -524,7 +583,10 @@ function renderAdmin(){
     <div class="main">
       <div class="top">
         <div class="evt"><button class="hamb" onclick="document.querySelector('.side').classList.toggle('open')">☰</button><select onchange="DB.currentEvent=this.value;save();render()">${evOpts}</select><button class="btn btn-g btn-sm" onclick="newEvent()">+ New</button></div>
-        <div class="role-tag"><span>Viewing as</span><select onchange="DB.role=this.value;save();render()">${['Event Director','Operations Manager','Production Manager','Staff Coordinator','Risk Manager'].map(r=>`<option ${r===DB.role?'selected':''}>${r}</option>`).join('')}</select></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="notif-bell" id="notif-bell-inline" onclick="toggleNotifPanel()" title="Messages from the EventOps team" style="display:flex;font-size:1rem">🔔<div class="nb-dot" id="notif-dot-inline" style="display:none"></div></div>
+          <div class="role-tag"><span>Viewing as</span><select onchange="DB.role=this.value;save();render()">${['Event Director','Operations Manager','Production Manager','Staff Coordinator','Risk Manager'].map(r=>`<option ${r===DB.role?'selected':''}>${r}</option>`).join('')}</select></div>
+        </div>
       </div>
       <div class="content" id="content"></div>
     </div>`;
@@ -1435,6 +1497,112 @@ function hideTyping(){const t=document.getElementById('typ');if(t)t.remove();}
 function answerChat(text){showTyping();const q=text.toLowerCase();let ans=null;for(const e of KB){if(e.k.some(k=>q.includes(k))){ans=e.a;break;}}if(!ans)ans='I don\'t have a specific answer for that, but try:<br>• Use the <b>sidebar</b> to navigate to any module<br>• The <b>Director</b> page shows your financial overview<br>• Click <b>+ Add</b> buttons within each module to add data<br>• All changes save to Supabase cloud automatically';setTimeout(()=>{hideTyping();addBotMsg(ans);renderChips(['Add quote lines','Generate invoice PDF','Ripple engine','Field crew app']);},600+Math.random()*400);}
 function sendChat(){const ipt=document.getElementById('chat-ipt');const t=ipt.value.trim();if(!t)return;ipt.value='';document.getElementById('chat-chips').innerHTML='';addUserMsg(t);answerChat(t);}
 
+/* ═══ FEEDBACK ══════════════════════════════════════════════ */
+let fbType = 'suggestion';
+function openFeedback(){
+  document.getElementById('fb-modal-bg').classList.add('show');
+  document.getElementById('fb-msg').focus();
+}
+function closeFeedback(){ document.getElementById('fb-modal-bg').classList.remove('show'); }
+function selectFbType(type, el){
+  fbType = type;
+  document.querySelectorAll('.fb-type').forEach(t => t.classList.remove('sel'));
+  el.classList.add('sel');
+}
+async function submitFeedback(){
+  const msg = document.getElementById('fb-msg').value.trim();
+  const err = document.getElementById('fb-err');
+  err.textContent = '';
+  if(!msg){ err.textContent = 'Please write a message before sending.'; return; }
+  const btn = document.querySelector('#fb-modal-bg .btn-p');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  try {
+    const e = DB.currentEvent ? E() : null;
+    const row = {
+      user_id: supabaseUser?.id || null,
+      user_email: supabaseUser?.email || null,
+      company_name: DB.org?.name || null,
+      type: fbType,
+      message: msg,
+      page: page || 'general',
+      read_by_admin: false,
+    };
+    // Insert feedback to Supabase
+    const { data: inserted, error: dbErr } = await sb.from('user_feedback').insert(row).select().single();
+    if(dbErr) throw new Error(dbErr.message);
+    // Run AI analysis in background (fire and forget)
+    if(inserted?.id){
+      fetch('/api/ai-feedback', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ message: msg, type: fbType, page, userEmail: supabaseUser?.email, companyName: DB.org?.name }),
+      }).then(r=>r.json()).then(async ai=>{
+        if(ai.aiSummary || ai.category){
+          await sb.from('user_feedback').update({
+            category: ai.category || fbType,
+            ai_summary: ai.aiSummary || null,
+            priority: ai.priority || 'normal',
+            suggested_reply: ai.suggestedReply || null,
+            tags: ai.tags || [],
+          }).eq('id', inserted.id);
+        }
+      }).catch(()=>{});
+    }
+    closeFeedback();
+    document.getElementById('fb-msg').value = '';
+    toast('Thanks for your feedback! The EventOps team will review it.');
+  } catch(e) {
+    err.textContent = 'Could not send — please try again.';
+  }
+  btn.textContent = 'Send feedback →'; btn.disabled = false;
+}
+
+/* ═══ ADMIN MESSAGES (inbox for users) ══════════════════════ */
+let adminMsgs = [];
+async function loadAdminMessages(){
+  if(!supabaseUser) return;
+  try {
+    const {data} = await sb.from('admin_messages')
+      .select('*')
+      .or(`to_user_id.eq.${supabaseUser.id},to_email.eq.${supabaseUser.email}`)
+      .order('created_at', {ascending: false})
+      .limit(20);
+    adminMsgs = data || [];
+    const unread = adminMsgs.filter(m => !m.read_by_user).length;
+    // Show bell when there are messages
+    ['notif-bell', 'notif-bell-inline'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = adminMsgs.length ? 'flex' : 'none';
+    });
+    ['notif-dot', 'notif-dot-inline'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = unread > 0 ? 'block' : 'none';
+    });
+    // Render notification list
+    const list = document.getElementById('notif-list');
+    if(list){
+      list.innerHTML = adminMsgs.length
+        ? adminMsgs.map(m=>`<div class="notif-item ${m.read_by_user?'':''}">
+            <div class="nt">${m.subject||'Message from EventOps'}</div>
+            <div class="nm">${m.message}</div>
+            <div style="font-size:.7rem;color:var(--muted);margin-top:4px">${new Date(m.created_at).toLocaleDateString('en-ZA',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+          </div>`).join('')
+        : '<div style="padding:16px;color:var(--muted);font-size:.83rem">No messages yet.</div>';
+    }
+    // Mark all as read
+    if(unread > 0){
+      const ids = adminMsgs.filter(m=>!m.read_by_user).map(m=>m.id);
+      sb.from('admin_messages').update({read_by_user:true}).in('id',ids).then(()=>{});
+    }
+  } catch(e){ /* silent */ }
+}
+
+function toggleNotifPanel(){
+  const panel = document.getElementById('notif-panel');
+  panel.classList.toggle('show');
+  if(panel.classList.contains('show')) loadAdminMessages();
+}
+
 /* ═══ INIT ══════════════════════════════════════════════════ */
 function isCrewBoard(){ return window.location.hash==='#crewboard'; }
 
@@ -1445,6 +1613,7 @@ async function init(){
     supabaseUser = s.user;
     await loadFromCloud();
     await refreshAppCounts();
+    await loadAdminMessages();
   }
   sb.auth.onAuthStateChange(async(_e, s)=>{
     if(isCrewBoard()) return;
@@ -1453,6 +1622,7 @@ async function init(){
     if(supabaseUser && !wasLoggedIn){
       await loadFromCloud();
       await refreshAppCounts();
+      await loadAdminMessages();
       render();
     } else if(!supabaseUser){
       session = null;
