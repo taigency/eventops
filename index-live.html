@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventOps ERP</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--bg:#070912;--bg2:#0c1020;--panel:#10142a;--panel2:#161b36;--line:rgba(255,255,255,.08);--txt:#eef1f8;--muted:#9aa3bd;--accent:#6d6bff;--accent2:#22d3ee;--good:#34d399;--warn:#fbbf24;--bad:#fb7185;--grad:linear-gradient(120deg,#6d6bff,#a855f7 50%,#22d3ee);}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--txt);font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;font-size:14px}
+  button{font-family:inherit;cursor:pointer}input,select,textarea{font-family:inherit}
+  .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  #app{display:flex;min-height:100vh}
+  .side{width:225px;background:var(--bg2);border-right:1px solid var(--line);padding:18px 14px;flex-shrink:0;display:flex;flex-direction:column}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.05rem;padding:6px 8px 16px}
+  .brand .m{width:28px;height:28px;border-radius:8px;background:var(--grad);display:grid;place-items:center;font-size:14px}
+  .nav-i{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--muted);font-weight:500;margin-bottom:2px;transition:.15s;font-size:.9rem;cursor:pointer}
+  .nav-i:hover{background:var(--panel);color:var(--txt)}
+  .nav-i.active{background:var(--panel);color:var(--txt);box-shadow:inset 3px 0 0 var(--accent)}
+  .nav-i .ic{width:20px;text-align:center}
+  .side-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);font-size:.76rem;color:var(--muted)}
+  .logoutb{margin-top:10px;width:100%;text-align:left}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .top{display:flex;align-items:center;justify-content:space-between;padding:13px 24px;border-bottom:1px solid var(--line);background:rgba(12,16,32,.6);backdrop-filter:blur(10px);position:sticky;top:0;z-index:20}
+  .top .evt{display:flex;align-items:center;gap:10px}
+  .top select{background:var(--panel);color:var(--txt);border:1px solid var(--line);padding:8px 12px;border-radius:9px;font-size:.88rem}
+  .role-tag{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted)}
+  .hamb{display:none;background:var(--panel);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:7px 11px;font-size:1rem}
+  .content{padding:24px;overflow:auto}
+  .pg-title{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+  .pg-sub{color:var(--muted);margin-bottom:20px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}
+  .grid{display:grid;gap:16px}.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1fr 1fr}
+  @media(max-width:1050px){.g4{grid-template-columns:1fr 1fr}.g3,.g2{grid-template-columns:1fr}}
+  .btn{padding:9px 16px;border-radius:9px;font-weight:600;font-size:.85rem;border:none;transition:.2s;cursor:pointer}
+  .btn-p{background:var(--grad);color:#fff}.btn-p:hover{filter:brightness(1.1)}
+  .btn-g{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}.btn-g:hover{background:#1d2342}
+  .btn-sm{padding:5px 11px;font-size:.78rem;border-radius:7px}
+  .kpi .lbl{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .kpi .v{font-size:1.5rem;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums}
+  .kpi .d{font-size:.78rem;margin-top:4px}
+  table{width:100%;border-collapse:collapse;font-size:.87rem}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding:9px 11px;border-bottom:1px solid var(--line)}
+  td{padding:10px 11px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+  tr:last-child td{border-bottom:none}
+  .badge{font-size:.71rem;font-weight:700;padding:4px 10px;border-radius:100px;white-space:nowrap}
+  .b-green{background:rgba(52,211,153,.15);color:var(--good)}.b-amber{background:rgba(251,191,36,.15);color:var(--warn)}.b-red{background:rgba(251,113,133,.15);color:var(--bad)}.b-blue{background:rgba(109,107,255,.18);color:#a9a7ff}
+  .sec-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+  .sec-h h3{font-size:1.08rem}
+  .ipt{background:var(--bg2);border:1px solid var(--line);color:var(--txt);padding:9px 11px;border-radius:8px;width:100%;font-size:.88rem}
+  .ipt:focus{outline:none;border-color:var(--accent)}
+  .form-row{margin-bottom:10px}
+  label.fl{font-size:.78rem;color:var(--muted);display:block;margin-bottom:5px}
+  .pos{color:var(--good)}.neg{color:var(--bad)}.amb{color:var(--warn)}
+  .empty{color:var(--muted);text-align:center;padding:26px;font-size:.9rem}
+  .x{background:none;border:none;color:var(--bad);font-size:.95rem;cursor:pointer}
+  input[type=range]{width:100%;-webkit-appearance:none;height:6px;border-radius:6px;background:#262b44}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#6d6bff;cursor:pointer}
+  .note{font-size:.78rem;color:var(--muted);background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:14px}
+  .ripple-flag{margin-top:16px;padding:12px 16px;border-radius:10px;display:flex;align-items:center;gap:10px;font-size:.88rem}
+  .pill{font-size:.78rem;padding:5px 12px;border-radius:100px;background:var(--panel2);border:1px solid var(--line)}
+  .br{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:.92rem}.br:last-child{border:none}
+  .br.tot{border-top:2px solid var(--accent);border-bottom:none;margin-top:6px;padding-top:14px;font-size:1.12rem;font-weight:800}
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+  .ga{background:var(--bg2);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .ga img{width:100%;height:120px;object-fit:cover;display:block}
+  .ga .cap{padding:8px 10px;font-size:.8rem;display:flex;justify-content:space-between;align-items:center}
+  .ga .typ{font-size:.68rem;color:var(--accent2);text-transform:uppercase;letter-spacing:.05em}
+  .upbox{border:1.5px dashed var(--line);border-radius:12px;padding:24px;text-align:center;color:var(--muted);cursor:pointer}
+  .upbox:hover{border-color:var(--accent);color:var(--txt)}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;width:100%;max-width:460px;max-height:90vh;overflow:auto}
+  .modal h3{margin-bottom:16px}.modal-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+  #doc{position:fixed;inset:0;background:#3a3f55;z-index:200;display:none;overflow:auto;padding:30px 0}
+  #doc.show{display:block}
+  .doc-bar{position:fixed;top:0;left:0;right:0;background:#10142a;border-bottom:1px solid var(--line);padding:12px 20px;display:flex;justify-content:flex-end;gap:10px;z-index:210}
+  .paper{background:#fff;color:#1a1d29;max-width:780px;margin:64px auto 0;padding:54px 60px;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.4);font-size:13px;line-height:1.6}
+  .paper h1{font-size:1.7rem;color:#10142a;margin-bottom:2px}
+  .paper h2{font-size:1.05rem;margin:26px 0 10px;color:#10142a;border-bottom:2px solid #6d6bff;padding-bottom:5px}
+  .paper table{font-size:12.5px}.paper th{color:#666;border-color:#ddd}.paper td{border-color:#eee;color:#1a1d29}
+  .paper .ph{color:#888}.paper .pbr{display:flex;justify-content:space-between;padding:6px 0}
+  .paper .pbr.t{font-weight:800;font-size:1.1rem;border-top:2px solid #10142a;margin-top:6px;padding-top:10px}
+  .paper .sig{margin-top:40px;display:flex;justify-content:space-between;gap:40px}
+  .paper .sig div{flex:1;border-top:1px solid #333;padding-top:6px;font-size:11px;color:#666}
+  .paper .imgrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.paper .imgrow img{width:100%;border-radius:4px;border:1px solid #ddd}
+  @media print{.doc-bar{display:none}#app,#modalBg{display:none!important}#doc{position:static;background:#fff;padding:0}.paper{box-shadow:none;margin:0;max-width:100%}}
+  #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#1d2342;border:1px solid var(--line);padding:11px 18px;border-radius:10px;font-size:.85rem;opacity:0;transition:.3s;z-index:300;pointer-events:none;text-align:center}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media(max-width:760px){
+    .side{position:fixed;left:0;top:0;bottom:0;z-index:60;transform:translateX(-100%);transition:.25s;box-shadow:0 0 50px rgba(0,0,0,.6)}
+    .side.open{transform:none}
+    .hamb{display:inline-block}.content{padding:16px}.top{padding:11px 14px}
+    .role-tag span{display:none}
+  }
+  /* AUTH */
+  .auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+  .auth-box{max-width:420px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:32px}
+  .auth-brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.3rem;margin-bottom:6px}
+  .auth-brand .m{width:36px;height:36px;border-radius:10px;background:var(--grad);display:grid;place-items:center;font-size:18px}
+  .auth-tabs{display:flex;gap:0;margin:22px 0 20px;background:var(--bg2);border-radius:10px;padding:3px}
+  .auth-tab{flex:1;text-align:center;padding:8px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--muted);transition:.15s}
+  .auth-tab.on{background:var(--panel);color:var(--txt)}
+  .auth-err{color:var(--bad);font-size:.82rem;margin-bottom:10px;min-height:18px}
+  .auth-demo{margin-top:14px;padding:14px;background:var(--bg2);border:1px solid var(--line);border-radius:12px}
+  .auth-demo-title{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent2);margin-bottom:10px}
+  .demo-user{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:.15s;background:var(--panel)}
+  .demo-user:hover{border-color:var(--accent)}
+  .demo-av{width:34px;height:34px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+  .demo-user .nm{font-weight:600;font-size:.88rem}.demo-user .rl{font-size:.74rem;color:var(--muted)}
+  /* LOGIN (role selector) */
+  .login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .loginbox{max-width:390px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:28px}
+  .loginbox .lh{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.25rem;margin-bottom:4px}
+  .loginbox .lh .m{width:34px;height:34px;border-radius:9px;background:var(--grad);display:grid;place-items:center;font-size:16px}
+  .lsec{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:20px 0 8px}
+  .luser{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:13px;margin-bottom:8px;cursor:pointer;transition:.15s;background:var(--bg2)}
+  .luser:hover{border-color:var(--accent);transform:translateX(2px)}
+  .luser .av{width:38px;height:38px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:700;font-size:.9rem;flex-shrink:0}
+  .luser .nm{font-weight:600}.luser .rl{font-size:.78rem;color:var(--muted)}
+  .luser .arr{margin-left:auto;color:var(--muted)}
+  .side-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);font-size:.76rem;color:var(--muted)}
+  .logoutb{margin-top:10px;width:100%;text-align:left}
+  /* FIELD APP */
+  .fieldapp{max-width:460px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg2);position:relative}
+  .fbar{background:var(--grad);padding:18px 18px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .fbar .fapp{font-size:.7rem;opacity:.85;letter-spacing:.06em}
+  .fbar .fev{font-weight:800;font-size:1.2rem;margin-top:2px}
+  .fbar .fmeta{font-size:.78rem;opacity:.92;margin-top:2px}
+  .favatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-weight:700;flex-shrink:0}
+  .fevsel{padding:12px 16px 0}
+  .fbody{flex:1;padding:16px;padding-bottom:84px;overflow:auto}
+  .ptab{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:4px 0 10px}
+  .duty{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px}
+  .duty .dt{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+  .duty .tm{font-weight:800;font-size:1.05rem}
+  .duty .ac{font-size:.92rem}.duty .ow{font-size:.74rem;color:var(--muted);margin-top:3px}
+  .confbtn{border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;font-weight:700;cursor:pointer}
+  .upgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .upbtn{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 8px;text-align:center;font-size:.82rem;cursor:pointer;color:var(--txt)}
+  .upbtn:hover{border-color:var(--accent)}.upbtn .ic{font-size:1.4rem;display:block;margin-bottom:5px}
+  .botnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;background:var(--panel);border-top:1px solid var(--line);display:flex;z-index:40}
+  .bn{flex:1;text-align:center;padding:9px 0 11px;color:var(--muted);font-size:.68rem;cursor:pointer}
+  .bn .ic{display:block;font-size:1.2rem;margin-bottom:2px}
+  .bn.active{color:var(--accent2)}
+  /* CREW BOARD */
+  .cb-screen{min-height:100vh;background:var(--bg)}
+  .cb-hero{background:var(--grad);padding:44px 30px 32px;text-align:center}
+  .cb-hero h1{font-size:2.2rem;font-weight:900;color:#fff;margin-bottom:8px}
+  .cb-hero p{color:rgba(255,255,255,.88);font-size:1rem;margin-bottom:18px}
+  .cb-hero .cb-link{font-size:.8rem;color:rgba(255,255,255,.7);margin-top:10px}
+  .cb-body{max-width:960px;margin:0 auto;padding:30px 20px}
+  .cb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+  .pos-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:10px;transition:.2s}
+  .pos-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .pos-card .ev{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--accent2);margin-bottom:2px}
+  .pos-card .role{font-size:1.15rem;font-weight:800}
+  .pos-card .meta{font-size:.82rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+  .pos-card .desc{font-size:.84rem;color:var(--muted);line-height:1.55;border-top:1px solid var(--line);padding-top:10px}
+  .pos-card .rate-row{display:flex;gap:10px}
+  .pos-card .rpill{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:6px 12px;font-size:.82rem;font-weight:700;flex:1;text-align:center}
+  .pos-card .rpill small{display:block;font-size:.65rem;color:var(--muted);font-weight:400;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em}
+  .app-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px}
+  .app-card .ac-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+  .app-card .ac-name{font-weight:700}.app-card .ac-email{font-size:.78rem;color:var(--muted)}
+  .app-card .ac-quote{font-size:1.15rem;font-weight:800;color:var(--good);white-space:nowrap}
+  .app-card .ac-msg{font-size:.82rem;color:var(--muted);line-height:1.5;margin:8px 0}
+  .app-card .ac-port{font-size:.78rem;color:var(--accent2)}
+  .app-card .ac-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .pub-badge{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:100px;white-space:nowrap;background:rgba(52,211,153,.15);color:var(--good)}
+  .draft-badge{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:100px;white-space:nowrap;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .cb-auth-box{max-width:420px;margin:32px auto;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:28px}
+  /* CHAT */
+  .chat-fab{position:fixed;bottom:22px;right:22px;width:52px;height:52px;border-radius:50%;background:var(--grad);border:none;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(109,107,255,.45);z-index:500;display:flex;align-items:center;justify-content:center;transition:.2s}
+  .chat-fab:hover{transform:scale(1.08)}
+  .chat-panel{position:fixed;bottom:84px;right:22px;width:340px;max-width:calc(100vw - 28px);background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.55);z-index:500;display:flex;flex-direction:column;overflow:hidden;transition:.2s;transform-origin:bottom right}
+  .chat-panel.hidden{transform:scale(.85);opacity:0;pointer-events:none}
+  .chat-head{background:var(--grad);padding:13px 16px;display:flex;justify-content:space-between;align-items:center}
+  .chat-head span{color:#fff;font-weight:700;font-size:.9rem}
+  .chat-close{background:none;border:none;color:rgba(255,255,255,.85);cursor:pointer;font-size:16px}
+  .chat-msgs{height:280px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+  .msg{max-width:90%;padding:8px 12px;border-radius:13px;font-size:.83rem;line-height:1.5}
+  .msg.bot{background:var(--panel2);border-bottom-left-radius:3px;align-self:flex-start}
+  .msg.user{background:var(--accent);color:#fff;border-bottom-right-radius:3px;align-self:flex-end}
+  .msg.typing span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;margin:0 1px}
+  .msg.typing span:nth-child(2){animation-delay:.2s}.msg.typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+  .chat-chips{padding:0 10px 8px;display:flex;flex-wrap:wrap;gap:5px}
+  .chip{background:var(--bg2);border:1px solid var(--line);color:var(--muted);border-radius:20px;padding:3px 9px;font-size:.73rem;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--accent);color:var(--txt)}
+  .chat-input-row{padding:8px 10px;border-top:1px solid var(--line);display:flex;gap:6px}
+  .chat-ipt{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:7px 11px;font-size:.83rem;resize:none;outline:none}
+  .chat-ipt:focus{border-color:var(--accent)}
+  .chat-send{background:var(--accent);border:none;color:#fff;border-radius:9px;padding:7px 13px;font-size:.82rem;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<div id="doc"><div class="doc-bar"><button class="btn btn-g btn-sm" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn btn-p btn-sm" onclick="closeDoc()">Close</button></div><div id="paper"></div></div>
+<div id="toast"></div>
+
+<!-- CHAT -->
+<button class="chat-fab" id="chat-fab" onclick="toggleChat()" style="display:none">💬</button>
+<div class="chat-panel hidden" id="chat-panel">
+  <div class="chat-head"><span>⚡ EventOps Support</span><button class="chat-close" onclick="toggleChat()">✕</button></div>
+  <div class="chat-msgs" id="chat-msgs"></div>
+  <div class="chat-chips" id="chat-chips"></div>
+  <div class="chat-input-row">
+    <textarea class="chat-ipt" id="chat-ipt" rows="1" placeholder="Ask anything…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+    <button class="chat-send" onclick="sendChat()">Send</button>
+  </div>
+</div>
+
+<script>
+/* ═══ CONFIG ═══════════════════════════════════════════════ */
+const SUPABASE_URL      = "https://awbtpgugmzitjqovlewr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3YnRwZ3VnbXppdGpxb3ZsZXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NTkzMDYsImV4cCI6MjA5NzQzNTMwNn0.0SJMcy-B8tfoJHFDVwz4wQPuA03IU5NFWMBKe1_XNn0";
+const DEMO_EMAIL        = "demo@eventops.app";
+const DEMO_PASS         = "Demo1234!";
+/* ══════════════════════════════════════════════════════════ */
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabaseUser = null;   // logged-in Supabase user
+let session = null;        // role session {type, name, role}
+
+const store=(()=>{try{localStorage.setItem('__t','1');localStorage.removeItem('__t');return localStorage;}catch(e){const m={};return{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>m[k]=v+'',removeItem:k=>delete m[k]};}})();
+const DB_KEY='eventops_v4';
+const fmt=n=>'R '+Math.round(n).toLocaleString('en-ZA');
+const uid=()=>Math.random().toString(36).slice(2,9);
+const initials=n=>n.split(/[\s(]/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const CATS=['Venue','AV & Production','Decor & Styling','Staging & Set','Catering','Transport & Logistics','Labour & Crew','Other'];
+
+function seed(){return{
+  currentEvent:'e1',role:'Event Director',org:{name:'Your Event Company',client:'Acme Corporate'},
+  events:{e1:{
+    id:'e1',name:'TechExpo Cape Town',venue:'CTICC · Hall 4',dates:'12–14 Aug 2026',scope:420000,status:'Draft',
+    pricing:{marginPct:18,mgmtFeePct:8,discountPct:5,vatPct:15},
+    milestones:[{id:uid(),label:'Deposit on signature',pct:50,status:'Pending'},{id:uid(),label:'Pre-event payment',pct:40,status:'Pending'},{id:uid(),label:'Final on reconciliation',pct:10,status:'Pending'}],
+    ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},
+    quote:[{id:uid(),cat:'Venue',vendor:'CTICC',desc:'Hall 4 hire · 3 days incl. power',cost:96000,qty:1},{id:uid(),cat:'AV & Production',vendor:'BrightLine AV',desc:'LED wall, line array, lighting rig',cost:118000,qty:1},{id:uid(),cat:'AV & Production',vendor:'BrightLine AV',desc:'Vision mixing & operators',cost:27000,qty:1},{id:uid(),cat:'Staging & Set',vendor:'Apex Staging',desc:'Custom main stage & set build',cost:98000,qty:1},{id:uid(),cat:'Decor & Styling',vendor:'Bloom & Co',desc:'Floral, drapery & lounge styling',cost:41000,qty:1},{id:uid(),cat:'Catering',vendor:'Northgate Catering',desc:'Crew + delegate catering',cost:34000,qty:1},{id:uid(),cat:'Transport & Logistics',vendor:'RapidHaul',desc:'Equipment transport & rigging',cost:38000,qty:1}],
+    triple:[{id:uid(),item:'AV & Lighting Package',scope:145000,po:148500,invoice:0},{id:uid(),item:'Custom Stand Build',scope:98000,po:97000,invoice:97000},{id:uid(),item:'Transport & Logistics',scope:38000,po:41500,invoice:43900}],
+    schedule:[{id:uid(),day:'11 Aug',time:'06:00',activity:'Bump-in: trusses & rigging',owner:'Operations',assignee:'Rigging Crew (x4)',confirmed:false},{id:uid(),day:'11 Aug',time:'12:00',activity:'AV install & focus',owner:'Production',assignee:'AV Operators (x2)',confirmed:false},{id:uid(),day:'11 Aug',time:'18:00',activity:'Set build & decor dress',owner:'Staging',assignee:'Lead Technician',confirmed:false},{id:uid(),day:'12 Aug',time:'07:00',activity:'Tech rehearsal & soundcheck',owner:'Production',assignee:'AV Operators (x2)',confirmed:false},{id:uid(),day:'12 Aug',time:'08:00',activity:'Final rig check & sign-off',owner:'Production',assignee:'Lead Technician',confirmed:false},{id:uid(),day:'14 Aug',time:'17:00',activity:'Bump-out & strike',owner:'Operations',assignee:'Rigging Crew (x4)',confirmed:false}],
+    designs:[],
+    labour:[{id:uid(),name:'Lead Technician',rate:480,hours:30},{id:uid(),name:'Rigging Crew (x4)',rate:1200,hours:24},{id:uid(),name:'AV Operators (x2)',rate:560,hours:26}],
+    logistics:[{id:uid(),task:'Stage trusses delivery',status:'On time'},{id:uid(),task:'Generator + fuel drop',status:'Delayed'},{id:uid(),task:'Furniture bump-in',status:'Scheduled'}],
+    vendors:[{id:uid(),name:'Apex Staging (Pty) Ltd',csd:true,bbbee:'Level 2',expiry:'2027-01-15'},{id:uid(),name:'BrightLine AV',csd:true,bbbee:'Level 4',expiry:'2026-07-07'},{id:uid(),name:'RapidHaul Logistics',csd:true,bbbee:'Level 1',expiry:'2026-12-01'},{id:uid(),name:'Northgate Catering',csd:false,bbbee:'Level 3',expiry:'2026-09-20'}],
+  }}
+};}
+
+let DB = (()=>{try{const r=store.getItem(DB_KEY);return r?JSON.parse(r):seed();}catch(e){return seed();}})();
+
+function save(){
+  try{store.setItem(DB_KEY,JSON.stringify(DB));}catch(e){toast('Storage full — remove some designs.');}
+  saveToCloud();
+}
+
+async function saveToCloud(){
+  if(!supabaseUser) return;
+  try{
+    await sb.from('user_data').upsert({user_id:supabaseUser.id, data:DB, updated_at:new Date().toISOString()});
+  }catch(e){ /* silent */ }
+}
+
+async function loadFromCloud(){
+  if(!supabaseUser) return;
+  try{
+    const {data} = await sb.from('user_data').select('data').eq('user_id',supabaseUser.id).single();
+    if(data?.data){ DB=data.data; migrateDB(); store.setItem(DB_KEY,JSON.stringify(DB)); }
+  }catch(e){ /* use local */ }
+}
+
+function migrateDB(){
+  if(!DB.events) DB.events={};
+  if(!DB.org) DB.org={name:'EventOps',client:'Client'};
+  if(!DB.role) DB.role='Event Director';
+  const evIds=Object.keys(DB.events);
+  if(!DB.currentEvent||!DB.events[DB.currentEvent]) DB.currentEvent=evIds[0]||null;
+  const def={pricing:{marginPct:18,mgmtFeePct:8,discountPct:0,vatPct:15},milestones:[],ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},quote:[],triple:[],schedule:[],designs:[],labour:[],logistics:[],vendors:[],status:'Draft'};
+  evIds.forEach(id=>{
+    const e=DB.events[id];
+    Object.keys(def).forEach(k=>{ if(e[k]===undefined) e[k]=JSON.parse(JSON.stringify(def[k])); });
+    if(!e.pricing) e.pricing={...def.pricing};
+    ['marginPct','mgmtFeePct','discountPct','vatPct'].forEach(k=>{ if(e.pricing[k]===undefined) e.pricing[k]=def.pricing[k]; });
+    e.labour.forEach(l=>{ if(!l.positionId) l.positionId=null; if(l.published===undefined) l.published=false; if(l.appCount===undefined) l.appCount=0; if(l.desc===undefined) l.desc=''; });
+  });
+}
+
+const E=()=>DB.events[DB.currentEvent];
+function allCrew(){const s=new Set();Object.values(DB.events).forEach(e=>e.labour.forEach(l=>s.add(l.name)));return [...s];}
+function labourSubtotal(){return E().labour.reduce((s,l)=>s+l.rate*l.hours,0);}
+function costSubtotal(){return E().quote.reduce((s,q)=>s+q.cost*q.qty,0)+labourSubtotal();}
+function quoteCalc(){const sub=costSubtotal(),p=E().pricing;const margin=sub*(p.marginPct/100),mgmt=sub*(p.mgmtFeePct/100);const pre=sub+margin+mgmt,discount=pre*(p.discountPct/100);const net=pre-discount,vat=net*((p.vatPct||0)/100),total=net+vat;return{sub,margin,mgmt,pre,discount,net,vat,total,grossProfit:margin+mgmt-discount};}
+function rippleCost(){const r=E().ripple,d=r.delay;return{labour:r.otRate*d,accom:r.accomRate*d,catering:r.cateringRate*d,fuel:r.fuelRate*d,total:(r.otRate+r.accomRate+r.cateringRate+r.fuelRate)*d};}
+
+const PAGES=[{id:'dashboard',ic:'🎯',label:'Director'},{id:'quote',ic:'🧾',label:'Quotation'},{id:'finance',ic:'💰',label:'Finance'},{id:'designs',ic:'🎨',label:'Designs'},{id:'schedule',ic:'🗓️',label:'Schedule'},{id:'ripple',ic:'⚡',label:'Ripple Engine'},{id:'workforce',ic:'👷',label:'Workforce'},{id:'logistics',ic:'🚚',label:'Logistics'},{id:'compliance',ic:'🛡️',label:'Compliance'}];
+let page='dashboard', fieldTab='duties';
+
+/* ═══ ROUTER ════════════════════════════════════════════════ */
+function render(){
+  if(!supabaseUser){ return renderAuth(); }
+  if(!session){ return renderRoleSelect(); }
+  if(session.type==='field'){ return renderField(); }
+  renderAdmin();
+  document.getElementById('chat-fab').style.display='flex';
+}
+
+/* ═══ SUPABASE AUTH SCREEN ══════════════════════════════════ */
+let authTab='in';
+function renderAuth(){
+  document.getElementById('chat-fab').style.display='none';
+  document.getElementById('app').style.cssText='display:block';
+  document.getElementById('app').innerHTML=`
+    <div class="auth-screen"><div class="auth-box">
+      <div class="auth-brand"><span class="m">⚡</span>EventOps<span class="grad">ERP</span></div>
+      <p style="color:var(--muted);font-size:.88rem">Sign in to access the full event management platform.</p>
+      <div class="auth-tabs">
+        <div class="auth-tab ${authTab==='in'?'on':''}" onclick="setAuthTab('in')">Sign in</div>
+        <div class="auth-tab ${authTab==='up'?'on':''}" onclick="setAuthTab('up')">Sign up</div>
+      </div>
+      <div class="auth-err" id="auth-err"></div>
+      <div class="form-row"><label class="fl">Email</label><input class="ipt" id="a-email" type="email" placeholder="you@company.co.za"></div>
+      <div class="form-row"><label class="fl">Password</label><input class="ipt" id="a-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-p" style="width:100%;padding:11px;margin-top:4px" onclick="doAuth()">${authTab==='in'?'Sign in →':'Create account →'}</button>
+      <div class="auth-demo">
+        <div class="auth-demo-title">🎯 Try with demo account</div>
+        <div class="demo-user" onclick="demoAuth()">
+          <div class="demo-av">SN</div>
+          <div><div class="nm">Sarah Naidoo — Event Director</div><div class="rl">Full ERP · pre-loaded demo event</div></div>
+          <span style="margin-left:auto;color:var(--muted)">→</span>
+        </div>
+      </div>
+    </div></div>`;
+}
+
+function setAuthTab(t){ authTab=t; renderAuth(); }
+
+async function doAuth(){
+  const email=document.getElementById('a-email').value.trim();
+  const pass=document.getElementById('a-pass').value;
+  const err=document.getElementById('auth-err');
+  err.textContent='';
+  if(!email||!pass){err.textContent='Enter email and password.';return;}
+  const fn = authTab==='in'
+    ? sb.auth.signInWithPassword({email,password:pass})
+    : sb.auth.signUp({email,password:pass});
+  const {data,error}=await fn;
+  if(error){err.textContent=error.message;return;}
+  if(authTab==='up'){err.style.color='var(--good)';err.textContent='Account created! Check inbox if confirmation is enabled.';}
+}
+
+async function demoAuth(){
+  document.getElementById('auth-err').textContent='Signing in…';
+  const {error}=await sb.auth.signInWithPassword({email:DEMO_EMAIL,password:DEMO_PASS});
+  if(error) document.getElementById('auth-err').textContent=error.message;
+}
+
+/* ═══ ROLE SELECT (after Supabase auth) ════════════════════ */
+function renderRoleSelect(){
+  document.getElementById('chat-fab').style.display='none';
+  document.getElementById('app').style.cssText='display:block';
+  const crew=allCrew();
+  document.getElementById('app').innerHTML=`
+    <div class="login"><div class="loginbox">
+      <div class="lh"><span class="m">⚡</span>EventOps<span class="grad">ERP</span></div>
+      <div style="color:var(--muted);font-size:.88rem;margin-bottom:4px">Welcome back. Choose your role view.</div>
+      <div style="font-size:.78rem;color:var(--accent2);margin-bottom:2px">${supabaseUser.email}</div>
+      <div class="lsec">Management</div>
+      <div class="luser" onclick="login('admin','${supabaseUser.email.split('@')[0]}','Event Director')">
+        <div class="av">${initials(supabaseUser.email)}</div>
+        <div><div class="nm">Event Director</div><div class="rl">Full ERP — all modules</div></div>
+        <div class="arr">→</div>
+      </div>
+      ${crew.length?`<div class="lsec">Crew & Technicians</div>${crew.map(c=>`<div class="luser" onclick="login('field','${c.replace(/'/g,'')}')"><div class="av">${initials(c)}</div><div><div class="nm">${c}</div><div class="rl">Field app · duties & uploads</div></div><div class="arr">→</div></div>`).join('')}`:''}
+      <div style="margin-top:16px;text-align:center"><button class="btn btn-g btn-sm" onclick="signOut()">↩ Sign out</button></div>
+    </div></div>`;
+}
+
+function login(type,name,role){session={type,name,role:role||name};if(role){DB.role=role;save();}page='dashboard';fieldTab='duties';render();}
+
+async function signOut(){
+  await sb.auth.signOut();
+  supabaseUser=null; session=null;
+  render();
+}
+
+function logout(){session=null;render();}
+
+/* ═══ ADMIN ERP ═════════════════════════════════════════════ */
+function renderAdmin(){
+  const evOpts=Object.values(DB.events).map(ev=>`<option value="${ev.id}" ${ev.id===DB.currentEvent?'selected':''}>${ev.name}</option>`).join('');
+  document.getElementById('app').style.cssText='display:flex';
+  document.getElementById('app').innerHTML=`
+    <div class="side">
+      <div class="brand"><span class="m">⚡</span> EventOps<span class="grad">ERP</span></div>
+      ${PAGES.map(p=>`<div class="nav-i ${p.id===page?'active':''}" onclick="go('${p.id}')"><span class="ic">${p.ic}</span>${p.label}</div>`).join('')}
+      <div class="side-foot">
+        <div style="margin-bottom:4px">${supabaseUser?.email||session.name}</div>
+        <div style="font-size:.7rem;color:var(--accent2)">☁ Cloud synced</div>
+        <button class="btn btn-g btn-sm logoutb" onclick="logout()">↩ Switch role</button>
+        <button class="btn btn-g btn-sm logoutb" onclick="signOut()" style="margin-top:4px">⏻ Sign out</button>
+      </div>
+    </div>
+    <div class="main">
+      <div class="top">
+        <div class="evt"><button class="hamb" onclick="document.querySelector('.side').classList.toggle('open')">☰</button><select onchange="DB.currentEvent=this.value;save();render()">${evOpts}</select><button class="btn btn-g btn-sm" onclick="newEvent()">+ New</button></div>
+        <div class="role-tag"><span>Viewing as</span><select onchange="DB.role=this.value;save();render()">${['Event Director','Operations Manager','Production Manager','Staff Coordinator','Risk Manager'].map(r=>`<option ${r===DB.role?'selected':''}>${r}</option>`).join('')}</select></div>
+      </div>
+      <div class="content" id="content"></div>
+    </div>`;
+  ({dashboard:vDash,quote:vQuote,finance:vFin,designs:vDesigns,schedule:vSched,ripple:vRipple,workforce:vWork,logistics:vLog,compliance:vComp}[page])();
+}
+
+function go(p){page=p;renderAdmin();}
+function statusBadge(s){const m={Draft:'b-blue',Quoted:'b-amber',Accepted:'b-green',Contracted:'b-green'};return`<span class="badge ${m[s]||'b-blue'}">${s}</span>`;}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200);}
+
+/* ═══ PAGE VIEWS ════════════════════════════════════════════ */
+function vDash(){const e=E(),q=quoteCalc(),rc=rippleCost(),vpct=q.net?(rc.total/q.net*100):0;document.getElementById('content').innerHTML=`<div class="pg-title">Master Controller</div><div class="pg-sub">${e.name} · ${e.venue} · ${e.dates} &nbsp;${statusBadge(e.status)}</div><div class="grid g4" style="margin-bottom:0"><div class="card kpi"><div class="lbl">Vendor Cost</div><div class="v">${fmt(q.sub)}</div><div class="d" style="color:var(--muted)">Compiled quotes</div></div><div class="card kpi"><div class="lbl">Client Quote (incl VAT)</div><div class="v grad">${fmt(q.total)}</div><div class="d" style="color:var(--muted)">${fmt(q.net)} + VAT</div></div><div class="card kpi"><div class="lbl">Gross Profit</div><div class="v pos">${fmt(q.grossProfit)}</div><div class="d pos">${q.sub?(q.grossProfit/q.sub*100).toFixed(1):0}% on cost</div></div><div class="card kpi"><div class="lbl">Ripple Impact</div><div class="v ${rc.total?'amb':''}">${fmt(rc.total)}</div><div class="d ${vpct>5?'neg':vpct>0?'amb':'pos'}">${vpct.toFixed(1)}% of quote</div></div></div><div class="card"><div class="sec-h"><h3>Triple-Match Accounting</h3><button class="btn btn-p btn-sm" onclick="addTriple()">+ Add line item</button></div><p style="color:var(--muted);font-size:.85rem;margin-bottom:14px">Scope → contracted PO → final invoice, with 5% variance flags.</p><table><tr><th>Line item</th><th>Scope</th><th>PO</th><th>Invoice</th><th>Variance</th><th>Status</th><th></th></tr>${e.triple.map(t=>{const base=t.scope||t.po,fin=t.invoice||t.po||t.scope,v=base?((fin-base)/base*100):0;const cls=Math.abs(v)>5?'b-red':(t.invoice?'b-green':'b-amber'),st=Math.abs(v)>5?'⚠ Over 5%':(t.invoice?'✓ Reconciled':'Awaiting invoice');return`<tr><td>${t.item}</td><td>${fmt(t.scope)}</td><td>${fmt(t.po)}</td><td>${t.invoice?fmt(t.invoice):'—'}</td><td class="${v>5?'neg':v<-5?'pos':'amb'}">${v>=0?'+':''}${v.toFixed(1)}%</td><td><span class="badge ${cls}">${st}</span></td><td><button class="x" onclick="del('triple','${t.id}')">✕</button></td></tr>`;}).join('')}</table></div>`;}
+
+function vQuote(){const e=E(),p=e.pricing,q=quoteCalc(),ls=labourSubtotal();const byCat={};e.quote.forEach(i=>{(byCat[i.cat]=byCat[i.cat]||[]).push(i);});const vendorSub=e.quote.reduce((s,i)=>s+i.cost*i.qty,0);document.getElementById('content').innerHTML=`<div class="pg-title">Quotation Builder</div><div class="pg-sub">Compile every vendor quote and workforce cost, apply pricing & VAT, generate the client document. ${statusBadge(e.status)}</div><div class="grid g2" style="grid-template-columns:1.6fr 1fr"><div><div class="card"><div class="sec-h"><h3>Compiled costs</h3><button class="btn btn-p btn-sm" onclick="addQuote()">+ Add line item</button></div>${Object.keys(byCat).length?Object.keys(byCat).map(cat=>`<div style="margin-bottom:6px"><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent2);margin:10px 0 4px">${cat}</div><table><tr><th>Vendor</th><th>Description</th><th>Qty</th><th>Unit</th><th>Total</th><th></th></tr>${byCat[cat].map(i=>`<tr><td>${i.vendor}</td><td>${i.desc}</td><td>${i.qty}</td><td>${fmt(i.cost)}</td><td>${fmt(i.cost*i.qty)}</td><td><button class="x" onclick="del('quote','${i.id}')">✕</button></td></tr>`).join('')}</table></div>`).join(''):'<div class="empty">No vendor line items yet. Click + Add line item to start.</div>'}${e.labour.length?`<div style="margin-bottom:6px"><div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--warn);margin:14px 0 4px">👷 Labour & Crew <span style="color:var(--muted);font-weight:400;text-transform:none">(from Workforce)</span></div><table><tr><th>Role</th><th>Rate/hr</th><th>Hours</th><th>Cost</th><th></th></tr>${e.labour.map(l=>`<tr><td>${l.name}</td><td>${fmt(l.rate)}</td><td>${l.hours}</td><td>${fmt(l.rate*l.hours)}</td><td><button class="btn btn-g btn-sm" onclick="go('workforce')">Edit</button></td></tr>`).join('')}<tr style="border-top:1px solid var(--line)"><td colspan="3" style="font-weight:700">Labour subtotal</td><td style="font-weight:700">${fmt(ls)}</td><td></td></tr></table></div>`:'<div class="note" style="margin-top:12px">Add crew on the <b>Workforce</b> page — labour costs will appear here automatically.</div>'}</div></div><div><div class="card"><h3 style="margin-bottom:14px">Organiser pricing</h3>${[['marginPct','Margin / markup %'],['mgmtFeePct','Management fee %'],['discountPct','Client discount %'],['vatPct','VAT %']].map(([k,l])=>`<div class="form-row"><label class="fl">${l}</label><input class="ipt" type="number" value="${p[k]}" oninput="E().pricing.${k}=+this.value||0;save();vQuote()"></div>`).join('')}<div style="margin-top:12px"><div class="br"><span>Vendor costs</span><b>${fmt(vendorSub)}</b></div><div class="br"><span>Labour & crew</span><b class="amb">${fmt(ls)}</b></div><div class="br" style="border-top:1px solid var(--line);padding-top:10px"><span><b>Total cost base</b></span><b>${fmt(q.sub)}</b></div><div class="br"><span>+ Margin (${p.marginPct}%)</span><b class="pos">${fmt(q.margin)}</b></div><div class="br"><span>+ Management fee (${p.mgmtFeePct}%)</span><b class="pos">${fmt(q.mgmt)}</b></div><div class="br"><span>− Discount (${p.discountPct}%)</span><b class="neg">-${fmt(q.discount)}</b></div><div class="br"><span>Net (excl. VAT)</span><b>${fmt(q.net)}</b></div><div class="br"><span>+ VAT (${p.vatPct}%)</span><b>${fmt(q.vat)}</b></div><div class="br tot"><span>Client total</span><span class="grad">${fmt(q.total)}</span></div></div><div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-g btn-sm" style="flex:1" onclick="genQuote()">📄 Quotation</button><button class="btn btn-p btn-sm" style="flex:1" onclick="acceptQuote()">✓ Accept → contract</button></div></div></div></div>`;}
+
+function vFin(){const e=E(),q=quoteCalc(),inv=q.total;const invoiced=e.milestones.filter(m=>m.status!=='Pending').reduce((s,m)=>s+inv*m.pct/100,0);const paid=e.milestones.filter(m=>m.status==='Paid').reduce((s,m)=>s+inv*m.pct/100,0);document.getElementById('content').innerHTML=`<div class="pg-title">Finance & Invoicing</div><div class="pg-sub">Deposit and milestone invoicing against the contract value (incl VAT).</div><div class="grid g4" style="margin-bottom:0"><div class="card kpi"><div class="lbl">Contract value</div><div class="v grad">${fmt(inv)}</div><div class="d" style="color:var(--muted)">incl. VAT</div></div><div class="card kpi"><div class="lbl">Invoiced</div><div class="v">${fmt(invoiced)}</div><div class="d" style="color:var(--muted)">${inv?(invoiced/inv*100).toFixed(0):0}% issued</div></div><div class="card kpi"><div class="lbl">Paid</div><div class="v pos">${fmt(paid)}</div><div class="d pos">${inv?(paid/inv*100).toFixed(0):0}% received</div></div><div class="card kpi"><div class="lbl">Outstanding</div><div class="v ${inv-paid>0?'amb':'pos'}">${fmt(inv-paid)}</div><div class="d" style="color:var(--muted)">remaining</div></div></div><div class="card"><div class="sec-h"><h3>Payment milestones</h3><button class="btn btn-g btn-sm" onclick="addMilestone()">+ Add milestone</button></div><table><tr><th>Milestone</th><th>%</th><th>Amount (incl VAT)</th><th>Status</th><th>Actions</th></tr>${e.milestones.map(m=>{const amt=inv*m.pct/100;const cls=m.status==='Paid'?'b-green':m.status==='Invoiced'?'b-amber':'b-blue';return`<tr><td>${m.label}</td><td>${m.pct}%</td><td>${fmt(amt)}</td><td><span class="badge ${cls}">${m.status}</span></td><td style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-g btn-sm" onclick="genInvoice('${m.id}')">📄 Invoice</button><button class="btn btn-g btn-sm" onclick="cycleStatus('${m.id}')">${m.status==='Paid'?'↺ Reset':m.status==='Invoiced'?'✓ Mark paid':'Issue'}</button><button class="x" onclick="del('milestones','${m.id}')">✕</button></td></tr>`;}).join('')}</table><div class="note">Issuing or marking paid generates a live tax invoice document. The full build posts to an immutable audit trail.</div></div>`;}
+
+function vDesigns(){const e=E();document.getElementById('content').innerHTML=`<div class="pg-title">Designs & Renders</div><div class="pg-sub">Attach 3D renders, decor moodboards and stage/set plans — they appear on the client quotation.</div><div class="card"><div class="upbox" onclick="document.getElementById('upl').click()"><div style="font-size:1.6rem;margin-bottom:6px">⬆</div>Click to upload a render, moodboard or plan<div style="font-size:.75rem;margin-top:6px">Auto-resized & saved in this browser (demo only)</div></div><input type="file" id="upl" accept="image/*" style="display:none" onchange="uploadDesign(this)">${e.designs.length?`<div class="gallery" style="margin-top:18px">${e.designs.map(d=>`<div class="ga"><img src="${d.img}"><div class="cap"><div><div class="typ">${d.type}</div>${d.label}</div><button class="x" onclick="del('designs','${d.id}')">✕</button></div></div>`).join('')}</div>`:''}</div>`;}
+function uploadDesign(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const max=900;let w=img.width,h=img.height;if(w>max){h=h*max/w;w=max;}const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);const data=cv.toDataURL('image/jpeg',0.7);modal('Tag this design',[{k:'label',label:'Label',val:f.name.replace(/\.[^.]+$/,'')},{k:'type',label:'Type',val:'Render',select:['Render','Moodboard','Stage / Set Plan','Floorplan']}],v=>{E().designs.push({id:uid(),img:data,label:v.label||'Untitled',type:v.type});});};img.src=r.result;};r.readAsDataURL(f);inp.value='';}
+
+function vSched(){const e=E(),rows=[...e.schedule].sort((a,b)=>(a.day+a.time).localeCompare(b.day+b.time));document.getElementById('content').innerHTML=`<div class="pg-title">Production Schedule</div><div class="pg-sub">Automated run sheet — sorted by day and time, assigned to crew.</div><div class="card"><div class="sec-h"><h3>Run sheet</h3><button class="btn btn-p btn-sm" onclick="addSched()">+ Add item</button></div><table><tr><th>Day</th><th>Time</th><th>Activity</th><th>Dept</th><th>Assigned to</th><th>Confirmed</th><th></th></tr>${rows.length?rows.map(s=>`<tr><td>${s.day}</td><td>${s.time}</td><td>${s.activity}</td><td><span class="pill">${s.owner}</span></td><td>${s.assignee||'—'}</td><td>${s.confirmed?'<span class="badge b-green">✓ Yes</span>':'<span class="badge b-blue">Pending</span>'}</td><td><button class="x" onclick="del('schedule','${s.id}')">✕</button></td></tr>`).join(''):'<tr><td colspan="7"><div class="empty">No items yet.</div></td></tr>'}</table></div>`;}
+
+function vRipple(){const e=E(),r=e.ripple,rc=rippleCost(),q=quoteCalc(),vpct=q.net?(rc.total/q.net*100):0;document.getElementById('content').innerHTML=`<div class="pg-title">⚡ Real-Time Ripple Engine</div><div class="pg-sub">Change one field — every dependent cost recalculates across the project.</div><div class="grid g2"><div class="card"><h3 style="margin-bottom:16px">Setup delay simulation</h3><label class="fl">Delay: <b class="amb">${r.delay} hour${r.delay===1?'':'s'}</b></label><input type="range" min="0" max="10" value="${r.delay}" oninput="E().ripple.delay=+this.value;save();vRipple()"><table style="margin-top:18px"><tr><th>Cascade</th><th>Added cost</th></tr><tr><td>👷 Local labour overtime</td><td class="${rc.labour?'amb':''}">${fmt(rc.labour)}</td></tr><tr><td>✈️ Technician accommodation</td><td class="${rc.accom?'amb':''}">${fmt(rc.accom)}</td></tr><tr><td>🍽️ Catering & welfare</td><td class="${rc.catering?'amb':''}">${fmt(rc.catering)}</td></tr><tr><td>⛽ Transport & fuel</td><td class="${rc.fuel?'amb':''}">${fmt(rc.fuel)}</td></tr></table><div class="ripple-flag ${vpct>5?'b-red':'b-green'}">${vpct>5?'⚠':'✓'} Ripple is ${vpct.toFixed(1)}% of the quote — ${vpct>5?'exceeds 5% threshold. Director alerted.':'within threshold.'}</div></div><div class="card"><h3 style="margin-bottom:16px">Cascade rates (per hour)</h3>${[['otRate','Labour overtime'],['accomRate','Accommodation'],['cateringRate','Catering'],['fuelRate','Transport & fuel']].map(([k,l])=>`<div class="form-row"><label class="fl">${l}</label><input class="ipt" type="number" value="${r[k]}" oninput="E().ripple.${k}=+this.value||0;save();vRipple()"></div>`).join('')}<div class="note">In the full build these rates derive automatically from Workforce, Logistics and Catering.</div></div></div>`;}
+
+function vWork(){
+  const e=E(),total=e.labour.reduce((s,l)=>s+l.rate*l.hours,0);
+  const boardUrl=window.location.origin+window.location.pathname+'#crewboard';
+  const rows=e.labour.length?e.labour.map(l=>{
+    const cost=l.rate*l.hours;
+    const pubBadge=l.published?`<span class="pub-badge">🟢 Live</span>`:`<span class="draft-badge">Draft</span>`;
+    const appCount=l.appCount?`<span class="badge b-blue" style="cursor:pointer" onclick="viewApplicants('${l.positionId}','${l.name.replace(/'/g,'')}')">${l.appCount} applicant${l.appCount===1?'':'s'} →</span>`:'';
+    const pubBtn=l.published
+      ?`<button class="btn btn-g btn-sm" onclick="unpublishPosition('${l.id}')">Unpublish</button>`
+      :`<button class="btn btn-p btn-sm" onclick="publishPosition('${l.id}')">🌐 Publish</button>`;
+    return`<tr>
+      <td><div style="font-weight:600">${l.name}</div>${l.desc?`<div style="font-size:.76rem;color:var(--muted)">${l.desc}</div>`:''}</td>
+      <td>${fmt(l.rate)}</td><td>${l.hours}</td><td>${fmt(cost)}</td>
+      <td>${pubBadge}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${appCount}${pubBtn}<button class="x" onclick="delLabour('${l.id}')">✕</button></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="6"><div class="empty">No crew yet. Click + Add crew to get started.</div></td></tr>';
+  document.getElementById('content').innerHTML=`
+    <div class="pg-title">Workforce & Labour</div>
+    <div class="pg-sub">Roster crew, set rates and hours — then publish open positions to the public Crew Board for applications.</div>
+    <div class="card" style="background:rgba(109,107,255,.1);border-color:rgba(109,107,255,.3);margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div><div style="font-weight:700;margin-bottom:3px">🌐 Crew Board</div><div style="font-size:.83rem;color:var(--muted)">Public page where freelance crew browse and apply for open positions.</div></div>
+        <div style="display:flex;gap:8px"><button class="btn btn-g btn-sm" onclick="navigator.clipboard.writeText('${boardUrl}');toast('Link copied!')">📋 Copy link</button><a href="#crewboard" target="_blank" class="btn btn-p btn-sm" style="text-decoration:none">Open board →</a></div>
+      </div>
+    </div>
+    <div class="card"><div class="sec-h"><h3>Crew roster · ${fmt(total)} total</h3><button class="btn btn-p btn-sm" onclick="addLabour()">+ Add crew</button></div>
+    <table><tr><th>Role / Description</th><th>Rate/hr</th><th>Hours</th><th>Cost</th><th>Board status</th><th>Actions</th></tr>${rows}</table>
+    <div class="note">Published positions appear on the public Crew Board. Applicants sign up and submit a quote — you review them here. Accepted crew can log into the Field app.</div></div>`;
+}
+
+function vLog(){const e=E();document.getElementById('content').innerHTML=`<div class="pg-title">Operations & Logistics</div><div class="pg-sub">Bump-in/out tasks, deliveries and status.</div><div class="card"><div class="sec-h"><h3>Logistics tasks</h3><button class="btn btn-p btn-sm" onclick="addLog()">+ Add task</button></div><table><tr><th>Task</th><th>Status</th><th></th></tr>${e.logistics.length?e.logistics.map(t=>`<tr><td>${t.task}</td><td><select class="ipt" style="width:auto;padding:5px 8px" onchange="E().logistics.find(x=>x.id==='${t.id}').status=this.value;save()">${['Scheduled','On time','Delayed','Complete'].map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></td><td><button class="x" onclick="del('logistics','${t.id}')">✕</button></td></tr>`).join(''):'<tr><td colspan="3"><div class="empty">No tasks yet.</div></td></tr>'}</table></div>`;}
+
+function vComp(){const e=E(),today=new Date();document.getElementById('content').innerHTML=`<div class="pg-title">Supplier Compliance</div><div class="pg-sub">CSD registration, tax status, and B-BBEE affidavit tracking.</div><div class="card"><div class="sec-h"><h3>Vendors</h3><button class="btn btn-p btn-sm" onclick="addVendor()">+ Add vendor</button></div><table><tr><th>Vendor</th><th>CSD</th><th>B-BBEE</th><th>Affidavit expiry</th><th>Status</th><th></th></tr>${e.vendors.map(v=>{const exp=new Date(v.expiry),days=Math.round((exp-today)/86400000);let cls,txt;if(!v.csd){cls='b-red';txt='CSD / tax issue';}else if(days<0){cls='b-red';txt='Affidavit expired';}else if(days<30){cls='b-amber';txt='Expiring ('+days+'d)';}else{cls='b-green';txt='Compliant';}return`<tr><td>${v.name}</td><td><span class="badge ${v.csd?'b-green':'b-red'}">${v.csd?'Verified':'Not found'}</span></td><td>${v.bbbee}</td><td>${v.expiry}</td><td><span class="badge ${cls}">${txt}</span></td><td><button class="x" onclick="del('vendors','${v.id}')">✕</button></td></tr>`;}).join('')}</table></div>`;}
+
+/* ═══ FIELD APP ═════════════════════════════════════════════ */
+function renderField(){
+  const s=session,e=E(),evs=Object.values(DB.events);
+  document.getElementById('chat-fab').style.display='flex';
+  document.getElementById('app').style.cssText='display:block';
+  document.getElementById('app').innerHTML=`
+    <div class="fieldapp">
+      <div class="fbar"><div><div class="fapp">EVENTOPS FIELD</div><div class="fev">${e.name}</div><div class="fmeta">${e.venue} · ${e.dates}</div></div><div class="favatar" title="${s.name}">${initials(s.name)}</div></div>
+      ${evs.length>1?`<div class="fevsel"><select class="ipt" onchange="DB.currentEvent=this.value;save();renderField()">${evs.map(ev=>`<option value="${ev.id}" ${ev.id===DB.currentEvent?'selected':''}>${ev.name}</option>`).join('')}</select></div>`:''}
+      <div class="fbody" id="fbody"></div>
+      <div class="botnav">
+        ${[['duties','📋','Duties'],['uploads','⬆','Uploads'],['runsheet','🗓','Run sheet'],['account','👤','Account']].map(([t,ic,l])=>`<div class="bn ${fieldTab===t?'active':''}" onclick="fieldTab='${t}';renderField()"><span class="ic">${ic}</span>${l}</div>`).join('')}
+      </div>
+    </div>`;
+  renderFieldTab();
+}
+function renderFieldTab(){
+  const s=session,e=E(),b=document.getElementById('fbody');
+  if(fieldTab==='duties'){
+    const mine=[...e.schedule].filter(x=>x.assignee===s.name).sort((a,b)=>(a.day+a.time).localeCompare(b.day+b.time));
+    const done=mine.filter(x=>x.confirmed).length;
+    b.innerHTML=`<div class="ptab">My call sheet — ${s.name}</div>${mine.length?`<div style="font-size:.82rem;color:var(--muted);margin-bottom:12px">${done}/${mine.length} duties confirmed</div>`+mine.map(x=>`<div class="duty"><div class="dt"><div class="tm">${x.day} · ${x.time}</div><button class="confbtn ${x.confirmed?'b-green':'b-blue'}" onclick="confirmDuty('${x.id}')">${x.confirmed?'✓ Confirmed':'Confirm'}</button></div><div class="ac">${x.activity}</div><div class="ow">Dept: ${x.owner}</div></div>`).join(''):'<div class="empty">No duties assigned to you on this event yet.</div>'}`;
+  }else if(fieldTab==='uploads'){
+    b.innerHTML=`<div class="ptab">Upload from site</div><div class="upgrid"><div class="upbtn" onclick="fieldUpload('Quote')"><span class="ic">🧾</span>Quote</div><div class="upbtn" onclick="fieldUpload('Invoice')"><span class="ic">📑</span>Invoice</div><div class="upbtn" onclick="fieldUpload('Purchase Order')"><span class="ic">📋</span>PO</div><div class="upbtn" onclick="fieldUpload('Contract')"><span class="ic">✍️</span>Contract</div><div class="upbtn" onclick="fieldUpload('Site photo')"><span class="ic">📸</span>Site photo</div><div class="upbtn" onclick="fieldUpload('Damage report')"><span class="ic">⚠️</span>Damage</div></div><div class="note" style="margin-top:14px">In production these open your phone camera or file picker and upload directly to the event project.</div>`;
+  }else if(fieldTab==='runsheet'){
+    const rows=[...e.schedule].sort((a,b)=>(a.day+a.time).localeCompare(b.day+b.time));
+    b.innerHTML=`<div class="ptab">Full run sheet</div>${rows.map(x=>`<div class="duty" style="${x.assignee===s.name?'border-color:var(--accent)':''}"><div class="dt"><div class="tm">${x.day} · ${x.time}</div><span class="pill">${x.owner}</span></div><div class="ac">${x.activity}</div><div class="ow">${x.assignee||'Unassigned'}${x.assignee===s.name?' · you':''}</div></div>`).join('')}`;
+  }else{
+    b.innerHTML=`<div class="ptab">Account</div><div class="card"><div style="display:flex;align-items:center;gap:12px"><div class="favatar" style="background:var(--grad)">${initials(s.name)}</div><div><div style="font-weight:700">${s.name}</div><div style="font-size:.8rem;color:var(--muted)">Field crew · ${supabaseUser?.email||''}</div></div></div></div><div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-g" style="flex:1" onclick="logout()">↩ Switch role</button><button class="btn btn-g" style="flex:1" onclick="signOut()">⏻ Sign out</button></div><div class="note" style="margin-top:14px">Tip: on a phone, use "Add to Home Screen" to open this like an installed app.</div>`;
+  }
+}
+function confirmDuty(id){const s=E().schedule.find(x=>x.id===id);s.confirmed=!s.confirmed;save();renderFieldTab();toast(s.confirmed?'Duty confirmed ✓':'Confirmation removed');}
+function fieldUpload(t){toast(t+' — opens camera / files in production');}
+
+/* ═══ SHARED ACTIONS ════════════════════════════════════════ */
+function del(coll,id){E()[coll]=E()[coll].filter(x=>x.id!==id);save();renderAdmin();}
+function modal(title,fields,onSave){const m=document.getElementById('modal');m.innerHTML=`<h3>${title}</h3>${fields.map(f=>f.select?`<div class="form-row"><label class="fl">${f.label}</label><select class="ipt" id="f_${f.k}">${f.select.map(o=>`<option ${o===f.val?'selected':''}>${o}</option>`).join('')}</select></div>`:`<div class="form-row"><label class="fl">${f.label}</label><input class="ipt" id="f_${f.k}" type="${f.type||'text'}" value="${f.val||''}" placeholder="${f.ph||''}"></div>`).join('')}<div class="modal-acts"><button class="btn btn-g" onclick="closeModal()">Cancel</button><button class="btn btn-p" id="mSave">Save</button></div>`;document.getElementById('modalBg').classList.add('show');document.getElementById('mSave').onclick=()=>{const vals={};fields.forEach(f=>vals[f.k]=f.type==='number'?(+document.getElementById('f_'+f.k).value||0):document.getElementById('f_'+f.k).value.trim());onSave(vals);closeModal();save();renderAdmin();};}
+function closeModal(){document.getElementById('modalBg').classList.remove('show');}
+document.getElementById('modalBg').onclick=e=>{if(e.target.id==='modalBg')closeModal();};
+
+function addQuote(){modal('Add line item',[{k:'cat',label:'Category',val:'Venue',select:CATS},{k:'vendor',label:'Vendor / resource'},{k:'desc',label:'Description'},{k:'qty',label:'Quantity',type:'number',val:1},{k:'cost',label:'Unit cost (R)',type:'number'}],v=>{if(v.vendor||v.desc)E().quote.push({id:uid(),cat:v.cat,vendor:v.vendor||'—',desc:v.desc||'',qty:v.qty||1,cost:v.cost||0});});}
+function addTriple(){modal('Add line item',[{k:'item',label:'Line item'},{k:'scope',label:'Scope (R)',type:'number'},{k:'po',label:'PO (R)',type:'number'},{k:'invoice',label:'Invoice (R, optional)',type:'number'}],v=>{if(v.item)E().triple.push({id:uid(),...v});});}
+function addMilestone(){modal('Add milestone',[{k:'label',label:'Description'},{k:'pct',label:'Percentage of total',type:'number'}],v=>{if(v.label)E().milestones.push({id:uid(),label:v.label,pct:v.pct||0,status:'Pending'});});}
+function cycleStatus(id){const m=E().milestones.find(x=>x.id===id);m.status=m.status==='Pending'?'Invoiced':m.status==='Invoiced'?'Paid':'Pending';save();renderAdmin();}
+function addSched(){const crew=E().labour.map(l=>l.name);modal('Add schedule item',[{k:'day',label:'Day',ph:'12 Aug'},{k:'time',label:'Time',ph:'07:00'},{k:'activity',label:'Activity'},{k:'owner',label:'Department',val:'Production',select:['Event Director','Operations','Production','Staging','Catering','Risk']},{k:'assignee',label:'Assign to crew',val:crew[0]||'',select:crew.length?crew:['—']}],v=>{if(v.activity)E().schedule.push({id:uid(),day:v.day||'TBD',time:v.time||'',activity:v.activity,owner:v.owner,assignee:v.assignee,confirmed:false});});}
+function addLabour(){
+  const m=document.getElementById('modal');
+  m.innerHTML=`<h3>Add crew / position</h3>
+    <div class="form-row"><label class="fl">Role / position title</label><input class="ipt" id="f_name" placeholder="e.g. AV Technician"></div>
+    <div class="form-row"><label class="fl">Description (shown on Crew Board)</label><textarea class="ipt" id="f_desc" rows="2" placeholder="Skills required, experience, responsibilities…"></textarea></div>
+    <div class="form-row"><label class="fl">Rate per hour (R)</label><input class="ipt" id="f_rate" type="number" placeholder="0"></div>
+    <div class="form-row"><label class="fl">Hours</label><input class="ipt" id="f_hours" type="number" placeholder="0"></div>
+    <div class="form-row" style="background:rgba(109,107,255,.08);border:1px solid rgba(109,107,255,.25);border-radius:10px;padding:12px">
+      <label class="fl" style="color:var(--accent2);margin-bottom:8px">🌐 Crew Board</label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.88rem">
+        <input type="checkbox" id="f_publish" style="width:16px;height:16px;accent-color:var(--accent)">
+        Publish this position — freelance crew can apply
+      </label>
+    </div>
+    <div class="modal-acts"><button class="btn btn-g" onclick="closeModal()">Cancel</button><button class="btn btn-p" id="mSave">Save</button></div>`;
+  document.getElementById('modalBg').classList.add('show');
+  document.getElementById('mSave').onclick=()=>{
+    const name=document.getElementById('f_name').value.trim();
+    if(!name){toast('Enter a role name');return;}
+    const l={id:uid(),name,desc:document.getElementById('f_desc').value.trim(),rate:+document.getElementById('f_rate').value||0,hours:+document.getElementById('f_hours').value||0,published:false,positionId:null,appCount:0};
+    E().labour.push(l);
+    closeModal();save();
+    if(document.getElementById('f_publish')?.checked) publishPosition(l.id);
+    else renderAdmin();
+  };
+}
+function addLog(){modal('Add logistics task',[{k:'task',label:'Task'}],v=>{if(v.task)E().logistics.push({id:uid(),task:v.task,status:'Scheduled'});});}
+function addVendor(){modal('Add vendor',[{k:'name',label:'Vendor name'},{k:'bbbee',label:'B-BBEE level',ph:'Level 1'},{k:'expiry',label:'Affidavit expiry',type:'date'}],v=>{if(v.name)E().vendors.push({id:uid(),name:v.name,csd:true,bbbee:v.bbbee||'—',expiry:v.expiry||'2026-12-31'});});}
+function newEvent(){modal('New event',[{k:'name',label:'Event name'},{k:'venue',label:'Venue'},{k:'dates',label:'Dates'}],v=>{if(!v.name)return;const id=uid();DB.events[id]={id,name:v.name,venue:v.venue||'',dates:v.dates||'',scope:0,status:'Draft',pricing:{marginPct:18,mgmtFeePct:8,discountPct:0,vatPct:15},milestones:[{id:uid(),label:'Deposit on signature',pct:50,status:'Pending'},{id:uid(),label:'Pre-event payment',pct:40,status:'Pending'},{id:uid(),label:'Final on reconciliation',pct:10,status:'Pending'}],ripple:{delay:0,otRate:2600,accomRate:1150,cateringRate:520,fuelRate:680},quote:[],triple:[],schedule:[],designs:[],labour:[],logistics:[],vendors:[]};DB.currentEvent=id;page='quote';});}
+
+/* ═══ CREW BOARD ════════════════════════════════════════════ */
+function delLabour(id){
+  const l=E().labour.find(x=>x.id===id);
+  if(l?.positionId) sb.from('crew_positions').update({published:false}).eq('id',l.positionId);
+  E().labour=E().labour.filter(x=>x.id!==id);
+  save();renderAdmin();
+}
+
+async function publishPosition(labourId){
+  if(!supabaseUser){toast('Sign in to publish');return;}
+  const e=E(),l=E().labour.find(x=>x.id===labourId);
+  if(!l)return;
+  if(!l.positionId) l.positionId=uid();
+  l.published=true;
+  save();
+  const {error}=await sb.from('crew_positions').upsert({
+    id:l.positionId,event_id:e.id,event_name:e.name,event_venue:e.venue,
+    event_dates:e.dates,role_name:l.name,rate:l.rate,hours:l.hours,
+    description:l.desc||'',published:true,director_user_id:supabaseUser.id
+  });
+  if(error){toast('Publish failed: '+error.message);return;}
+  toast('Position published to Crew Board ✓');
+  vWork();
+}
+
+async function unpublishPosition(labourId){
+  const l=E().labour.find(x=>x.id===labourId);
+  if(!l)return;
+  if(l.positionId) await sb.from('crew_positions').update({published:false}).eq('id',l.positionId);
+  l.published=false;
+  save();
+  toast('Position unpublished');
+  vWork();
+}
+
+async function viewApplicants(positionId,roleName){
+  const m=document.getElementById('modal');
+  m.style.maxWidth='700px';
+  m.innerHTML=`<h3>Applicants — ${roleName}</h3><div style="color:var(--muted);font-size:.85rem;margin-bottom:14px">Loading…</div>`;
+  document.getElementById('modalBg').classList.add('show');
+  const {data,error}=await sb.from('crew_applications').select('*').eq('position_id',positionId).order('created_at');
+  if(error||!data||!data.length){
+    m.innerHTML=`<h3>Applicants — ${roleName}</h3><div class="empty">No applications yet.</div><div class="modal-acts"><button class="btn btn-g" onclick="closeModal();m.style.maxWidth=''">Close</button></div>`;
+    return;
+  }
+  const rows=data.map(a=>{
+    const cls=a.status==='accepted'?'b-green':a.status==='rejected'?'b-red':'b-blue';
+    const st=a.status==='accepted'?'✓ Accepted':a.status==='rejected'?'Rejected':'Pending';
+    return`<div class="app-card">
+      <div class="ac-top">
+        <div><div class="ac-name">${a.applicant_name||'—'}</div><div class="ac-email">${a.applicant_email||''}</div></div>
+        <div style="text-align:right"><div class="ac-quote">${fmt(a.quote_amount||0)}</div><span class="badge ${cls}" style="font-size:.68rem">${st}</span></div>
+      </div>
+      ${a.message?`<div class="ac-msg">"${a.message}"</div>`:''}
+      ${a.portfolio_url?`<div class="ac-port"><a href="${a.portfolio_url}" target="_blank" style="color:var(--accent2)">${a.portfolio_url}</a></div>`:''}
+      <div class="ac-acts">
+        ${a.status!=='accepted'?`<button class="btn btn-p btn-sm" onclick="setAppStatus('${a.id}','${positionId}','${roleName}','accepted')">✓ Accept</button>`:''}
+        ${a.status!=='rejected'?`<button class="btn btn-g btn-sm" onclick="setAppStatus('${a.id}','${positionId}','${roleName}','rejected')">Reject</button>`:''}
+        <button class="btn btn-g btn-sm" onclick="navigator.clipboard.writeText('${a.applicant_email||''}');toast('Email copied')">📋 Copy email</button>
+      </div>
+    </div>`;
+  }).join('');
+  m.innerHTML=`<h3>Applicants — ${roleName} <span style="color:var(--muted);font-weight:400;font-size:.85rem">${data.length} received</span></h3>${rows}<div class="modal-acts"><button class="btn btn-g" onclick="closeModal();document.getElementById('modal').style.maxWidth=''">Close</button></div>`;
+}
+
+async function setAppStatus(appId,positionId,roleName,status){
+  await sb.from('crew_applications').update({status}).eq('id',appId);
+  if(status==='accepted'){
+    const {data}=await sb.from('crew_applications').select('applicant_name,quote_amount').eq('id',appId).single();
+    if(data){
+      const l=E().labour.find(x=>x.positionId===positionId);
+      if(l){l.acceptedCrew=data.applicant_name;l.acceptedQuote=data.quote_amount;}
+      save();
+    }
+  }
+  toast(status==='accepted'?'Applicant accepted ✓':'Application rejected');
+  viewApplicants(positionId,roleName);
+}
+
+/* ── PUBLIC CREW BOARD ──────────────────────────────────── */
+let cbAuthTab='in',cbPendingPos=null;
+
+async function renderCrewBoard(){
+  document.getElementById('chat-fab').style.display='none';
+  document.getElementById('app').style.cssText='display:block';
+  const {data:positions}=await sb.from('crew_positions').select('*').eq('published',true).order('created_at',{ascending:false});
+  const {data:{session:s}}=await sb.auth.getSession();
+  const boardUser=s?.user||null;
+  const cards=(positions||[]).length
+    ?positions.map(p=>`<div class="pos-card">
+        <div class="ev">${p.event_name}</div>
+        <div class="role">${p.role_name}</div>
+        <div class="meta"><span>📍 ${p.event_venue||'—'}</span><span>📅 ${p.event_dates||'—'}</span></div>
+        ${p.description?`<div class="desc">${p.description}</div>`:''}
+        <div class="rate-row">
+          <div class="rpill"><small>Rate/hr</small>${fmt(p.rate)}</div>
+          <div class="rpill"><small>Hours</small>${p.hours}</div>
+          <div class="rpill"><small>Total</small>${fmt(p.rate*p.hours)}</div>
+        </div>
+        <button class="btn btn-p apply-btn" onclick="openApplyModal(${JSON.stringify(p).replace(/"/g,'&quot;')})">Apply for this position →</button>
+      </div>`).join('')
+    :'<div class="empty" style="grid-column:1/-1;padding:60px 20px;color:var(--muted)">No open positions at the moment — check back soon.</div>';
+  document.getElementById('app').innerHTML=`
+    <div class="cb-screen">
+      <div class="cb-hero">
+        <h1>⚡ EventOps Crew Board</h1>
+        <p>Open positions for professional event crew. Apply directly — the Event Director reviews your quote.</p>
+        <div class="cb-link">Powered by EventOps ERP · Sign up to apply</div>
+      </div>
+      <div class="cb-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+          <div style="font-weight:700;font-size:1.1rem">${(positions||[]).length} open position${(positions||[]).length===1?'':'s'}</div>
+          <div style="display:flex;gap:8px">
+            ${boardUser?`<span style="font-size:.82rem;color:var(--muted);line-height:32px">Signed in as ${boardUser.email}</span><button class="btn btn-g btn-sm" onclick="sb.auth.signOut().then(()=>renderCrewBoard())">Sign out</button>`:`<button class="btn btn-p btn-sm" onclick="showCBAuth()">Sign in / Join to apply</button>`}
+            <a href="${window.location.origin+window.location.pathname}" class="btn btn-g btn-sm" style="text-decoration:none">← ERP Login</a>
+          </div>
+        </div>
+        <div class="cb-grid">${cards}</div>
+      </div>
+    </div>`;
+}
+
+function showCBAuth(pendingPos){
+  if(pendingPos) cbPendingPos=pendingPos;
+  const err=document.getElementById('cb-auth-err');
+  const existing=document.getElementById('cb-auth-overlay');
+  if(existing)existing.remove();
+  const overlay=document.createElement('div');
+  overlay.id='cb-auth-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML=`<div class="cb-auth-box">
+    <div style="font-weight:800;font-size:1.15rem;margin-bottom:6px">⚡ Join EventOps Crew</div>
+    <p style="color:var(--muted);font-size:.88rem;margin-bottom:16px">Create an account or sign in to apply for this position.</p>
+    <div class="auth-tabs"><div class="auth-tab ${cbAuthTab==='in'?'on':''}" onclick="cbAuthTab='in';showCBAuth()">Sign in</div><div class="auth-tab ${cbAuthTab==='up'?'on':''}" onclick="cbAuthTab='up';showCBAuth()">Join crew</div></div>
+    <div class="auth-err" id="cb-auth-err"></div>
+    <div class="form-row"><label class="fl">Your name</label><input class="ipt" id="cb-name" placeholder="Full name" ${cbAuthTab==='in'?'style="display:none"':''}></div>
+    <div class="form-row"><label class="fl">Email</label><input class="ipt" id="cb-email" type="email" placeholder="you@email.com"></div>
+    <div class="form-row"><label class="fl">Password</label><input class="ipt" id="cb-pass" type="password" placeholder="••••••••"></div>
+    <button class="btn btn-p" style="width:100%;padding:11px;margin-top:4px" onclick="doCBAuth()">${cbAuthTab==='in'?'Sign in →':'Create account →'}</button>
+    <button class="btn btn-g" style="width:100%;padding:9px;margin-top:8px" onclick="document.getElementById('cb-auth-overlay').remove()">Cancel</button>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function doCBAuth(){
+  const email=document.getElementById('cb-email').value.trim();
+  const pass=document.getElementById('cb-pass').value;
+  const name=document.getElementById('cb-name')?.value.trim()||'';
+  const err=document.getElementById('cb-auth-err');
+  err.textContent='';
+  if(!email||!pass){err.textContent='Enter email and password.';return;}
+  let res;
+  if(cbAuthTab==='up'){
+    res=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
+  } else {
+    res=await sb.auth.signInWithPassword({email,password:pass});
+  }
+  if(res.error){err.textContent=res.error.message;return;}
+  document.getElementById('cb-auth-overlay').remove();
+  if(cbPendingPos){const pos=cbPendingPos;cbPendingPos=null;openApplyModal(pos);}
+  else renderCrewBoard();
+}
+
+function openApplyModal(pos){
+  sb.auth.getSession().then(({data:{session:s}})=>{
+    if(!s){showCBAuth(pos);return;}
+    const u=s.user;
+    const existing=document.getElementById('cb-apply-overlay');
+    if(existing)existing.remove();
+    const overlay=document.createElement('div');
+    overlay.id='cb-apply-overlay';
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto';
+    overlay.innerHTML=`<div class="cb-auth-box" style="max-width:500px">
+      <div class="ev" style="color:var(--accent2);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${pos.event_name}</div>
+      <div style="font-weight:800;font-size:1.15rem;margin-bottom:2px">Apply: ${pos.role_name}</div>
+      <div style="font-size:.82rem;color:var(--muted);margin-bottom:16px">${pos.event_venue} · ${pos.event_dates} · ${fmt(pos.rate)}/hr · ${pos.hours}hrs</div>
+      <div class="auth-err" id="apply-err"></div>
+      <div class="form-row"><label class="fl">Your name</label><input class="ipt" id="ap-name" value="${u.user_metadata?.full_name||''}"></div>
+      <div class="form-row"><label class="fl">Email</label><input class="ipt" id="ap-email" value="${u.email}" readonly></div>
+      <div class="form-row"><label class="fl">Your quoted rate for this contract (R total)</label><input class="ipt" id="ap-quote" type="number" placeholder="${pos.rate*pos.hours}"></div>
+      <div class="form-row"><label class="fl">Cover note — experience, availability, why you're the right fit</label><textarea class="ipt" id="ap-msg" rows="3" placeholder="Tell the director about yourself…"></textarea></div>
+      <div class="form-row"><label class="fl">Portfolio / website URL (optional)</label><input class="ipt" id="ap-port" placeholder="https://"></div>
+      <button class="btn btn-p" style="width:100%;padding:11px;margin-top:4px" onclick="submitApplication('${pos.id}','${pos.role_name.replace(/'/g,'')}')">Submit application →</button>
+      <button class="btn btn-g" style="width:100%;padding:9px;margin-top:8px" onclick="document.getElementById('cb-apply-overlay').remove()">Cancel</button>
+    </div>`;
+    document.body.appendChild(overlay);
+  });
+}
+
+async function submitApplication(positionId,roleName){
+  const err=document.getElementById('apply-err');
+  err.textContent='';
+  const {data:{session:s}}=await sb.auth.getSession();
+  if(!s){err.textContent='Session expired. Please sign in again.';return;}
+  const app={
+    id:uid(),position_id:positionId,applicant_user_id:s.user.id,
+    applicant_name:document.getElementById('ap-name').value.trim(),
+    applicant_email:document.getElementById('ap-email').value.trim(),
+    quote_amount:+document.getElementById('ap-quote').value||0,
+    message:document.getElementById('ap-msg').value.trim(),
+    portfolio_url:document.getElementById('ap-port').value.trim(),
+    status:'pending'
+  };
+  if(!app.applicant_name){err.textContent='Enter your name.';return;}
+  const {error}=await sb.from('crew_applications').upsert(app,{onConflict:'position_id,applicant_user_id'});
+  if(error){err.textContent=error.message;return;}
+  document.getElementById('cb-apply-overlay').remove();
+  const conf=document.createElement('div');
+  conf.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px';
+  conf.innerHTML=`<div class="cb-auth-box" style="text-align:center"><div style="font-size:2.5rem;margin-bottom:12px">🎉</div><div style="font-weight:800;font-size:1.2rem;margin-bottom:8px">Application submitted!</div><div style="color:var(--muted);font-size:.9rem;margin-bottom:20px">The event director will review your quote for <b>${roleName}</b> and be in touch.</div><button class="btn btn-p" onclick="this.closest('div[style]').remove();renderCrewBoard()">Back to board</button></div>`;
+  document.body.appendChild(conf);
+}
+
+async function refreshAppCounts(){
+  if(!supabaseUser) return;
+  const e=E();
+  const posIds=e.labour.filter(l=>l.positionId).map(l=>l.positionId);
+  if(!posIds.length) return;
+  const {data}=await sb.from('crew_applications').select('position_id').in('position_id',posIds);
+  if(!data) return;
+  const counts={};
+  data.forEach(r=>{counts[r.position_id]=(counts[r.position_id]||0)+1;});
+  e.labour.forEach(l=>{if(l.positionId) l.appCount=counts[l.positionId]||0;});
+}
+
+/* ═══ DOCUMENTS ═════════════════════════════════════════════ */
+function showDoc(html){document.getElementById('paper').innerHTML=html;document.getElementById('doc').classList.add('show');}
+function closeDoc(){document.getElementById('doc').classList.remove('show');}
+function genQuote(){const e=E(),q=quoteCalc(),p=e.pricing,ls=labourSubtotal(),vs=e.quote.reduce((s,i)=>s+i.cost*i.qty,0);const byCat={};e.quote.forEach(i=>{(byCat[i.cat]=byCat[i.cat]||[]).push(i);});const ref='Q-'+e.id.toUpperCase()+'-'+new Date().getFullYear();e.status='Quoted';save();showDoc(`<div class="paper"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>QUOTATION</h1><div class="ph">${ref} · ${new Date().toLocaleDateString('en-ZA')}</div></div><div style="text-align:right"><b>${DB.org.name}</b><br><span class="ph">Prepared for ${DB.org.client}</span></div></div><h2>${e.name}</h2><div class="ph">${e.venue} · ${e.dates}</div>${Object.keys(byCat).map(cat=>`<h2>${cat}</h2><table><tr><th>Description</th><th>Qty</th><th style="text-align:right">Amount</th></tr>${byCat[cat].map(i=>`<tr><td>${i.desc} <span class="ph">(${i.vendor})</span></td><td>${i.qty}</td><td style="text-align:right">${fmt(i.cost*i.qty)}</td></tr>`).join('')}</table>`).join('')}${e.labour.length?`<h2>Labour & Crew</h2><table><tr><th>Role</th><th>Rate / hr</th><th>Hours</th><th style="text-align:right">Cost</th></tr>${e.labour.map(l=>`<tr><td>${l.name}</td><td>${fmt(l.rate)}</td><td>${l.hours}</td><td style="text-align:right">${fmt(l.rate*l.hours)}</td></tr>`).join('')}</table>`:''}${e.designs.length?`<h2>Designs & Concepts</h2><div class="imgrow">${e.designs.slice(0,4).map(d=>`<div><img src="${d.img}"><div class="ph" style="font-size:11px;margin-top:3px">${d.type}: ${d.label}</div></div>`).join('')}</div>`:''}<h2>Investment Summary</h2><div class="pbr"><span>Vendor & production costs</span><span>${fmt(vs)}</span></div>${ls?`<div class="pbr"><span>Labour & crew costs</span><span>${fmt(ls)}</span></div>`:''}${ls||vs?`<div class="pbr" style="border-top:1px solid #ddd;padding-top:8px"><span>Total cost base</span><span>${fmt(q.sub)}</span></div>`:''}<div class="pbr"><span>Project margin (${p.marginPct}%)</span><span>${fmt(q.margin)}</span></div><div class="pbr"><span>Management fee (${p.mgmtFeePct}%)</span><span>${fmt(q.mgmt)}</span></div><div class="pbr"><span>Discount (${p.discountPct}%)</span><span>-${fmt(q.discount)}</span></div><div class="pbr"><span>Net (excl. VAT)</span><span>${fmt(q.net)}</span></div><div class="pbr"><span>VAT (${p.vatPct}%)</span><span>${fmt(q.vat)}</span></div><div class="pbr t"><span>Total (incl. VAT)</span><span>${fmt(q.total)}</span></div><p class="ph" style="margin-top:16px">Valid 30 days. Acceptance generates a binding contract and an auditable purchase-order trail.</p></div>`);}
+function acceptQuote(){const e=E(),q=quoteCalc();e.status='Contracted';if(!e.triple.length){e.quote.forEach(i=>e.triple.push({id:uid(),item:i.desc,scope:i.cost*i.qty,po:i.cost*i.qty,invoice:0}));}e.scope=q.net;save();const ref='C-'+e.id.toUpperCase()+'-'+new Date().getFullYear();showDoc(`<div class="paper"><h1>EVENT SERVICES CONTRACT</h1><div class="ph">${ref} · ${new Date().toLocaleDateString('en-ZA')}</div><h2>Parties</h2><p><b>Service Provider:</b> ${DB.org.name}<br><b>Client:</b> ${DB.org.client}</p><h2>Scope of Work</h2><p>Delivery of <b>${e.name}</b> at ${e.venue} on ${e.dates}, per accepted quotation, including venue, production, staging, decor, catering, transport and crew as specified.</p><h2>Contract Value</h2><div class="pbr"><span>Net (excl. VAT)</span><span>${fmt(q.net)}</span></div><div class="pbr"><span>VAT (${e.pricing.vatPct}%)</span><span>${fmt(q.vat)}</span></div><div class="pbr t"><span>Total contract value</span><span>${fmt(q.total)}</span></div><h2>Payment Schedule</h2><table><tr><th>Milestone</th><th>%</th><th style="text-align:right">Amount</th></tr>${e.milestones.map(m=>`<tr><td>${m.label}</td><td>${m.pct}%</td><td style="text-align:right">${fmt(q.total*m.pct/100)}</td></tr>`).join('')}</table><h2>Financial Workflow & Audit Trail</h2><p>All vendor purchase orders are issued against this contract value. Each PO and invoice is reconciled via Triple-Match accounting; variances exceeding 5% require Event Director approval and are logged to an immutable audit trail.</p><div class="sig"><div>Service Provider · Date</div><div>Client · Date</div></div></div>`);setTimeout(()=>renderAdmin(),50);}
+function genInvoice(id){const e=E(),q=quoteCalc(),m=e.milestones.find(x=>x.id===id);if(m.status==='Pending'){m.status='Invoiced';save();}const amt=q.total*m.pct/100,net=amt/(1+(e.pricing.vatPct/100)),vat=amt-net;const ref='INV-'+e.id.toUpperCase()+'-'+m.pct;showDoc(`<div class="paper"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>TAX INVOICE</h1><div class="ph">${ref} · ${new Date().toLocaleDateString('en-ZA')}</div></div><div style="text-align:right"><b>${DB.org.name}</b><br><span class="ph">VAT-registered supplier</span></div></div><h2>Bill To</h2><p>${DB.org.client}</p><h2>${m.label} — ${e.name}</h2><table><tr><th>Description</th><th style="text-align:right">Amount</th></tr><tr><td>${m.label} (${m.pct}% of contract value)<br><span class="ph">${e.venue} · ${e.dates}</span></td><td style="text-align:right">${fmt(net)}</td></tr></table><div style="margin-top:12px"><div class="pbr"><span>Net</span><span>${fmt(net)}</span></div><div class="pbr"><span>VAT (${e.pricing.vatPct}%)</span><span>${fmt(vat)}</span></div><div class="pbr t"><span>Amount due</span><span>${fmt(amt)}</span></div></div><p class="ph" style="margin-top:16px">Payment due within 14 days. Reconciled against contract on the audit trail.</p></div>`);setTimeout(()=>renderAdmin(),50);}
+
+/* ═══ CHAT ══════════════════════════════════════════════════ */
+const KB=[
+  {k:['dashboard','director','kpi','overview'],a:'The <b>Director</b> view shows KPIs (vendor cost, client quote, gross profit, ripple impact) and the Triple-Match accounting table. Switch events with the dropdown at the top.'},
+  {k:['quote','line item','add line','vendor cost'],a:'Go to <b>Quotation</b> in the sidebar. Click <b>+ Add line item</b> to add vendor costs by category. Adjust Margin %, Mgmt fee %, Discount % and VAT % on the right — the client total updates instantly.'},
+  {k:['invoice','milestone','payment','finance'],a:'Go to <b>Finance</b>. Click <b>Issue</b> on a milestone to generate a tax invoice PDF, then <b>Mark paid</b> when received. Add new milestones with <b>+ Add milestone</b>.'},
+  {k:['triple','match','po','scope','reconcil'],a:'Triple-Match on the Dashboard tracks Scope → PO → Invoice per line item. Variances over 5% show a red flag. Click <b>+ Add line item</b> to add rows, or they auto-populate when you Accept a quote.'},
+  {k:['ripple','delay','cascade','overtime'],a:'The <b>Ripple Engine</b> simulates what a setup delay costs across labour, accommodation, catering and fuel. Drag the slider to set delay hours — all costs cascade instantly.'},
+  {k:['crew','staff','labour','workforce','technician'],a:'Go to <b>Workforce</b> to add crew with hourly rates and hours. Crew added here appear in the Schedule assignee list and can log into the Field app to see their duties.'},
+  {k:['field','mobile','phone','app','crew login'],a:'Crew members log in from the role selector screen after Supabase auth. They see the Field app with their personal call sheet, run sheet, and upload shortcuts. On mobile, use "Add to Home Screen" to install it.'},
+  {k:['schedule','run sheet','duty','assign'],a:'Go to <b>Schedule</b> and click <b>+ Add item</b>. Set the day, time, activity, department and assign to a crew member. Crew see their assigned items in the Field app and can confirm them.'},
+  {k:['design','render','moodboard','image','upload'],a:'Go to <b>Designs</b> and click the upload box. Images are auto-resized and tagged (Render, Moodboard, Stage Plan, Floorplan). They appear in the generated quotation PDF.'},
+  {k:['compliance','vendor','csd','bbbee','affidavit'],a:'Go to <b>Compliance</b> to track vendor CSD status, B-BBEE level and affidavit expiry. Items expiring within 30 days show amber; expired or missing CSD shows red.'},
+  {k:['logistics','task','bump','delivery'],a:'Go to <b>Logistics</b> for bump-in/out tasks. Set status per task (Scheduled, On time, Delayed, Complete). Delayed items feed into Ripple Engine risk.'},
+  {k:['new event','create event','add event'],a:'Click <b>+ New</b> next to the event dropdown at the top. Enter name, venue and dates. A new event is created with default pricing and empty modules ready to fill.'},
+  {k:['save','cloud','sync','data','lost'],a:'Your data saves to localStorage instantly and syncs to Supabase cloud on every change. Sign in on any device with the same account to pick up where you left off.'},
+  {k:['sign out','logout','account','email'],a:'Use <b>Switch role</b> to go back to the role selector, or <b>Sign out</b> to fully log out of your Supabase account. Your data is saved to the cloud.'},
+  {k:['print','pdf','document','contract','quotation doc'],a:'Click <b>📄 Quotation</b> on the Quote page to generate the client document, or <b>📄 Invoice</b> on the Finance page per milestone. In the document view, click <b>🖨 Print / Save PDF</b>.'},
+];
+const CHIPS_INIT=['How do I add a quote?','Finance & invoicing','Ripple engine','Field app for crew','Generate a PDF'];
+let chatOpen=false,chatStarted=false;
+function toggleChat(){chatOpen=!chatOpen;document.getElementById('chat-panel').classList.toggle('hidden',!chatOpen);if(chatOpen&&!chatStarted){chatStarted=true;initChat();}}
+function initChat(){addBotMsg('Hi! 👋 I\'m the EventOps assistant. Ask me about any module — quotations, finance, ripple engine, field app, crew, compliance, or generating documents.');renderChips(CHIPS_INIT);}
+function renderChips(chips){document.getElementById('chat-chips').innerHTML=chips.map(c=>`<span class="chip" onclick="chipSend('${c}')">${c}</span>`).join('');}
+function chipSend(t){document.getElementById('chat-chips').innerHTML='';addUserMsg(t);answerChat(t);}
+function addBotMsg(html){appendMsg('bot',html);}
+function addUserMsg(t){appendMsg('user',t,true);}
+function appendMsg(cls,content,isText=false){const m=document.createElement('div');m.className='msg '+cls;if(isText)m.textContent=content;else m.innerHTML=content;const box=document.getElementById('chat-msgs');box.appendChild(m);box.scrollTop=box.scrollHeight;}
+function showTyping(){const m=document.createElement('div');m.className='msg bot typing';m.id='typ';m.innerHTML='<span></span><span></span><span></span>';document.getElementById('chat-msgs').appendChild(m);document.getElementById('chat-msgs').scrollTop=99999;}
+function hideTyping(){const t=document.getElementById('typ');if(t)t.remove();}
+function answerChat(text){showTyping();const q=text.toLowerCase();let ans=null;for(const e of KB){if(e.k.some(k=>q.includes(k))){ans=e.a;break;}}if(!ans)ans='I don\'t have a specific answer for that, but try:<br>• Use the <b>sidebar</b> to navigate to any module<br>• The <b>Director</b> page shows your financial overview<br>• Click <b>+ Add</b> buttons within each module to add data<br>• All changes save to Supabase cloud automatically';setTimeout(()=>{hideTyping();addBotMsg(ans);renderChips(['Add quote lines','Generate invoice PDF','Ripple engine','Field crew app']);},600+Math.random()*400);}
+function sendChat(){const ipt=document.getElementById('chat-ipt');const t=ipt.value.trim();if(!t)return;ipt.value='';document.getElementById('chat-chips').innerHTML='';addUserMsg(t);answerChat(t);}
+
+/* ═══ INIT ══════════════════════════════════════════════════ */
+function isCrewBoard(){ return window.location.hash==='#crewboard'; }
+
+async function init(){
+  if(isCrewBoard()){ renderCrewBoard(); return; }
+  const {data:{session:s}} = await sb.auth.getSession();
+  if(s){
+    supabaseUser = s.user;
+    await loadFromCloud();
+    await refreshAppCounts();
+  }
+  sb.auth.onAuthStateChange(async(_e, s)=>{
+    if(isCrewBoard()) return;
+    const wasLoggedIn = !!supabaseUser;
+    supabaseUser = s?.user || null;
+    if(supabaseUser && !wasLoggedIn){
+      await loadFromCloud();
+      await refreshAppCounts();
+      render();
+    } else if(!supabaseUser){
+      session = null;
+      render();
+    }
+  });
+  render();
+}
+window.addEventListener('hashchange',()=>{ if(isCrewBoard()) renderCrewBoard(); else { init(); } });
+init();
+</script>
+</body>
+</html>
