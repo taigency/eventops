@@ -436,6 +436,7 @@ let session = null;        // role session {type, name, role}
 
 const store=(()=>{try{localStorage.setItem('__t','1');localStorage.removeItem('__t');return localStorage;}catch(e){const m={};return{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>m[k]=v+'',removeItem:k=>delete m[k]};}})();
 const DB_KEY='eventops_v4';
+const USER_KEY='eventops_uid'; // tracks which user's data is in localStorage
 const fmt=n=>'R '+Math.round(n).toLocaleString('en-ZA');
 const uid=()=>Math.random().toString(36).slice(2,9);
 const initials=n=>n.split(/[\s(]/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
@@ -2190,11 +2191,22 @@ async function checkAccountStatus(){
   return true;
 }
 
+function clearIfDifferentUser(userId){
+  const prev = store.getItem(USER_KEY);
+  if(prev && prev !== userId){
+    // Different user on this browser — wipe stale data immediately
+    store.removeItem(DB_KEY);
+    DB = seed();
+  }
+  store.setItem(USER_KEY, userId);
+}
+
 async function init(){
   if(isCrewBoard()){ renderCrewBoard(); return; }
   const {data:{session:s}} = await sb.auth.getSession();
   if(s){
     supabaseUser = s.user;
+    clearIfDifferentUser(supabaseUser.id);
     await loadFromCloud();
     const allowed = await checkAccountStatus();
     if(!allowed) return;
@@ -2207,6 +2219,7 @@ async function init(){
     const wasLoggedIn = !!supabaseUser;
     supabaseUser = s?.user || null;
     if(supabaseUser && !wasLoggedIn){
+      clearIfDifferentUser(supabaseUser.id);
       await loadFromCloud();
       const allowed = await checkAccountStatus();
       if(!allowed) return;
@@ -2215,6 +2228,7 @@ async function init(){
       await loadAdminMessages();
       render();
     } else if(!supabaseUser){
+      store.removeItem(USER_KEY);
       session = null;
       render();
     }
