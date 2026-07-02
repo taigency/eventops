@@ -478,9 +478,15 @@ async function saveToCloud(){
 async function loadFromCloud(){
   if(!supabaseUser) return;
   try{
-    const {data} = await sb.from('user_data').select('data').eq('user_id',supabaseUser.id).single();
-    if(data?.data){ DB=data.data; migrateDB(); store.setItem(DB_KEY,JSON.stringify(DB)); }
-  }catch(e){ /* use local */ }
+    const {data,error} = await sb.from('user_data').select('data').eq('user_id',supabaseUser.id).maybeSingle();
+    if(data?.data){
+      DB=data.data; migrateDB(); store.setItem(DB_KEY,JSON.stringify(DB));
+    } else if(!error){
+      // No row for this user — genuinely new account, start fresh
+      DB=seed(); store.setItem(DB_KEY,JSON.stringify(DB));
+    }
+    // If error (network failure), keep whatever is in localStorage
+  }catch(e){ /* network error — keep local */ }
 }
 
 function migrateDB(){
